@@ -6,6 +6,11 @@
 bin/
 obj/
 
+Assests/
+node_modules/
+Properties/
+*.manifest
+
 # Common node modules locations
 /node_modules
 /wwwroot/node_modules
