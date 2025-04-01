@@ -1,6 +1,4 @@
-﻿using App1.Repos;
-using App1.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,11 +12,11 @@ namespace App1.Services
     {
         private readonly ReviewsRepo reviewRepo;
 
-        public ReviewsService()
+        public ReviewsService() { }
         public ReviewsService(ReviewsRepo reviewsRepo)
         {
             reviewRepo = new ReviewsRepo();
-            this.reviewsRepo = reviewsRepo;
+            this.reviewRepo = reviewsRepo;
         }
 
         public void HideReview(int reviewID)

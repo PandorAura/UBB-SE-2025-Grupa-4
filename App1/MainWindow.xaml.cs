@@ -15,6 +15,8 @@ using Microsoft.UI.Xaml.Navigation;
 using App1.Ai_Check;
 
 using App1.Models;
+using System.Collections.ObjectModel;
+using App1.Services;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -27,25 +29,30 @@ namespace App1
     public sealed partial class MainWindow : Window
     {
 
-
+        private ReviewsService reviewsService;
+        public ObservableCollection<Review> Reviews { get; set; }
 
         public MainWindow()
         {
             this.InitializeComponent();
-            ListView Reviews = new ListView();
-            Reviews.Items.Add(new Review());
-            Reviews.Items.Add(new Review());
-            Reviews.Items.Add(new Review());
-            Reviews.Items.Add(new Review());
-            Reviews.Items.Add(new Review());
+            reviewsService = new ReviewsService();
 
-            // Add the ListView to a parent container in the visual tree (which you created in the corresponding XAML file).
-            ReviewsPanel.Children.Add(Reviews);
-        }
+            Reviews = new ObservableCollection<Review>
+            {
+                new Review(),
+                new Review(),
+                new Review(),
+                new Review(),
+                new Review(),
+                new Review(),
+                new Review(),
+                new Review(),
+                new Review(),
+                new Review(),
+                new Review()
+            };
 
-        private void myButton_Click(object sender, RoutedEventArgs e)
-        {
-            myButton.Content = "Clicked";
+            ReviewsList.ItemsSource = Reviews;
         }
         private void TrainModel_Click(object sender, RoutedEventArgs e)
         {

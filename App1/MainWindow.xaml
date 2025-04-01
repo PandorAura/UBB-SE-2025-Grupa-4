@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="App1">
+    Title="IMBD for Drinks - Admin">
 
     <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
@@ -47,12 +47,35 @@
 
         <Image Margin="20,0,0,0" HorizontalAlignment="Left" Source="Assets/beers-logo.png"/>
 
-        <StackPanel Grid.Row="1" Margin="20" Orientation="Vertical" HorizontalAlignment="Center">
-            <TextBox x:Name="SearchTextBox" Margin="20" Width="200" PlaceholderText="Search items..." />
-            <StackPanel Name="ReviewsPanel"></StackPanel>
-            <!--<Button Content="Automatically check reviews" Click="AutoCheckButton_Click">-->
-            <Button Content="Automatically check reviews" Margin="20"/>
-        </StackPanel>
+        <Grid Grid.Row="1" Margin="20" HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Search Box -->
+                <RowDefinition Height="*"/>
+                <!-- ListView (Expands) -->
+                <RowDefinition Height="Auto"/>
+                <!-- Button -->
+            </Grid.RowDefinitions>
+
+            <!-- Search Box -->
+            <TextBox x:Name="SearchTextBox" Margin="20" Width="200" PlaceholderText="Search items..." Grid.Row="0"/>
+
+            <!-- Scrollable ListView -->
+            <ListView x:Name="ReviewsList" Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="5" Padding="10" Background="LightGray" CornerRadius="5">
+                            <StackPanel>
+                                <TextBlock Text="{Binding content}" FontSize="14" Foreground="Black"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <!-- Button stays fixed -->
+            <Button Content="Automatically check reviews" Margin="20" Grid.Row="2"/>
+        </Grid>
 
     </Grid>
 

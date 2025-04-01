@@ -10,6 +10,14 @@ namespace App1.Models
 {
     public class Review
     {
+
+        public Review()
+        {
+            numberOfFlags = 0;
+            content = "Lorem ipsum";
+            userID = 0;
+        }
+
         public int reviewID { get; }
         
         public int numberOfFlags { get; set; }
@@ -19,19 +27,6 @@ namespace App1.Models
         public bool isHidden { get; set; }
 
         public int userID { get; set; }
-
-        public Review() 
-        {
-            NumberOfFlags = 0;
-            Content = "Lorem ipsum";
-            UserId = 0;
-        }
-
-        public String toString()
-        {
-            //return getUserName + Content + "\n";
-            return  Content + "\n";
-        }
 
     }
 }
