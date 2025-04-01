@@ -15,7 +15,7 @@ namespace App1.Models
 
         public int numberOfDeletedReviews { get; }
 
-        public int permissionId { get; }
+        public int permissionID { get; set; }
 
         public bool hasAppealed { get; }  
 
