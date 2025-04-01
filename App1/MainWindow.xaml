@@ -9,7 +9,51 @@
     mc:Ignorable="d"
     Title="App1">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-    </StackPanel>
+    </StackPanel>-->
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="8*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row ="0" Grid.ColumnSpan ="3" Background="#1f3d7a"/>
+        <Border Grid.Row="1" Grid.Column="0" Background="#152951"/>
+        <Border Grid.Row="1" Grid.Column="1" Background="Beige"/>
+        <Border Grid.Row="1" Grid.Column="2" Background="GhostWhite"/>
+
+        <!--<StackPanel Grid.Row ="1" Grid.Column="0" Margin="40,0,0,0" VerticalAlignment="Center">
+            <TextBlock Foreground="White" FontSize="25" Text="Today - 64° F"/>
+            <TextBlock Foreground="White" FontSize="25" Text="Partially Cloudy"/>
+            <TextBlock Foreground="White" FontSize="25" Text="Precipitation: 25%"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal"
+            HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Foreground="White" FontSize="25" Text="High: 66°" Margin="0,0,20,0"/>
+            <TextBlock Foreground="White" FontSize="25" Text="Low: 43°" Margin="0,0,20,0"/>
+            <TextBlock Foreground="White" FontSize="25" Text="Feels like: 63°"/>
+        </StackPanel>-->
+
+        <!--<StackPanel VerticalAlignment="Center" HorizontalAlignment="Left">
+            <Image Height="Auto" Margin="20,0,0,0" Source="Assets/beers-logo.png"/>
+        </StackPanel>-->
+
+        <Image Margin="20,0,0,0" HorizontalAlignment="Left" Source="Assets/beers-logo.png"/>
+
+        <StackPanel Grid.Row="1" Margin="20" Orientation="Vertical" HorizontalAlignment="Center">
+            <TextBox x:Name="SearchTextBox" Margin="20" Width="200" PlaceholderText="Search items..." />
+            <StackPanel Name="ReviewsPanel"></StackPanel>
+            <!--<Button Content="Automatically check reviews" Click="AutoCheckButton_Click">-->
+            <Button Content="Automatically check reviews" Margin="20"/>
+        </StackPanel>
+
+    </Grid>
+
 </Window>

@@ -20,5 +20,18 @@ namespace App1.Models
 
         public int UserId { get; set; }
 
+        public Review() 
+        {
+            NumberOfFlags = 0;
+            Content = "Lorem ipsum";
+            UserId = 0;
+        }
+
+        public String toString()
+        {
+            //return getUserName + Content + "\n";
+            return  Content + "\n";
+        }
+
     }
 }
