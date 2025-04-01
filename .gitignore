@@ -44,7 +44,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 training_log.txt/
-curseword_model/
+curseword_model*
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
