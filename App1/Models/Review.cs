@@ -10,15 +10,15 @@ namespace App1.Models
 {
     public class Review
     {
-        public int ReviewId { get; }
+        public int reviewID { get; }
         
-        public int NumberOfFlags { get; set; }
+        public int numberOfFlags { get; set; }
 
-        public string Content { get; set; }
+        public string content { get; set; }
         
-        public bool IsHidden { get; set; }
+        public bool isHidden { get; set; }
 
-        public int UserId { get; set; }
+        public int userID { get; set; }
 
     }
 }
