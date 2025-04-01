@@ -8,16 +8,16 @@ namespace App1.Models
 {
     public class User
     {
-        public int UserId { get; }
-        public string Email { get; }
+        public int userId { get; }
+        public string email { get; }
 
-        public string Name { get; }
+        public string name { get; }
 
-        public int NumberOfDeletedReviews { get; }
+        public int numberOfDeletedReviews { get; }
 
-        public int PermissionId { get; }
+        public int permissionId { get; }
 
-        public bool HasAppealed { get; }  
+        public bool hasAppealed { get; }  
 
     }
 }

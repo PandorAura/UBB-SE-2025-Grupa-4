@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using App1.Ai_Check;
 
 using App1.Models;
 
@@ -42,9 +43,24 @@ namespace App1
             ReviewsPanel.Children.Add(Reviews);
         }
 
-        //private void myButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    myButton.Content = "Clicked";
-        //}
+        private void myButton_Click(object sender, RoutedEventArgs e)
+        {
+            myButton.Content = "Clicked";
+        }
+        private void TrainModel_Click(object sender, RoutedEventArgs e)
+        {
+            ReviewModelTrainer.TrainModel();
+            ContentDialog dialog = new ContentDialog
+            {
+                Title = "Training Complete",
+                Content = "The model has been trained and saved.",
+                CloseButtonText = "OK",
+                XamlRoot = this.Content.XamlRoot // Set the XamlRoot property
+            };
+            _ = dialog.ShowAsync();
+        }
+
+
     }
+
 }

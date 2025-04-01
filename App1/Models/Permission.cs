@@ -8,8 +8,8 @@ namespace App1.Models
 {
     public class Permission
     {
-        public int PermissionId { get;}
+        public int permissionId { get;}
 
-        public int Level { get; set; }
+        public int level { get; set; }
     }
 }
