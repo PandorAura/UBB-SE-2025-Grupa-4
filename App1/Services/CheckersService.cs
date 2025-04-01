@@ -1,7 +1,7 @@
 ﻿using System;
 using App1.Models;
 using App1.Repositories;
-using App1.Services; // Assuming you have ReviewsService available
+using App1.Services; 
 using Microsoft.ML;
 using System.IO;
 
@@ -16,16 +16,15 @@ namespace App1.Services
         public CheckersService()
         {
             reviewsRepo = new ReviewsRepo();
-            reviewsService = new ReviewsService(); // Initialize the ReviewsService
+            reviewsService = new ReviewsService();
         }
 
         public void RunAutoCheck(int reviewID)
         {
-            // Implement the logic for automatic checks on the review with the given reviewID
             var review = reviewsRepo.GetReviewByID(reviewID);
             if (review != null)
             {
-                // Perform some automatic check (this can be your custom logic)
+                // partea de auto
                 
             }
             else
@@ -36,18 +35,18 @@ namespace App1.Services
 
         public void RunAICheck(int reviewID)
         {
-            // Get the specific review from the repository by ID
+            // get the specific review from the repository by ID
             var review = reviewsRepo.GetReviewByID(reviewID);
             if (review != null)
             {
-                // Perform AI-based check
-                bool isOffensive = CheckReviewWithAI(review.content); // Use ReviewText getter
+                // perform AI-based check
+                bool isOffensive = CheckReviewWithAI(review.content); 
 
-                // If the review is offensive, hide it
+                // if the review is offensive, hide it
                 if (isOffensive)
                 {
                     Console.WriteLine($"Review {reviewID} is offensive. Hiding the review.");
-                    reviewsService.HideReview(reviewID); // Hide the review
+                    reviewsService.HideReview(reviewID); // hide the review
                 }
                 else
                 {
@@ -64,19 +63,19 @@ namespace App1.Services
         {
             var context = new MLContext();
 
-            // Load the trained model
+            // load the trained model
             ITransformer model = context.Model.Load(ModelPath, out var modelInputSchema);
 
-            // Create the prediction engine
+            // create the prediction engine
             var predEngine = context.Model.CreatePredictionEngine<ReviewData, ReviewPrediction>(model);
 
-            // Create a new review object with the provided text
+            // create a new review object with the provided text
             var review = new ReviewData { Text = reviewText };
 
-            // Make the prediction
+            // make the prediction
             var prediction = predEngine.Predict(review);
 
-            // Return whether the review is offensive
+            // return whether the review is offensive
             return prediction.IsOffensive;
         }
     }
