@@ -10,8 +10,8 @@ namespace App1.Ai_Check
     public class ReviewModelTrainer
     {
         private static readonly string DataPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.Parent.FullName,"Ai_Check", "review_data.csv");
-        private static readonly string ModelPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "curseword_model.zip");
-        private static readonly string LogFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "training_log.txt");
+        private static readonly string ModelPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.Parent.FullName, "Logs", "curseword_model.zip");
+        private static readonly string LogFilePath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.Parent.FullName, "Logs", "training_log.txt");
 
         public static void TrainModel()
         {
