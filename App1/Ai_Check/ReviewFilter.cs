@@ -5,16 +5,19 @@ namespace App1.Ai_Check
     public class ReviewData
     {
         [LoadColumn(0)]
-        public string Text { get; set; } // Review text
+        public string Text { get; set; }  // Review text
 
         [LoadColumn(1)]
-        [ColumnName("IsOffensive")] // Label for ML.NET training
-        public bool IsOffensive { get; set; } // 1 = offensive, 0 = not offensive
+        [ColumnName("Label")]  // ML.NET expects "Label" for binary classification
+        public bool IsOffensive { get; set; }  // True = offensive, False = not offensive
     }
 
     public class ReviewPrediction
     {
         [ColumnName("PredictedLabel")]
-        public float Prediction { get; set; } // Model’s prediction: 1 (offensive) or 0 (not offensive)
+        public bool Prediction { get; set; }  // Direct bool output (more intuitive)
+
+        [ColumnName("Score")]
+        public float Probability { get; set; }  // Raw score for threshold tuning
     }
 }
