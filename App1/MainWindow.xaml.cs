@@ -14,12 +14,13 @@ namespace App1
         public MainWindow()
         {
             this.InitializeComponent();
-            InitializeScheduler().ConfigureAwait(false); // Start scheduler
-            ScheduleDelayedEmailAutomatically().ConfigureAwait(false); // Auto-schedule email
+            InitializeScheduler().ConfigureAwait(false);
+            ScheduleDelayedEmailAutomatically().ConfigureAwait(false);
+
         }
 
 
-            private async Task InitializeScheduler()
+        private async Task InitializeScheduler()
             {
                 StdSchedulerFactory factory = new StdSchedulerFactory();
                 _scheduler = await factory.GetScheduler();
@@ -31,9 +32,9 @@ namespace App1
             {
                 var jobData = new JobDataMap
         {
-            { "RecipientEmail", "aurapandor@gmail.com" },
+            { "RecipientEmail", "mkhenike@gmail.com" },
             { "Subject", "Auto-Scheduled Email" },
-            { "Body", "This email was scheduled automatically when the app started!" }
+            { "Body", "HIII HAVE A NICE DAYY!" }
         };
 
                 IJobDetail job = JobBuilder.Create<EmailJob>()
