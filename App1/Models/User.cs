@@ -17,6 +17,8 @@ namespace App1.Models
 
         public int permissionID { get; set; }
 
+        public List<Role> roles { get; set; }
+
         public bool hasAppealed { get; }  
 
     }
