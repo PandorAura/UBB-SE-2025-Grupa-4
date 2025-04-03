@@ -21,6 +21,6 @@
 
     public override string ToString()
     {
-        return "Id: " + userId.ToString() + ", email: " + email;
+        return "Id: " + UserId.ToString() + ", email: " + Email;
     }
 }

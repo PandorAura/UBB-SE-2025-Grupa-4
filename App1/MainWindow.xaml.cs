@@ -11,6 +11,9 @@ using App1.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView.WinUI;
 using LiveChartsCore.SkiaSharpView;
+using System.Collections.Generic;
+using Microsoft.UI.Xaml.Controls;
+using System.Linq;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -75,10 +78,9 @@ namespace App1
             }
         }
 
-            reviewsService = new ReviewsService();
-            userService = new UserService();
 
-        }
+
+        
 
         private void TrainModel_Click(object sender, RoutedEventArgs e)
         {
@@ -110,16 +112,16 @@ namespace App1
             ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>  // getBannedUsers() from UserService
             {
                 new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
+                //new User(22),
+                //new User(),
+                //new User(2),
+                //new User(),
+                //new User(12),
+                //new User(),
+                //new User(4),
+                //new User(6),
+                //new User(),
+                //new User(79)
             };
 
             AppealsList.ItemsSource = UsersWhichAppealed;
@@ -129,17 +131,17 @@ namespace App1
         {
             ObservableCollection<User> UsersRoleRequests = new ObservableCollection<User>
             {
-                new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
+                //new User(),
+                //new User(22),
+                //new User(),
+                //new User(2),
+                //new User(),
+                //new User(12),
+                //new User(),
+                //new User(4),
+                //new User(6),
+                //new User(),
+                //new User(79)
             };
 
             RequestsList.ItemsSource = UsersRoleRequests;
@@ -208,20 +210,20 @@ namespace App1
             ObservableCollection<User> AllAppeals = new ObservableCollection<User>
             {
                 new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
+                //new User(22),
+                //new User(),
+                //new User(2),
+                //new User(),
+                //new User(12),
+                //new User(),
+                //new User(4),
+                //new User(6),
+                //new User(),
+                //new User(79)
             };
             string filter = BannedUserSearchTextBox.Text.ToLower();
             AppealsList.ItemsSource = new ObservableCollection<User>(
-                AllAppeals.Where(user => user.email.ToLower().Contains(filter))
+                AllAppeals.Where(user => user.Email.ToLower().Contains(filter))
             );
         }
 
