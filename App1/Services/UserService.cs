@@ -13,6 +13,11 @@ namespace App1.Services
             userRepo = new UserRepo();
         }
 
+        public UserService(UserRepo userRepo)
+        {
+            this.userRepo = userRepo;
+        }
+
         public void ChangeUserPermission(int userID, int permissionID)
         {
             userRepo.UpdatePermission(userID, permissionID);
@@ -26,6 +31,13 @@ namespace App1.Services
         public List<User> GetBannedUsers()
         {   //aici sa puneti voi cat inseamna banned
             return userRepo.GetUsersByPermission(-1);
+        }
+
+        public List<User> GetAppealedUsers() { 
+
+            return userRepo.GetAppealedUsers();
+        
+
         }
     }
 }

@@ -20,6 +20,9 @@ using App1.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView.WinUI;
 using LiveChartsCore.SkiaSharpView;
+using Windows.System;
+using User = App1.Models.User;
+using Microsoft.UI.Text;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -35,17 +38,21 @@ namespace App1
         private ReviewsService reviewsService;
         private UserService userService;
         private CheckersService checkersService;
+        
+  
 
         public MainWindow()
         {
+
+            reviewsService = new ReviewsService(new Repositories.ReviewsRepo());
+            userService = new UserService(new Repositories.UserRepo());
             this.InitializeComponent();
             LoadStatistics();
             displayReviews();
             displayAppeal();
             displayRoleRequests();
 
-            reviewsService = new ReviewsService();
-            userService = new UserService();
+          
 
         }
         private void TrainModel_Click(object sender, RoutedEventArgs e)
@@ -63,43 +70,118 @@ namespace App1
 
         private void displayReviews()
         {
-            ObservableCollection<Review> Reviews = new ObservableCollection<Review>  // getReviews() from ReviewsService
-            {
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review()
-            };
+            
+            ObservableCollection<Review> Reviews = new ObservableCollection<Review>(reviewsService.GetReviews());
+
 
             ReviewsList.ItemsSource = Reviews;
         }
 
         private void displayAppeal()
         {
-            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>  // getBannedUsers() from UserService
-            {
-                new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
-            };
 
-            AppealsList.ItemsSource = UsersWhichAppealed;
+
+
+
+
+            ObservableCollection<User> UsersThatAppealed = new ObservableCollection<User>(userService.GetAppealedUsers());
+
+
+            AppealsList.ItemsSource = UsersThatAppealed;
         }
+
+
+
+        private void AppealsList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is User selectedUser)
+            {
+                Flyout flyout = new Flyout();
+                StackPanel panel = new StackPanel { Padding = new Thickness(10) };
+
+                TextBlock userInfo = new TextBlock
+                {
+                    Text = $"User ID: {selectedUser.userId}\nEmail: {selectedUser.email}",
+                    FontSize = 18
+                };
+
+                // List of reviews for this user
+                List<Review> userReviews = reviewsService.GetReviews().Where(r => r.userID == selectedUser.userId).ToList();
+
+                TextBlock reviewsHeader = new TextBlock
+                {
+                    Text = "User Reviews:",
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 10, 0, 5)
+                };
+
+                ListView reviewsList = new ListView
+                {
+                    ItemsSource = userReviews.Select(r => $"Review ID: {r.reviewID}, Content: {r.content}").ToList(),
+                    MaxHeight = 200
+                };
+
+                // Ban Button
+                Button banButton = new Button
+                {
+                    Content = "Keep Ban",
+                    Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
+                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
+                    HorizontalAlignment = HorizontalAlignment.Stretch
+                };
+                banButton.Click += (s, args) =>
+                {
+                    selectedUser.permissionID = 0;
+                    userInfo.Text = $"User ID: {selectedUser.userId}\nEmail: {selectedUser.email}\nStatus: Banned";
+                };
+
+                // Appeal Button
+                Button appealButton = new Button
+                {
+                    Content = "Accept Appeal",
+                    Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green),
+                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
+                    HorizontalAlignment = HorizontalAlignment.Stretch
+                };
+                appealButton.Click += (s, args) =>
+                {
+                    selectedUser.permissionID = 1;
+                    userInfo.Text = $"User ID: {selectedUser.userId}\nEmail: {selectedUser.email}\nStatus: Active";
+                };
+
+                // Close Button
+                Button closeButton = new Button
+                {
+                    Content = "Close Appeal Case",
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+                closeButton.Click += (s, args) =>
+                {
+                    selectedUser.hasAppealed = false;
+                    AppealsList.ItemsSource = null;
+                    AppealsList.ItemsSource = userService.GetAppealedUsers();
+                    flyout.Hide();
+                };
+
+                // Add items to panel
+                panel.Children.Add(userInfo);
+                panel.Children.Add(reviewsHeader);
+                panel.Children.Add(reviewsList);
+                panel.Children.Add(banButton);
+                panel.Children.Add(appealButton);
+                panel.Children.Add(closeButton);
+
+
+                flyout.Content = panel;
+                flyout.Placement = FlyoutPlacementMode.Left;
+                flyout.ShowAt((FrameworkElement)sender);
+            }
+        }
+
+
+
+
+
 
         private void displayRoleRequests()
         {
@@ -120,6 +202,9 @@ namespace App1
 
             RequestsList.ItemsSource = UsersRoleRequests;
         }
+
+
+
 
         private void LoadPieChart()
         {

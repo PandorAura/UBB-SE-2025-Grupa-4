@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="App1.Views.AppealDetailsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:App1.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <StackPanel Padding="20">
+        <TextBlock x:Name="UserInfoText" FontSize="18" FontWeight="Bold"/>
+
+        <TextBlock Text="User Reviews:" FontWeight="Bold" Margin="0,10,0,5"/>
+        <ListView x:Name="ReviewsListView" MaxHeight="200"/>
+
+        <Button Content="Keep Ban" Background="Red" Foreground="White" Click="BanUser_Click"/>
+        <Button Content="Accept Appeal" Background="Green" Foreground="White" Click="AcceptAppeal_Click"/>
+        <Button Content="Close Appeal Case" Click="CloseAppeal_Click"/>
+    </StackPanel>
+</Page>

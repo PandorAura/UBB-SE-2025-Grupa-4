@@ -12,7 +12,9 @@ namespace App1.Services
     {
         private readonly ReviewsRepo reviewRepo;
 
-        public ReviewsService() { }
+        public ReviewsService() {
+
+        }
         public ReviewsService(ReviewsRepo reviewsRepo)
         {
             reviewRepo = new ReviewsRepo();

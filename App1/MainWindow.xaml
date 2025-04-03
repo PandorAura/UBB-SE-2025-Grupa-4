@@ -10,8 +10,11 @@
     mc:Ignorable="d"
     Title="IMBD for Drinks - Admin">
 
+
+
     <!--main grid-->
     <Grid>
+ 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="1*"/>
@@ -67,7 +70,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/> <!--search box resizes, the others stay fixed-->
+                <RowDefinition Height="*"/>
+                <!--search box resizes, the others stay fixed-->
             </Grid.RowDefinitions>
 
             <TextBlock Margin="20,20,20,0" FontSize="14" Foreground="Black">
@@ -78,19 +82,24 @@
                      PlaceholderText="Search appeals..."
                      TextChanged="BannedUserSearchTextBox_TextChanged"/>
 
-            <ListView x:Name="AppealsList" Grid.Row="2" ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListView x:Name="AppealsList" Grid.Row="2" ScrollViewer.VerticalScrollBarVisibility="Auto" IsItemClickEnabled="True" ItemClick="AppealsList_ItemClick">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Border Margin="5" Padding="10" Background="LightGray" CornerRadius="5">
                             <StackPanel>
-                                <TextBlock Text="{Binding}" FontSize="14" Foreground="Black"/>
+                                <TextBlock Text="{Binding Mode=TwoWay}" FontSize="14" Foreground="Black"/>
                                 <!--<TextBlock Text="{Binding email}" FontSize="14" Foreground="Black"/>-->
                             </StackPanel>
                         </Border>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+            
+            
+
         </Grid>
+        
+       
 
         <!--statistics and role requests column-->
         <Grid Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch">

@@ -18,7 +18,7 @@ namespace App1.Models
             userID = 0;
         }
 
-        public int reviewID { get; }
+        public int reviewID { get; set; }
         
         public int numberOfFlags { get; set; }
 
