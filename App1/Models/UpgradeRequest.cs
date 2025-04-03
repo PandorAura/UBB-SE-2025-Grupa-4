@@ -9,10 +9,12 @@ namespace App1.Models
 {
     public class UpgradeRequest
     {
+        public UpgradeRequest(int newRequestId, int newRequestingUserId) { 
+            RequestId = newRequestId;
+            this.RequestingUserId = newRequestingUserId;
+        }
         public int RequestId { get; set; }
 
         public int RequestingUserId { get; set; }
-
-        public List<Role> UserRoles { get; set; }
     }
 }

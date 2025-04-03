@@ -9,7 +9,7 @@ namespace App1.Repositories
 {
     public class RolesRepository
     {
-        private List<Role> roles;
+        private readonly List<Role> _roles;
         public RolesRepository() {
 
             List<Role> roles = new List<Role>();
@@ -20,12 +20,12 @@ namespace App1.Repositories
 
         public List<Role> getRoles()
         {
-            return roles;
+            return _roles;
         }
 
         public Role getUpgradedRoleBasedOnCurrentId(int currentRoleId)
         {
-            Role upgradedRole = roles.First( role => role.RoleId ==  currentRoleId + 1 );
+            Role upgradedRole = _roles.First( role => role.RoleId ==  currentRoleId + 1 );
             return upgradedRole;
         }
     }
