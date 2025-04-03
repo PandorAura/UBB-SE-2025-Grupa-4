@@ -10,8 +10,9 @@ namespace App1.Models
     public class UpgradeRequest
     {
         public int RequestId { get; set; }
+
         public int RequestingUserId { get; set; }
 
-        public int HighestRoleId { get; set; }
+        public List<Role> UserRoles { get; set; }
     }
 }

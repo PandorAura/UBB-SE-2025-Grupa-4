@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.System;
 
 namespace App1.Services
 {
@@ -13,6 +14,7 @@ namespace App1.Services
     {
         private UpgradeRequestsRepository upgradeRequestsRepository;
         private IRolesRepository rolesRepository;
+        private UserRepo userRepo;
 
         public UpgradeRequestsService(UpgradeRequestsRepository upgradeRequestsRepository, IRolesRepository rolesRepository)
         {
@@ -20,21 +22,23 @@ namespace App1.Services
             this.rolesRepository = rolesRepository;
         }
 
-        public List<UpgradeRequest> getAllRequests()
+        public List<UpgradeRequest> GetAllRequests()
         {
             return this.upgradeRequestsRepository.getAllRequests();
         }
-
-        public void handleRequest(bool accepted, int requestId)
+        public void HandleRequest(bool accepted, int requestId)
         {
             if (accepted)
             {
                 UpgradeRequest currentRequest =  this.upgradeRequestsRepository.getUpgradeRequest(requestId);
 
-                Role upgradedRole = rolesRepository.getUpgradedRoleBasedOnCurrentId(currentRequest.HighestRoleId);
+                int requestingUserId = currentRequest.RequestingUserId;
 
-                // add role to the user's roles list
+                int highestRoleId = this.userRepo.getHighestRoleIdBasedOnUserId(requestingUserId);
 
+                Role upgradedRole = rolesRepository.getUpgradedRoleBasedOnCurrentId(highestRoleId);
+
+                this.userRepo.addRoleToUser(requestingUserId, upgradedRole);
             }
             this.upgradeRequestsRepository.deleteRequestBasedOnRequestId(requestId);
         }

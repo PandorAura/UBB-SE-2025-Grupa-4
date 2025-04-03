@@ -25,7 +25,8 @@ namespace App1.Repositories
         public UpgradeRequest getUpgradeRequest(int requestId)
         {
             // get from database based on id
-            return;
+            UpgradeRequest request;
+            return request;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace App1.Repositories
 {
     public class RolesRepository
     {
-        List<Role> roles;
+        private List<Role> roles;
         public RolesRepository() {
 
             List<Role> roles = new List<Role>();
