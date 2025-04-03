@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,7 +10,8 @@ namespace App1.AutoChecker
 {
     public class AutoCheck
     {
-        private static readonly string OffensiveWordsFilePath = Path.GetFullPath("offensive_words");
+        private static readonly string ProjectRoot = GetProjectRoot();
+        private static readonly string OffensiveWordsFilePath = Path.Combine(ProjectRoot, "AutoChecker", "offensive_words.txt");
         private static HashSet<string> OffensiveWords = LoadOffensiveWords();
 
         public AutoCheck()
@@ -33,6 +35,16 @@ namespace App1.AutoChecker
                 return new HashSet<string>(File.ReadAllLines(OffensiveWordsFilePath), StringComparer.OrdinalIgnoreCase);
             }
             return new HashSet<string>();
+        }
+
+        private static string GetProjectRoot([CallerFilePath] string filePath = "")
+        {
+            var dir = new FileInfo(filePath).Directory;
+            while (dir != null && !dir.GetFiles("*.csproj").Any())
+            {
+                dir = dir.Parent;
+            }
+            return dir?.FullName ?? throw new Exception("Project root not found!");
         }
     }
 }

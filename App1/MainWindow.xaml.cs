@@ -66,8 +66,6 @@ namespace App1
             List<string> messages = checkers.RunAutoCheck(reviews);
 
             OutputBox.Text = "";
-
-            // Loop through reviews and add them to the OutputBox
             foreach (var message in messages)
             {
                 OutputBox.Text += message + '\n';
