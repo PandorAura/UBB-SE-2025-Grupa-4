@@ -20,6 +20,15 @@ namespace App1.Models
             this.email = "example" + userId.ToString() + "@iss.com";
         }
 
+        public User(int userId, string email, string name, int numberOfDeletedReviews, int permissionID, bool hasAppealed) : this(userId)
+        {
+            this.email = email;
+            this.name = name;
+            this.numberOfDeletedReviews = numberOfDeletedReviews;
+            this.permissionID = permissionID;
+            this.hasAppealed = hasAppealed;
+        }
+
         public int userId { get; }
         public string email { get; }
 

@@ -39,13 +39,12 @@ namespace App1
         public MainWindow()
         {
             this.InitializeComponent();
+            reviewsService = new ReviewsService();
+            userService = new UserService();
             LoadStatistics();
             displayReviews();
             displayAppeal();
             displayRoleRequests();
-
-            reviewsService = new ReviewsService();
-            userService = new UserService();
 
         }
         private void TrainModel_Click(object sender, RoutedEventArgs e)
@@ -63,40 +62,14 @@ namespace App1
 
         private void displayReviews()
         {
-            ObservableCollection<Review> Reviews = new ObservableCollection<Review>  // getReviews() from ReviewsService
-            {
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review()
-            };
+            ObservableCollection<Review> Reviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
 
             ReviewsList.ItemsSource = Reviews;
         }
 
         private void displayAppeal()
         {
-            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>  // getBannedUsers() from UserService
-            {
-                new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
-            };
+            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetActiveUsers(1));
 
             AppealsList.ItemsSource = UsersWhichAppealed;
         }
@@ -159,20 +132,7 @@ namespace App1
 
         private void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ObservableCollection<Review> AllReviews = new ObservableCollection<Review>  // getReviews() from ReviewsService
-            {
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review()
-            };
+            ObservableCollection<Review> AllReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
             string filter = ReviewSearchTextBox.Text.ToLower();
             ReviewsList.ItemsSource = new ObservableCollection<Review>(
                 AllReviews.Where(review => review.content.ToLower().Contains(filter))
@@ -201,6 +161,30 @@ namespace App1
             );
         }
 
+        private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
+            {
+                reviewsService.resetReviewFlags(review.userID);
+            }
+            displayReviews();
+
+        }
+
+        private void MenuFlyoutHideReview_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
+            {
+                reviewsService.HideReview(review.userID);
+                reviewsService.resetReviewFlags(review.userID); //Reviews are displayed if they have at least one flag
+            }
+            displayReviews();
+        }
+
+        private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
+        {
+            //TODO
+        }
     }
 
 }

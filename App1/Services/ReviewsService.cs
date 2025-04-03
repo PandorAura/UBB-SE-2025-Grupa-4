@@ -12,11 +12,19 @@ namespace App1.Services
     {
         private readonly ReviewsRepo reviewRepo;
 
-        public ReviewsService() { }
+        public ReviewsService() {
+            reviewRepo = new ReviewsRepo();
+            reviewRepo.generateReviews();
+        }
         public ReviewsService(ReviewsRepo reviewsRepo)
         {
             reviewRepo = new ReviewsRepo();
             this.reviewRepo = reviewsRepo;
+        }
+
+        public void resetReviewFlags(int reviewID)
+        {
+            reviewRepo.GetReviewByID(reviewID).numberOfFlags = 0;
         }
 
         public void HideReview(int reviewID)
