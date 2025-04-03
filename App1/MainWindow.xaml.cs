@@ -1,9 +1,9 @@
-using App1.Ai_Check;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using Quartz;
 using Quartz.Impl;
 using System.Threading.Tasks;
+using System;
+using App1.Ai_Check;
 
 namespace App1
 {
@@ -16,74 +16,53 @@ namespace App1
             this.InitializeComponent();
             InitializeScheduler().ConfigureAwait(false);
             ScheduleDelayedEmailAutomatically().ConfigureAwait(false);
-
         }
 
-
         private async Task InitializeScheduler()
+        {
+            try
             {
                 StdSchedulerFactory factory = new StdSchedulerFactory();
                 _scheduler = await factory.GetScheduler();
                 await _scheduler.Start();
+                System.Diagnostics.Debug.WriteLine("Scheduler initialized successfully");
             }
-
-            // Schedule email without button click
-            private async Task ScheduleDelayedEmailAutomatically()
+            catch (Exception ex)
             {
-                var jobData = new JobDataMap
-        {
-            { "RecipientEmail", "mkhenike@gmail.com" },
-            { "Subject", "Auto-Scheduled Email" },
-            { "Body", "HIII HAVE A NICE DAYY!" }
-        };
+                System.Diagnostics.Debug.WriteLine($"Scheduler initialization failed: {ex}");
+            }
+        }
 
+        private async Task ScheduleDelayedEmailAutomatically()
+        {
+            try
+            {
                 IJobDetail job = JobBuilder.Create<EmailJob>()
                     .WithIdentity("autoEmailJob", "emailGroup")
-                    .UsingJobData(jobData)
                     .Build();
 
                 ITrigger trigger = TriggerBuilder.Create()
                     .WithIdentity("autoTrigger", "emailGroup")
-                    .StartAt(DateBuilder.FutureDate(1, IntervalUnit.Minute)) // Send after 1 minute
+                    .StartAt(DateBuilder.FutureDate(1, IntervalUnit.Minute))
                     .Build();
 
                 await _scheduler.ScheduleJob(job, trigger);
-
-                // Optional: Show a notification (if UI is ready)
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    ContentDialog dialog = new ContentDialog
-                    {
-                        Title = "Email Scheduled",
-                        Content = "An email will be sent in 1 minute.",
-                        CloseButtonText = "OK",
-                        XamlRoot = this.Content.XamlRoot
-                    };
-                   // _ = dialog.ShowAsync();
-                });
+                System.Diagnostics.Debug.WriteLine($"Job scheduled to run at {DateTime.Now.AddMinutes(1)}");
             }
-        
-
-
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Job scheduling failed: {ex}");
+            }
+        }
 
         private void myButton_Click(object sender, RoutedEventArgs e)
         {
             myButton.Content = "Clicked";
         }
 
-        
-
         private void TrainModel_Click(object sender, RoutedEventArgs e)
         {
             ReviewModelTrainer.TrainModel();
-            ContentDialog dialog = new ContentDialog
-            {
-                Title = "Training Complete",
-                Content = "The model has been trained and saved.",
-                CloseButtonText = "OK",
-                XamlRoot = this.Content.XamlRoot
-            };
-            _ = dialog.ShowAsync();
         }
     }
 }

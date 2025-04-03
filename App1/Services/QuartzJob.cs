@@ -4,22 +4,44 @@ using Quartz;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using App1.Services;
+using App1.Models;
+using Microsoft.Extensions.Configuration;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 public class EmailJob : IJob
 {
+    private readonly IUserService _userService;
+    private readonly IConfiguration _config;
+
+    public EmailJob(IUserService userService, IConfiguration configuration)
+    {
+        if (userService == null || configuration == null)
+        {
+            System.Diagnostics.Debug.WriteLine("DI FAILED - Null dependencies injected");
+            throw new ArgumentNullException();
+        }
+        System.Diagnostics.Debug.WriteLine("EmailJob created with valid dependencies");
+        _userService = userService;
+        _config = configuration;
+        System.Diagnostics.Debug.WriteLine("EmailJob constructor called");
+    }
+
     public async Task Execute(IJobExecutionContext context)
     {
+        System.Diagnostics.Debug.WriteLine("EmailJob execution started");
+
         try
         {
-            // 1. Get credentials from environment variables
-            var moderatorEmail = Environment.GetEnvironmentVariable("SMTP_MODERATOR_EMAIL", EnvironmentVariableTarget.User);
-            var moderatorPassword = Environment.GetEnvironmentVariable("SMTP_MODERATOR_PASSWORD", EnvironmentVariableTarget.User);
+            // 1. Get credentials from configuration
+            var moderatorEmail = _config["SMTP_MODERATOR_EMAIL"];
+            var moderatorPassword = _config["SMTP_MODERATOR_PASSWORD"];
 
             if (string.IsNullOrEmpty(moderatorEmail) || string.IsNullOrEmpty(moderatorPassword))
-                throw new Exception("SMTP credentials not configured in environment variables");
+                throw new Exception("SMTP credentials not configured");
 
-            // 2. Get all admin users (example - replace with your actual user repository)
-            var adminUsers = await UserRepository.GetAdminsAsync(); // Your method to get admins (roleId == 2)
+            // 2. Get all admin users through the injected service
+            var adminUsers = (_userService.GetActiveUsers(2)).ToList(); // 2 = admin role
             if (!adminUsers.Any()) return;
 
             // 3. Create and send emails
@@ -54,7 +76,6 @@ public class EmailJob : IJob
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Email Job Failed: {ex}");
-            // Consider adding retry logic here
         }
     }
 }
