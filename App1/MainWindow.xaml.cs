@@ -39,13 +39,12 @@ namespace App1
         public MainWindow()
         {
             this.InitializeComponent();
+            reviewsService = new ReviewsService();
+            userService = new UserService();
             LoadStatistics();
             displayReviews();
             displayAppeal();
             displayRoleRequests();
-
-            reviewsService = new ReviewsService();
-            userService = new UserService();
 
         }
         private void TrainModel_Click(object sender, RoutedEventArgs e)
@@ -63,40 +62,14 @@ namespace App1
 
         private void displayReviews()
         {
-            ObservableCollection<Review> Reviews = new ObservableCollection<Review>  // getReviews() from ReviewsService
-            {
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review()
-            };
+            ObservableCollection<Review> Reviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
 
             ReviewsList.ItemsSource = Reviews;
         }
 
         private void displayAppeal()
         {
-            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>  // getBannedUsers() from UserService
-            {
-                new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
-            };
+            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetActiveUsers(1));
 
             AppealsList.ItemsSource = UsersWhichAppealed;
         }

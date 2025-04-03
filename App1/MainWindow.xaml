@@ -8,7 +8,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     mc:Ignorable="d"
-    Title="IMBD for Drinks - Admin">
+    Title="IMBD for Drinks - Admin"
+    xmlns:models="using:App1.Models" 
+    >
 
     <!--main grid-->
     <Grid>
@@ -49,10 +51,14 @@
             <!-- Scrollable ListView -->
             <ListView x:Name="ReviewsList" Grid.Row="2" ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <ListView.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate x:DataType="models:Review">
                         <Border Margin="5" Padding="10" Background="LightGray" CornerRadius="5">
                             <StackPanel>
-                                <TextBlock Text="{Binding content}" FontSize="14" Foreground="Black"/>
+                                <TextBlock FontSize="14" Foreground="Black">
+                                    <Run Text="{x:Bind userID}"/>
+                                    <Run Text=": "/>
+                                    <Run Text="{x:Bind content}"/>
+                                </TextBlock>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
