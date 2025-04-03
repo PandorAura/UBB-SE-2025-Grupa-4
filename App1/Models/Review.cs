@@ -10,6 +10,14 @@ namespace App1.Models
 {
     public class Review
     {
+
+        public Review()
+        {
+            numberOfFlags = 0;
+            content = "Lorem ipsum";
+            userID = 0;
+        }
+
         public int reviewID { get; }
         
         public int numberOfFlags { get; set; }
