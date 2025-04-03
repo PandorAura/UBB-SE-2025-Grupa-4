@@ -12,7 +12,10 @@ namespace App1.Services
     {
         private readonly ReviewsRepo reviewRepo;
 
-        public ReviewsService() { }
+        public ReviewsService() {
+            reviewRepo = new ReviewsRepo();
+            reviewRepo.generateReviews();
+        }
         public ReviewsService(ReviewsRepo reviewsRepo)
         {
             reviewRepo = new ReviewsRepo();
