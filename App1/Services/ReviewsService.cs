@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using App1.Models;
 using App1.Repositories;
 
@@ -9,9 +12,11 @@ namespace App1.Services
     {
         private readonly ReviewsRepo reviewRepo;
 
-        public ReviewsService()
+        public ReviewsService() { }
+        public ReviewsService(ReviewsRepo reviewsRepo)
         {
             reviewRepo = new ReviewsRepo();
+            this.reviewRepo = reviewsRepo;
         }
 
         public void HideReview(int reviewID)
