@@ -14,12 +14,13 @@ namespace App1.Services
     {
         private IUpgradeRequestsRepository upgradeRequestsRepository;
         private IRolesRepository rolesRepository;
-        private UserRepo userRepo;
+        private IUserRepository userRepo;
 
-        public UpgradeRequestsService(IUpgradeRequestsRepository upgradeRequestsRepository, IRolesRepository rolesRepository)
+        public UpgradeRequestsService(IUpgradeRequestsRepository upgradeRequestsRepository, IRolesRepository rolesRepository, IUserRepository newUserRepo)
         {
             this.upgradeRequestsRepository = upgradeRequestsRepository;
             this.rolesRepository = rolesRepository;
+            this.userRepo = newUserRepo;
         }
 
         public List<UpgradeRequest> GetAllRequests()

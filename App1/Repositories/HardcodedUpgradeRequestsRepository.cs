@@ -7,15 +7,13 @@ using System.Threading.Tasks;
 
 namespace App1.Repositories
 {
-    public class HardcodedUpgradeRequestsRepository
+    public class HardcodedUpgradeRequestsRepository: IUpgradeRequestsRepository
     {
         private List<UpgradeRequest> _requests;
         public HardcodedUpgradeRequestsRepository() {
             _requests = new List<UpgradeRequest>();
-            _requests.Add(new UpgradeRequest(1, 1));
-            _requests.Add(new UpgradeRequest(2, 2));
-            _requests.Add(new UpgradeRequest(3, 3));
-            _requests.Add(new UpgradeRequest(4, 4));
+            _requests.Add(new UpgradeRequest(1, 1, "user12"));
+            _requests.Add(new UpgradeRequest(2, 2, "user123"));
         }
 
         public List<UpgradeRequest> getAllRequests()

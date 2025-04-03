@@ -20,6 +20,10 @@ using App1.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView.WinUI;
 using LiveChartsCore.SkiaSharpView;
+using App1.Repositories;
+using HarfBuzzSharp;
+//using CSharpMarkup.WinUI;
+using System.Diagnostics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -35,18 +39,27 @@ namespace App1
         private ReviewsService reviewsService;
         private UserService userService;
         private CheckersService checkersService;
+        private UpgradeRequestsService requestsService;
 
         public MainWindow()
         {
             this.InitializeComponent();
-            LoadStatistics();
-            displayReviews();
-            displayAppeal();
-            displayRoleRequests();
+
 
             reviewsService = new ReviewsService();
             userService = new UserService();
 
+            IUpgradeRequestsRepository hr = new HardcodedUpgradeRequestsRepository();
+            IRolesRepository r = new RolesRepository();
+            IUserRepository u = new HardcodedUserRepository();
+
+            requestsService = new UpgradeRequestsService(hr, r, u);
+
+            LoadStatistics();
+            displayReviews();
+            displayAppeal();
+
+            displayRoleRequests();
         }
         private void TrainModel_Click(object sender, RoutedEventArgs e)
         {
@@ -103,20 +116,8 @@ namespace App1
 
         private void displayRoleRequests()
         {
-            ObservableCollection<User> UsersRoleRequests = new ObservableCollection<User>
-            {
-                new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
-            };
+            List<UpgradeRequest> upgradeRequests = requestsService.GetAllRequests();
+            ObservableCollection<UpgradeRequest> UsersRoleRequests = new ObservableCollection<UpgradeRequest>(upgradeRequests);
 
             RequestsList.ItemsSource = UsersRoleRequests;
         }
@@ -201,6 +202,29 @@ namespace App1
             );
         }
 
+        private void AcceptButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                if (button.Tag is int RequestId)
+                {
+                    this.requestsService.HandleRequest(true, RequestId);
+
+                }
+            }
+            this.displayRoleRequests();
+        }
+        private void DeclineButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                if (button.Tag is int RequestId)
+                {
+                    this.requestsService.HandleRequest(false, RequestId);
+                }
+            }
+            this.displayRoleRequests();
+        }
     }
 
 }

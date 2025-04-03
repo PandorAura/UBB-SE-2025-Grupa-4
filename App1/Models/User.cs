@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Windows.System;
 
 namespace App1.Models
 {
@@ -31,7 +33,18 @@ namespace App1.Models
 
         public List<Role> roles { get; set; }
 
-        public bool hasAppealed { get; }  
+        public bool hasAppealed { get; }
+
+        public User(int userId, string email, string name, int numberOfDeletedReviews, int permissionID, bool hasAppealed, List<Role> roles)
+        {
+            this.userId = userId;
+            this.email = email;
+            this.name = name;
+            this.numberOfDeletedReviews = numberOfDeletedReviews;
+            this.permissionID = permissionID;
+            this.hasAppealed = hasAppealed;
+            this.roles = roles;
+        }
 
         public override string ToString()
         {

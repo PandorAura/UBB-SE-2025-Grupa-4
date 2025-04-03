@@ -6,7 +6,7 @@ using App1.Models;
 
 namespace App1.Repositories
 {
-    internal class UserRepo
+    public class UserRepo
     {
         private List<User> users;
 
