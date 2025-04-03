@@ -84,7 +84,7 @@ namespace App1
 
 
 
-            ObservableCollection<User> UsersThatAppealed = new ObservableCollection<User>(userService.GetAppealedUsers());
+            List<User> UsersThatAppealed =userService.GetAppealedUsers();
 
 
             AppealsList.ItemsSource = UsersThatAppealed;
@@ -99,14 +99,17 @@ namespace App1
                 Flyout flyout = new Flyout();
                 StackPanel panel = new StackPanel { Padding = new Thickness(10) };
 
+                selectedUser.permissionID = 0; // Assuming 0 is the permission ID for banned users
+               
+
                 TextBlock userInfo = new TextBlock
                 {
-                    Text = $"User ID: {selectedUser.userId}\nEmail: {selectedUser.email}",
+                    Text = $"User ID: {selectedUser.userId}\nEmail: {selectedUser.email}\nStatus: Banned",
                     FontSize = 18
                 };
 
                 // List of reviews for this user
-                List<Review> userReviews = reviewsService.GetReviews().Where(r => r.userID == selectedUser.userId).ToList();
+                List<Review> userReviews = reviewsService.GetReviewsByUser(selectedUser.userId);
 
                 TextBlock reviewsHeader = new TextBlock
                 {
@@ -117,7 +120,7 @@ namespace App1
 
                 ListView reviewsList = new ListView
                 {
-                    ItemsSource = userReviews.Select(r => $"Review ID: {r.reviewID}, Content: {r.content}").ToList(),
+                    ItemsSource = userReviews.Select(r => $"{r.content}").ToList(),
                     MaxHeight = 200
                 };
 
