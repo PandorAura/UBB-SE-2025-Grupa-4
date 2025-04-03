@@ -22,6 +22,11 @@ namespace App1.Services
             this.reviewRepo = reviewsRepo;
         }
 
+        public void resetReviewFlags(int reviewID)
+        {
+            reviewRepo.GetReviewByID(reviewID).numberOfFlags = 0;
+        }
+
         public void HideReview(int reviewID)
         {
             reviewRepo.UpdateHiddenReview(reviewID, true);

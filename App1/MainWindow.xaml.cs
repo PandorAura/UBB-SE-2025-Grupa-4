@@ -132,20 +132,7 @@ namespace App1
 
         private void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ObservableCollection<Review> AllReviews = new ObservableCollection<Review>  // getReviews() from ReviewsService
-            {
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review(),
-                new Review()
-            };
+            ObservableCollection<Review> AllReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
             string filter = ReviewSearchTextBox.Text.ToLower();
             ReviewsList.ItemsSource = new ObservableCollection<Review>(
                 AllReviews.Where(review => review.content.ToLower().Contains(filter))
@@ -174,6 +161,30 @@ namespace App1
             );
         }
 
+        private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
+            {
+                reviewsService.resetReviewFlags(review.userID);
+            }
+            displayReviews();
+
+        }
+
+        private void MenuFlyoutHideReview_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
+            {
+                reviewsService.HideReview(review.userID);
+                reviewsService.resetReviewFlags(review.userID); //Reviews are displayed if they have at least one flag
+            }
+            displayReviews();
+        }
+
+        private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
+        {
+            //TODO
+        }
     }
 
 }
