@@ -10,7 +10,7 @@
     Title="App1">
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-
+        <Button x:Name="myButton" Click="AutoCheck_Click">Run AutoCheck</Button>
+        <TextBox Name="OutputBox" Height="300" TextWrapping="Wrap"/>
     </StackPanel>
 </Window>

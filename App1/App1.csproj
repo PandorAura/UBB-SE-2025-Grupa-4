@@ -43,6 +43,11 @@
   <ItemGroup>
     <Folder Include="Logs\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="AutoChecker\offensive_words.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution

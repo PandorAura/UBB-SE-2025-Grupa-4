@@ -4,6 +4,9 @@ using App1.Repositories;
 using App1.Services; 
 using Microsoft.ML;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using App1.AutoChecker;
 
 namespace App1.Services
 {
@@ -11,26 +14,41 @@ namespace App1.Services
     {
         private readonly ReviewsRepo reviewsRepo;
         private readonly ReviewsService reviewsService;
+        private readonly AutoCheck autoCheck;
         private static readonly string ModelPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "curseword_model.zip");
 
         public CheckersService()
         {
             reviewsRepo = new ReviewsRepo();
             reviewsService = new ReviewsService();
-        }
+            autoCheck = new AutoCheck();        }
 
-        public void RunAutoCheck(int reviewID)
+        public List<string> RunAutoCheck(List<Review> reviews)
         {
-            var review = reviewsRepo.GetReviewByID(reviewID);
-            if (review != null)
+            List<string> messages = new List<string>();
+
+            foreach (var review in reviews)
             {
-                // partea de auto
-                
+                if (review != null)
+                {
+                    bool isOffensive = autoCheck.AutoCheckReview(review.content);
+
+                    if (isOffensive)
+                    {
+                        messages.Add($"Review {review.reviewID} is offensive. Hiding the review.");
+                        reviewsService.HideReview(review.reviewID);
+                    }
+                    else
+                    {
+                        messages.Add($"Review {review.reviewID} is not offensive.");
+                    }
+                }
+                else
+                {
+                    messages.Add("Review not found.");
+                }
             }
-            else
-            {
-                Console.WriteLine("Review not found.");
-            }
+            return messages;
         }
 
         public void RunAICheck(int reviewID)

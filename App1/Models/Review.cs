@@ -20,5 +20,13 @@ namespace App1.Models
 
         public int userID { get; set; }
 
+        public Review(int id, string text, int user)
+        {
+            reviewID = id;
+            content = text;
+            userID = user;
+            numberOfFlags = 0;
+            isHidden = false;
+        }
     }
 }
