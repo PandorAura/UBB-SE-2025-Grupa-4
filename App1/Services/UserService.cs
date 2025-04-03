@@ -31,6 +31,12 @@ namespace App1.Services
         public string GetUserName(int ID) { 
             return userRepo.getUserByID(ID).name;
         }
+
+        public List<User> GetAppealingUsers()
+        {
+            return userRepo.GetAppealingUsers();
+        }
+
     }
 }
 

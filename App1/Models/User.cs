@@ -38,7 +38,7 @@ namespace App1.Models
 
         public int permissionID { get; set; }
 
-        public bool hasAppealed { get; }  
+        public bool hasAppealed { get; set; }  
 
         public override string ToString()
         {

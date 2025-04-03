@@ -18,6 +18,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Microsoft.UI.Text;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -68,10 +69,102 @@ namespace App1.Views
 
         private void displayAppeal()
         {
-            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetActiveUsers(1));
+            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetAppealingUsers());
 
             AppealsList.ItemsSource = UsersWhichAppealed;
         }
+
+
+        private void AppealsList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is User selectedUser)
+            {
+                Flyout flyout = new Flyout();
+                StackPanel panel = new StackPanel { Padding = new Thickness(10) };
+
+                selectedUser.permissionID = 0; // Assuming 0 is the permission ID for banned users
+
+
+                TextBlock userInfo = new TextBlock
+                {
+                    Text = $"User ID: {selectedUser.userId}\nEmail: {selectedUser.email}\nStatus: Banned",
+                    FontSize = 18
+                };
+
+                // List of reviews for this user
+                List<Review> userReviews = reviewsService.GetReviewsByUser(selectedUser.userId);
+
+                TextBlock reviewsHeader = new TextBlock
+                {
+                    Text = "User Reviews:",
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 10, 0, 5)
+                };
+
+                ListView reviewsList = new ListView
+                {
+                    ItemsSource = userReviews.Select(r => $"{r.content}").ToList(),
+                    MaxHeight = 200
+                };
+
+                // Ban Button
+                Button banButton = new Button
+                {
+                    Content = "Keep Ban",
+                    Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
+                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
+                    HorizontalAlignment = HorizontalAlignment.Stretch
+                };
+                banButton.Click += (s, args) =>
+                {
+                    selectedUser.permissionID = 0;
+                    userInfo.Text = $"User ID: {selectedUser.userId}\nEmail: {selectedUser.email}\nStatus: Banned";
+                };
+
+                // Appeal Button
+                Button appealButton = new Button
+                {
+                    Content = "Accept Appeal",
+                    Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green),
+                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
+                    HorizontalAlignment = HorizontalAlignment.Stretch
+                };
+                appealButton.Click += (s, args) =>
+                {
+                    selectedUser.permissionID = 1;
+                    userInfo.Text = $"User ID: {selectedUser.userId}\nEmail: {selectedUser.email}\nStatus: Active";
+                };
+
+                // Close Button
+                Button closeButton = new Button
+                {
+                    Content = "Close Appeal Case",
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+                closeButton.Click += (s, args) =>
+                {
+                    selectedUser.hasAppealed = false;
+                    AppealsList.ItemsSource = null;
+                    AppealsList.ItemsSource = userService.GetAppealingUsers();
+                    flyout.Hide();
+                };
+
+                // Add items to panel
+                panel.Children.Add(userInfo);
+                panel.Children.Add(reviewsHeader);
+                panel.Children.Add(reviewsList);
+                panel.Children.Add(banButton);
+                panel.Children.Add(appealButton);
+                panel.Children.Add(closeButton);
+
+
+                flyout.Content = panel;
+                flyout.Placement = FlyoutPlacementMode.Left;
+                flyout.ShowAt((FrameworkElement)sender);
+            }
+        }
+
+
 
         private void displayRoleRequests()
         {
