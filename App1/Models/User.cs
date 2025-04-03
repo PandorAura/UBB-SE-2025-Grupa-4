@@ -18,4 +18,9 @@
         PermissionID = permissionID;
         HasAppealed = hasAppealed;
     }
+
+    public override string ToString()
+    {
+        return "Id: " + userId.ToString() + ", email: " + email;
+    }
 }
