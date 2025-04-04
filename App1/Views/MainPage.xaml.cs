@@ -271,7 +271,7 @@ namespace App1.Views
             };
             string filter = BannedUserSearchTextBox.Text.ToLower();
             AppealsList.ItemsSource = new ObservableCollection<User>(
-                AllAppeals.Where(user => user.Email.ToLower().Contains(filter))
+                userService.GetAppealingUsers()
             );
         }
 
