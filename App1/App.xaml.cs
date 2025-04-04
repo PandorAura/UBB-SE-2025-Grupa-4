@@ -33,9 +33,12 @@ namespace App1
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    // Repository and Services
+                    // Remove duplicate registration and add missing dependencies
                     services.AddSingleton<IUserRepository, UserRepo>();
-                    services.AddSingleton<IUserService, UserService>();
+                    services.AddSingleton<IReviewRepository, ReviewRepo>(); 
+                    services.AddSingleton<IUserService, UserService>(); 
+                    services.AddSingleton<IReviewService, ReviewsService>(); 
+                    services.AddTransient<EmailJob>();
 
                     // Quartz Configuration
                     services.AddSingleton<JobFactory>();

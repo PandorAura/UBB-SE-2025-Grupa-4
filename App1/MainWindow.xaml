@@ -52,7 +52,7 @@
                     <DataTemplate>
                         <Border Margin="5" Padding="10" Background="LightGray" CornerRadius="5">
                             <StackPanel>
-                                <TextBlock Text="{Binding content}" FontSize="14" Foreground="Black"/>
+                                <TextBlock Text="{Binding Content}" FontSize="14" Foreground="Black"/>
                             </StackPanel>
                         </Border>
                     </DataTemplate>

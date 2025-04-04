@@ -57,6 +57,11 @@ namespace App1.Services
                 throw new UserServiceException("Failed to get banned users", ex);
             }
         }
+
+        public List<User> GetUsersByPermission(int permissionId)
+        {
+            return  _userRepo.GetUsersByPermission(permissionId); 
+        }
     }
 
     public class UserServiceException : Exception

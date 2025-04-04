@@ -201,7 +201,7 @@ namespace App1
             };
             string filter = ReviewSearchTextBox.Text.ToLower();
             ReviewsList.ItemsSource = new ObservableCollection<Review>(
-                AllReviews.Where(review => review.content.ToLower().Contains(filter))
+                AllReviews.Where(review => review.Content.ToLower().Contains(filter))
             );
         }
 
