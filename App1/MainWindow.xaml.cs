@@ -6,6 +6,17 @@ using System;
 using App1.Views;
 using Microsoft.Extensions.DependencyInjection;
 
+using App1.Models;
+using System.Collections.ObjectModel;
+using App1.Services;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView.WinUI;
+using LiveChartsCore.SkiaSharpView;
+using App1.Repositories;
+using HarfBuzzSharp;
+//using CSharpMarkup.WinUI;
+using System.Diagnostics;
+
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 

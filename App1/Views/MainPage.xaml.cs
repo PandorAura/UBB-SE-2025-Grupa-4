@@ -28,9 +28,12 @@ namespace App1.Views
         private IReviewService reviewsService;
         private IUserService userService;
         private CheckersService checkersService;
+        private IUpgradeRequestsService requestsService;
+
+        //TO DO: Add interface for requests, pass to main Page, same as the others
 
         public MainPage(IReviewService reviewsService,
-                   IUserService userService
+                   IUserService userService, IUpgradeRequestsService upgradeRequestsService
                    )
         {
             this.InitializeComponent();
@@ -44,6 +47,7 @@ namespace App1.Views
             }
             this.reviewsService = reviewsService;
             this.userService = userService;
+            this.requestsService = upgradeRequestsService;
             //reviewsService = new ReviewsService();
             //userService = new UserService();
             LoadStatistics();
@@ -173,22 +177,34 @@ namespace App1.Views
 
         private void displayRoleRequests()
         {
-            ObservableCollection<User> UsersRoleRequests = new ObservableCollection<User>
-            {
-                new User(),
-                //new User(22),
-                //new User(),
-                //new User(2),
-                //new User(),
-                //new User(12),
-                //new User(),
-                //new User(4),
-                //new User(6),
-                //new User(),
-                //new User(79)
-            };
+            List<UpgradeRequest> upgradeRequests = requestsService.GetAllRequests();
+            ObservableCollection<UpgradeRequest> UsersRoleRequests = new ObservableCollection<UpgradeRequest>(upgradeRequests);
 
             RequestsList.ItemsSource = UsersRoleRequests;
+
+        }
+        private void AcceptButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                if (button.Tag is int RequestId)
+                {
+                    this.requestsService.HandleRequest(true, RequestId);
+
+                }
+            }
+            this.displayRoleRequests();
+        }
+        private void DeclineButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                if (button.Tag is int RequestId)
+                {
+                    this.requestsService.HandleRequest(false, RequestId);
+                }
+            }
+            this.displayRoleRequests();
         }
 
         private void LoadPieChart()
