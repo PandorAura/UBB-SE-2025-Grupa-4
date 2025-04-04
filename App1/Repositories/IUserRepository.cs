@@ -22,6 +22,5 @@ namespace App1.Repositories
 
         public List<User> GetUsers();
 
-        public void UpdatePermission(int userID, int permissionID);
     }
 }

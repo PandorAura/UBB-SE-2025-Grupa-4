@@ -28,12 +28,12 @@ namespace App1.Views
         private IReviewService reviewsService;
         private IUserService userService;
         private CheckersService checkersService;
-        private UpgradeRequestsService requestsService;
+        private IUpgradeRequestsService requestsService;
 
         //TO DO: Add interface for requests, pass to main Page, same as the others
 
         public MainPage(IReviewService reviewsService,
-                   IUserService userService
+                   IUserService userService, IUpgradeRequestsService upgradeRequestsService
                    )
         {
             this.InitializeComponent();
@@ -47,6 +47,7 @@ namespace App1.Views
             }
             this.reviewsService = reviewsService;
             this.userService = userService;
+            this.requestsService = upgradeRequestsService;
             //reviewsService = new ReviewsService();
             //userService = new UserService();
             LoadStatistics();

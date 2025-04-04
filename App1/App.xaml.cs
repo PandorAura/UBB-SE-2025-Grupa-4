@@ -36,9 +36,12 @@ namespace App1
 
                     // Remove duplicate registration and add missing dependencies
                     services.AddSingleton<IUserRepository, UserRepo>();
-                    services.AddSingleton<IReviewRepository, ReviewRepo>(); 
+                    services.AddSingleton<IReviewRepository, ReviewRepo>();
+                    services.AddSingleton<IUpgradeRequestsRepository, HardcodedUpgradeRequestsRepository>();
+                    services.AddSingleton<IRolesRepository, RolesRepository>();
                     services.AddSingleton<IUserService, UserService>(); 
                     services.AddSingleton<IReviewService, ReviewsService>(); 
+                    services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
                     services.AddTransient<EmailJob>();
 
                     // Quartz Configuration

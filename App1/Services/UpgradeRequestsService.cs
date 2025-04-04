@@ -10,7 +10,7 @@ using Windows.System;
 namespace App1.Services
 {
 
-    public class UpgradeRequestsService
+    public class UpgradeRequestsService: IUpgradeRequestsService
     {
         private IUpgradeRequestsRepository upgradeRequestsRepository;
         private IRolesRepository rolesRepository;

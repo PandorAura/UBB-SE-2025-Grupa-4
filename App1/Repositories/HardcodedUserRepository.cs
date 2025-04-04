@@ -58,27 +58,31 @@ namespace App1.Repositories
 
         public void UpdatePermission(int userID, int permissionID)
         {
-            var user = _users.FirstOrDefault(u => u.userId == userID);
+            var user = _users.FirstOrDefault(u => u.UserId == userID);
             if (user != null)
             {
-                user.permissionID = permissionID;
+                user.PermissionID = permissionID;
             }
         }
-
         public List<User> GetAppealedUsers()
         {
-            return _users.Where(u => u.hasAppealed).ToList();
+            return _users.Where(u => u.HasAppealed).ToList();
+        }
+
+        public List<User> GetAppealingUsers()
+        {
+            return _users.Where(u => u.HasAppealed).ToList();
         }
 
         public List<User> GetUsersByPermission(int permissionID)
         {
-            return _users.Where(u => u.permissionID == permissionID).ToList();
+            return _users.Where(u => u.PermissionID == permissionID).ToList();
         }
         public int getHighestRoleIdBasedOnUserId(int userId)
         {
-            User user = _users.First(user => user.userId == userId);
+            User user = _users.First(user => user.UserId == userId);
 
-            List<Role> roles = user.roles;
+            List<Role> roles = user.Roles;
 
             Role maxRole = roles.MaxBy(role => role.RoleId);
 
@@ -89,13 +93,18 @@ namespace App1.Repositories
 
         public void addRoleToUser(int userID, Role roleToAdd)
         {
-            User user = _users.First(user => user.userId == userID);
-            user.roles.Add(roleToAdd);
+            User user = _users.First(user => user.UserId == userID);
+            user.Roles.Add(roleToAdd);
         }
 
         public List<User> GetUsers()
         {
             return _users;
-        } 
+        }
+        public User getUserByID(int iD)
+        {
+            return _users[iD];
+        }
+
     }
 }

@@ -1,4 +1,7 @@
-﻿public class User
+﻿using App1.Models;
+using System.Collections.Generic;
+
+public class User
 {
     public int UserId { get; set; }
     public string Email { get; set; }
@@ -6,7 +9,7 @@
     public int NumberOfDeletedReviews { get; set; }
     public int PermissionID { get; set; }
     public bool HasAppealed { get; set; }
-    public List<Role> roles { get; set; }
+    public List<Role> Roles { get; set; }
 
     public User() { }
 

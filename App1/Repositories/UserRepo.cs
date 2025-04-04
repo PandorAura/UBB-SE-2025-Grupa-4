@@ -13,6 +13,15 @@ namespace App1.Repositories
 
         public UserRepo()
         {
+            List<Role> roles1 = new List<Role>
+            {
+                new Role(1, "user")
+            };
+            List<Role> roles2 = new List<Role>
+            {
+                new Role(1, "user"),
+                new Role(2, "admin")
+            };
             _users = new List<User>
             {
                 new User(
@@ -21,15 +30,18 @@ namespace App1.Repositories
                     name: "Admin One",
                     numberOfDeletedReviews: 3,
                     permissionID: 2,
-                    hasAppealed: false
+                    hasAppealed: false,
+                    roles: roles1
                 ),
                  new User(
-                    userId: 1,
+                    userId: 2,
                     email: "aurapandor@gmail.com",
                     name: "Admin One",
                     numberOfDeletedReviews: 3,
                     permissionID: 2,
-                    hasAppealed: false
+                    hasAppealed: false,
+                    roles: roles2
+
                 )
             };
         }
@@ -73,7 +85,7 @@ namespace App1.Repositories
         {
             User user = _users.First(user => user.UserId == userId);
 
-            List<Role> roles = user.roles;
+            List<Role> roles = user.Roles;
 
             Role maxRole = roles.MaxBy(role => role.RoleId);
 
@@ -93,7 +105,12 @@ namespace App1.Repositories
         public void addRoleToUser(int userID, Role roleToAdd)
         {
             User user = _users.First(user => user.UserId == userID);
-            user.roles.Add(roleToAdd);
+            user.Roles.Add(roleToAdd);
         }
+        public List<User> GetUsers()
+        {
+            return _users;
+        }
+
     }
 }
