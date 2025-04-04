@@ -15,7 +15,7 @@
 
     <!--main grid-->
     <Grid>
-        <Frame x:Name="rootFrame" SourcePageType="views:MainPage"/>
+        <Frame x:Name="rootFrame"/>
 
     </Grid>
 
