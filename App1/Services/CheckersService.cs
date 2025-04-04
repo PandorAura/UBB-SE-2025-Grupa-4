@@ -9,14 +9,14 @@ namespace App1.Services
 {
     internal class CheckersService
     {
-        private readonly ReviewsRepo reviewsRepo;
+        private readonly ReviewRepo reviewsRepo;
         private readonly ReviewsService reviewsService;
         private static readonly string ModelPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "curseword_model.zip");
 
         public CheckersService()
         {
-            reviewsRepo = new ReviewsRepo(); //TODO
-            reviewsService = new ReviewsService(); //TODO
+            reviewsRepo = new ReviewRepo();
+            reviewsService = new ReviewsService();
         }
 
         public void RunAutoCheck(int reviewID)
@@ -36,11 +36,11 @@ namespace App1.Services
         public void RunAICheck(int reviewID)
         {
             // get the specific review from the repository by ID
-            var review = reviewsRepo.GetReviewByID(reviewID);
+            Review review = (Review)reviewsRepo.GetReviewByID(reviewID);
             if (review != null)
             {
                 // perform AI-based check
-                bool isOffensive = CheckReviewWithAI(review.content); 
+                bool isOffensive = CheckReviewWithAI(review.Content); 
 
                 // if the review is offensive, hide it
                 if (isOffensive)
