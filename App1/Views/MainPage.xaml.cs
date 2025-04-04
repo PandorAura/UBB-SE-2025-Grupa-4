@@ -168,20 +168,7 @@ namespace App1.Views
 
         private void displayRoleRequests()
         {
-            ObservableCollection<User> UsersRoleRequests = new ObservableCollection<User>
-            {
-                new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
-            };
+            ObservableCollection<User> UsersRoleRequests = new ObservableCollection<User>(userService.GetAppealingUsers());
 
             RequestsList.ItemsSource = UsersRoleRequests;
         }

@@ -39,13 +39,7 @@ namespace App1
         public MainWindow()
         {
             this.InitializeComponent();
-            //reviewsService = new ReviewsService();
-            //userService = new UserService();
-            //LoadStatistics();
-            //displayReviews();
-            //displayAppeal();
-            //displayRoleRequests();
-
+            
         }
         //private void TrainModel_Click(object sender, RoutedEventArgs e)
         //{
