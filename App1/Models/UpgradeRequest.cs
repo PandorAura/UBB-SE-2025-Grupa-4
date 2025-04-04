@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSharpMarkup.WinUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,5 +20,10 @@ namespace App1.Models
         public int RequestingUserId { get; set; }
 
         public string RequestingUserName {  get; set; }
+
+        public override string ToString()
+        {
+            return this.RequestingUserName;
+        }
     }
 }

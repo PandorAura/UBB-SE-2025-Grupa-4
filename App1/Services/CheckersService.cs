@@ -15,8 +15,8 @@ namespace App1.Services
 
         public CheckersService()
         {
-            reviewsRepo = new ReviewsRepo();
-            reviewsService = new ReviewsService();
+            reviewsRepo = new ReviewsRepo(); //TODO
+            reviewsService = new ReviewsService(); //TODO
         }
 
         public void RunAutoCheck(int reviewID)

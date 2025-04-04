@@ -16,6 +16,16 @@ namespace App1.Models
             numberOfFlags = 0;
             content = "Lorem ipsum";
             userID = 0;
+            isHidden = false;
+        }
+
+        public Review(int reviewID, int numberOfFlags, string content, bool isHidden, int userID)
+        { 
+            this.reviewID = reviewID;
+            this.numberOfFlags = numberOfFlags;
+            this.content = content;
+            this.isHidden = isHidden;
+            this.userID = userID;
         }
 
         public int reviewID { get; }
