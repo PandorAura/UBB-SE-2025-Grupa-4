@@ -7,6 +7,7 @@ using Quartz;
 using Quartz.Impl;
 using System;
 using Microsoft.Extensions.Hosting;
+using App1.Views;
 
 namespace App1
 {
@@ -52,9 +53,9 @@ namespace App1
 
                     // Jobs
                     services.AddTransient<EmailJob>();
-
-                    // MainWindow
+                    services.AddTransient<MainPage>();
                     services.AddTransient<MainWindow>();
+
                 })
                 .Build();
         }

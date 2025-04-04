@@ -8,7 +8,7 @@ namespace App1.Services
     public class UserService: IUserService
     {
         private readonly IUserRepository _userRepo;
-        private const int BANNED_PERMISSION_ID = -1;
+        private const int BANNED_PERMISSION_ID = 0;
 
         public UserService(IUserRepository userRepository)
         {
@@ -62,7 +62,17 @@ namespace App1.Services
         {
             return  _userRepo.GetUsersByPermission(permissionId); 
         }
+    
+        public string GetUserName(int ID) { 
+            return _userRepo.getUserByID(ID).Name;
+        }
+
+        public List<User> GetAppealingUsers()
+        {
+            return _userRepo.GetAppealingUsers();
+        }
     }
+
 
     public class UserServiceException : Exception
     {

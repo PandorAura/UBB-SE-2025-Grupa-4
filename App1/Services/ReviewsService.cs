@@ -8,7 +8,7 @@ using App1.Repositories;
 
 namespace App1.Services
 {
-    internal class ReviewsService: IReviewService
+    public class ReviewsService: IReviewService
     {
         private readonly IReviewRepository _reviewRepository;
 
@@ -17,6 +17,11 @@ namespace App1.Services
         public ReviewsService(IReviewRepository reviewRepository)
         {
             this._reviewRepository = reviewRepository;
+        }
+
+        public void resetReviewFlags(int reviewID)
+        {
+            _reviewRepository.GetReviewByID(reviewID).NumberOfFlags = 0;
         }
 
         public void HideReview(int reviewID)
@@ -54,6 +59,11 @@ namespace App1.Services
             {
                 return _reviewRepository.GetReviewCountSince(date);
             }
+
+        public List<Review> GetReviewsByUser(int userId)
+        {
+            return _reviewRepository.GetReviewsByUser(userId);
         }
+    }
     }
 

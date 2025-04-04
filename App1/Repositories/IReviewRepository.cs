@@ -17,5 +17,7 @@ namespace App1.Repositories
 
         public void UpdateHiddenReview(int reviewID, bool isHidden);
         public void UpdateFlaggedReview(int reviewID, int numberOfFlags);
+        List<Review> GetReviewsByUser(int userId);
+        Review GetReviewByID(int reviewID);
     }
 }

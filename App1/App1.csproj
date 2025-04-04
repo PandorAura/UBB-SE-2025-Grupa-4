@@ -13,7 +13,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Page Remove="EmailTemplate.xaml" />
+    <None Remove="Views\MainPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,9 +53,9 @@
     <Folder Include="Logs\" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="EmailTemplate.xaml">
+    <Page Update="Views\MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
-    </None>
+    </Page>
   </ItemGroup>
 
   <!--
@@ -73,5 +73,6 @@
     <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
     <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 </Project>
