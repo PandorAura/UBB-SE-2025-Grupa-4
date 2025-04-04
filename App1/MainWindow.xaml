@@ -6,11 +6,17 @@
     xmlns:local="using:App1"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     mc:Ignorable="d"
-    Title="App1">
+    Title="IMBD for Drinks - Admin"
+    xmlns:models="using:App1.Models" 
+    xmlns:views="using:App1.Views"
+    >
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="myButton" Click="AutoCheck_Click">Run AutoCheck</Button>
-        <TextBox Name="OutputBox" Height="300" TextWrapping="Wrap"/>
-    </StackPanel>
+    <!--main grid-->
+    <Grid>
+        <Frame x:Name="rootFrame" SourcePageType="views:MainPage"/>
+
+    </Grid>
+
 </Window>

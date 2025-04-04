@@ -12,16 +12,15 @@ namespace App1.Services
 {
     internal class CheckersService
     {
-        private readonly ReviewsRepo reviewsRepo;
         private readonly ReviewsService reviewsService;
         private readonly AutoCheck autoCheck;
         private static readonly string ModelPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "curseword_model.zip");
 
-        public CheckersService()
+        public CheckersService(ReviewsService reviewsService)
         {
-            reviewsRepo = new ReviewsRepo();
-            reviewsService = new ReviewsService();
-            autoCheck = new AutoCheck();        }
+            this.reviewsService = reviewsService;
+            this.autoCheck = new AutoCheck();
+        }
 
         public List<string> RunAutoCheck(List<Review> reviews)
         {
@@ -37,6 +36,7 @@ namespace App1.Services
                     {
                         messages.Add($"Review {review.reviewID} is offensive. Hiding the review.");
                         reviewsService.HideReview(review.reviewID);
+                        reviewsService.resetReviewFlags(review.reviewID);
                     }
                     else
                     {
@@ -53,28 +53,28 @@ namespace App1.Services
 
         public void RunAICheck(int reviewID)
         {
-            // get the specific review from the repository by ID
-            var review = reviewsRepo.GetReviewByID(reviewID);
-            if (review != null)
-            {
-                // perform AI-based check
-                bool isOffensive = CheckReviewWithAI(review.content); 
+            ////get the specific review from the repository by ID
+            //var review = reviewsService.GetReviewsByUser(userID);
+            //if (review != null)
+            //{
+            //    // perform AI-based check
+            //    bool isOffensive = CheckReviewWithAI(review.content);
 
-                // if the review is offensive, hide it
-                if (isOffensive)
-                {
-                    Console.WriteLine($"Review {reviewID} is offensive. Hiding the review.");
-                    reviewsService.HideReview(reviewID); // hide the review
-                }
-                else
-                {
-                    Console.WriteLine($"Review {reviewID} is not offensive.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Review not found.");
-            }
+            //    // if the review is offensive, hide it
+            //    if (isOffensive)
+            //    {
+            //        Console.WriteLine($"Review {reviewID} is offensive. Hiding the review.");
+            //        reviewsService.HideReview(reviewID); // hide the review
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine($"Review {reviewID} is not offensive.");
+            //    }
+            //}
+            //else
+            //{
+            //    Console.WriteLine("Review not found.");
+            //}
         }
 
         private bool CheckReviewWithAI(string reviewText)
