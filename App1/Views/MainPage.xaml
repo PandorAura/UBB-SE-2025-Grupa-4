@@ -146,7 +146,7 @@
                                             <ColumnDefinition Width="1*" />
                                         </Grid.ColumnDefinitions>
 
-                                        <StackPanel Orientation="Vertical" Grid.Column="0">
+                                        <StackPanel Orientation="Vertical" Grid.Column="0" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding}" FontSize="16" FontWeight="Bold"/>
                                         </StackPanel>
 
