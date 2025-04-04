@@ -1,18 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using App1.Ai_Check;
+using Quartz;
+using Quartz.Impl;
+using System.Threading.Tasks;
+using System;
+using App1.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 using App1.Models;
 using System.Collections.ObjectModel;
@@ -30,39 +22,69 @@ using System.Diagnostics;
 
 namespace App1
 {
-    /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class MainWindow : Window
     {
-
-        //private ReviewsService reviewsService;
-        //private UserService userService;
-        //private CheckersService checkersService;
+        private IScheduler _scheduler;
 
         public MainWindow()
         {
             this.InitializeComponent();
-            //reviewsService = new ReviewsService();
-            //userService = new UserService();
-            //LoadStatistics();
-            //displayReviews();
-            //displayAppeal();
-            //displayRoleRequests();
-
+            InitializeScheduler().ConfigureAwait(false);
+            ScheduleDelayedEmailAutomatically().ConfigureAwait(false);
+            this.Activated += OnWindowActivated;
         }
-        //private void TrainModel_Click(object sender, RoutedEventArgs e)
-        //{
-        //    ReviewModelTrainer.TrainModel();
-        //    ContentDialog dialog = new ContentDialog
-        //    {
-        //        Title = "Training Complete",
-        //        Content = "The model has been trained and saved.",
-        //        CloseButtonText = "OK",
-        //        XamlRoot = this.Content.XamlRoot // Set the XamlRoot property
-        //    };
-        //    _ = dialog.ShowAsync();
-        //}
+
+        private void OnWindowActivated(object sender, WindowActivatedEventArgs args)
+        {
+            if (args.WindowActivationState != WindowActivationState.Deactivated)
+            {
+                rootFrame.Content = App.Host.Services.GetRequiredService<MainPage>();
+
+                this.Activated -= OnWindowActivated;
+            }
+        }
+        
+        private async Task InitializeScheduler()
+        {
+            try
+            {
+                StdSchedulerFactory factory = new StdSchedulerFactory();
+                _scheduler = await factory.GetScheduler();
+                await _scheduler.Start();
+                System.Diagnostics.Debug.WriteLine("Scheduler initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Scheduler initialization failed: {ex}");
+            }
+        }
+
+        private async Task ScheduleDelayedEmailAutomatically()
+        {
+            try
+            {
+                IJobDetail job = JobBuilder.Create<EmailJob>()
+                    .WithIdentity("autoEmailJob", "emailGroup")
+                    .Build();
+
+                ITrigger trigger = TriggerBuilder.Create()
+                    .WithIdentity("autoTrigger", "emailGroup")
+                    .StartAt(DateBuilder.FutureDate(1, IntervalUnit.Minute))
+                    .Build();
+
+                await _scheduler.ScheduleJob(job, trigger);
+                System.Diagnostics.Debug.WriteLine($"Job scheduled to run at {DateTime.Now.AddMinutes(1)}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Job scheduling failed: {ex}");
+            }
+        }
+
+
+
+        
+
 
         //private void displayReviews()
         //{
@@ -73,7 +95,20 @@ namespace App1
 
         //private void displayAppeal()
         //{
-        //    ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetActiveUsers(1));
+        //    ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>  // getBannedUsers() from UserService
+        //    {
+        //        new User(),
+        //        //new User(22),
+        //        //new User(),
+        //        //new User(2),
+        //        //new User(),
+        //        //new User(12),
+        //        //new User(),
+        //        //new User(4),
+        //        //new User(6),
+        //        //new User(),
+        //        //new User(79)
+        //    };
 
         //    AppealsList.ItemsSource = UsersWhichAppealed;
         //}
@@ -82,18 +117,18 @@ namespace App1
         //{
         //    ObservableCollection<User> UsersRoleRequests = new ObservableCollection<User>
         //    {
-        //        new User(),
-        //        new User(22),
-        //        new User(),
-        //        new User(2),
-        //        new User(),
-        //        new User(12),
-        //        new User(),
-        //        new User(4),
-        //        new User(6),
-        //        new User(),
-        //        new User(79)
-        //    };
+                //new User(),
+                //new User(22),
+                //new User(),
+                //new User(2),
+                //new User(),
+                //new User(12),
+                //new User(),
+                //new User(4),
+                //new User(6),
+                //new User(),
+                //new User(79)
+            };
 
         //    RequestsList.ItemsSource = UsersRoleRequests;
         //}
@@ -173,22 +208,53 @@ namespace App1
         //    }
         //    displayReviews();
 
-        //}
-
-        //private void MenuFlyoutHideReview_Click(object sender, RoutedEventArgs e)
+        //private void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         //{
-        //    if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
+        //    ObservableCollection<Review> AllReviews = new ObservableCollection<Review>  // getReviews() from ReviewsService
         //    {
-        //        reviewsService.HideReview(review.userID);
-        //        reviewsService.resetReviewFlags(review.userID); //Reviews are displayed if they have at least one flag
-        //    }
-        //    displayReviews();
+        //        new Review(),
+        //        new Review(),
+        //        new Review(),
+        //        new Review(),
+        //        new Review(),
+        //        new Review(),
+        //        new Review(),
+        //        new Review(),
+        //        new Review(),
+        //        new Review(),
+        //        new Review()
+        //    };
+        //    string filter = ReviewSearchTextBox.Text.ToLower();
+        //    ReviewsList.ItemsSource = new ObservableCollection<Review>(
+        //        AllReviews.Where(review => review.Content.ToLower().Contains(filter))
+        //    );
         //}
 
-        //private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
+        //private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         //{
-        //    //TODO
+        //    ObservableCollection<User> AllAppeals = new ObservableCollection<User>
+        //    {
+        //        new User(),
+        //        //new User(22),
+        //        //new User(),
+        //        //new User(2),
+        //        //new User(),
+        //        //new User(12),
+        //        //new User(),
+        //        //new User(4),
+        //        //new User(6),
+        //        //new User(),
+        //        //new User(79)
+        //    };
+        //    string filter = BannedUserSearchTextBox.Text.ToLower();
+        //    AppealsList.ItemsSource = new ObservableCollection<User>(
+        //        AllAppeals.Where(user => user.Email.ToLower().Contains(filter))
+        //    );
         //}
-    }
 
+        ////private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
+        ////{
+        ////    //TODO
+        //}
+    
 }

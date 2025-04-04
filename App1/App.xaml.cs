@@ -1,52 +1,79 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
-using App1.Ai_Check;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using App1.Services;
+using App1.Repositories;
+using Quartz;
+using Quartz.Impl;
+using System;
+using Microsoft.Extensions.Hosting;
+using App1.Views;
 
 namespace App1
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     public partial class App : Application
     {
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
+        public static IHost Host { get; private set; }
+        public static Window MainWindow { get; set; }
+
         public App()
         {
             this.InitializeComponent();
+            ConfigureHost();
         }
 
-        /// <summary>
-        /// Invoked when the application is launched.
-        /// </summary>
-        /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        private void ConfigureHost()
         {
-            ReviewModelTrainer.TrainModel();
-            m_window = new MainWindow();
-            m_window.Activate();
+            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
+                .ConfigureServices((context, services) =>
+                {
+                    // Configuration
+                    var config = new ConfigurationBuilder()
+                        .AddUserSecrets<App>()
+                        .AddEnvironmentVariables()
+                        .Build();
+                    services.AddSingleton<IConfiguration>(config);
+
+                    // Remove duplicate registration and add missing dependencies
+                    services.AddSingleton<IUserRepository, UserRepo>();
+                    services.AddSingleton<IReviewRepository, ReviewRepo>(); 
+                    services.AddSingleton<IUserService, UserService>(); 
+                    services.AddSingleton<IReviewService, ReviewsService>(); 
+                    services.AddTransient<EmailJob>();
+
+                    // Quartz Configuration
+                    services.AddSingleton<JobFactory>();
+                    services.AddSingleton(provider =>
+                    {
+                        var factory = new StdSchedulerFactory();
+                        var scheduler = factory.GetScheduler().Result;
+                        scheduler.JobFactory = provider.GetRequiredService<JobFactory>();
+                        return scheduler;
+                    });
+
+                    // Jobs
+                    services.AddTransient<EmailJob>();
+                    services.AddTransient<MainPage>();
+                    services.AddTransient<MainWindow>();
+
+                })
+                .Build();
         }
 
-        private Window? m_window;
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
+        {
+            // Initialize Quartz scheduler first
+            var scheduler = Host.Services.GetRequiredService<IScheduler>();
+            scheduler.Start().Wait(); // Start immediately
+
+            MainWindow = Host.Services.GetRequiredService<MainWindow>();
+            MainWindow.Activate();
+
+            // Prevent app suspension
+            Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += (s, e) =>
+            {
+                MainWindow?.Activate();
+            };
+        }
     }
 }

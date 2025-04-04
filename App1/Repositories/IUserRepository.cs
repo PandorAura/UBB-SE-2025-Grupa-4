@@ -12,7 +12,8 @@ namespace App1.Repositories
         public void UpdatePermission(int userID, int permissionID);
 
         public List<User> GetAppealedUsers();
-
+        List<User> GetAppealingUsers();
+        User getUserByID(int iD);
         public List<User> GetUsersByPermission(int permissionID);
 
         public int getHighestRoleIdBasedOnUserId(int userId);
@@ -21,5 +22,6 @@ namespace App1.Repositories
 
         public List<User> GetUsers();
 
+        public void UpdatePermission(int userID, int permissionID);
     }
 }

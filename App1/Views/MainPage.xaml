@@ -62,9 +62,9 @@
                             </Border.ContextFlyout>
                             <StackPanel>
                                 <TextBlock FontSize="14" Foreground="Black">
-                        <Run Text="{x:Bind userID}"/>
+                        <Run Text="{x:Bind UserID}"/>
                         <Run Text=": "/>
-                        <Run Text="{x:Bind content}"/>
+                        <Run Text="{x:Bind Content}"/>
                                 </TextBlock>
                             </StackPanel>
                             <ToolTipService.ToolTip>
