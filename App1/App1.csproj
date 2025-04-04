@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Logs\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\MainPage.xaml">
