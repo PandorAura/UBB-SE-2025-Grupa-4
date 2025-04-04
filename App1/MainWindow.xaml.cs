@@ -32,159 +32,159 @@ namespace App1
     public sealed partial class MainWindow : Window
     {
 
-        private ReviewsService reviewsService;
-        private UserService userService;
-        private CheckersService checkersService;
+        //private ReviewsService reviewsService;
+        //private UserService userService;
+        //private CheckersService checkersService;
 
         public MainWindow()
         {
             this.InitializeComponent();
-            reviewsService = new ReviewsService();
-            userService = new UserService();
-            LoadStatistics();
-            displayReviews();
-            displayAppeal();
-            displayRoleRequests();
+            //reviewsService = new ReviewsService();
+            //userService = new UserService();
+            //LoadStatistics();
+            //displayReviews();
+            //displayAppeal();
+            //displayRoleRequests();
 
         }
-        private void TrainModel_Click(object sender, RoutedEventArgs e)
-        {
-            ReviewModelTrainer.TrainModel();
-            ContentDialog dialog = new ContentDialog
-            {
-                Title = "Training Complete",
-                Content = "The model has been trained and saved.",
-                CloseButtonText = "OK",
-                XamlRoot = this.Content.XamlRoot // Set the XamlRoot property
-            };
-            _ = dialog.ShowAsync();
-        }
+        //private void TrainModel_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ReviewModelTrainer.TrainModel();
+        //    ContentDialog dialog = new ContentDialog
+        //    {
+        //        Title = "Training Complete",
+        //        Content = "The model has been trained and saved.",
+        //        CloseButtonText = "OK",
+        //        XamlRoot = this.Content.XamlRoot // Set the XamlRoot property
+        //    };
+        //    _ = dialog.ShowAsync();
+        //}
 
-        private void displayReviews()
-        {
-            ObservableCollection<Review> Reviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
+        //private void displayReviews()
+        //{
+        //    ObservableCollection<Review> Reviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
 
-            ReviewsList.ItemsSource = Reviews;
-        }
+        //    ReviewsList.ItemsSource = Reviews;
+        //}
 
-        private void displayAppeal()
-        {
-            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetActiveUsers(1));
+        //private void displayAppeal()
+        //{
+        //    ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetActiveUsers(1));
 
-            AppealsList.ItemsSource = UsersWhichAppealed;
-        }
+        //    AppealsList.ItemsSource = UsersWhichAppealed;
+        //}
 
-        private void displayRoleRequests()
-        {
-            ObservableCollection<User> UsersRoleRequests = new ObservableCollection<User>
-            {
-                new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
-            };
+        //private void displayRoleRequests()
+        //{
+        //    ObservableCollection<User> UsersRoleRequests = new ObservableCollection<User>
+        //    {
+        //        new User(),
+        //        new User(22),
+        //        new User(),
+        //        new User(2),
+        //        new User(),
+        //        new User(12),
+        //        new User(),
+        //        new User(4),
+        //        new User(6),
+        //        new User(),
+        //        new User(79)
+        //    };
 
-            RequestsList.ItemsSource = UsersRoleRequests;
-        }
+        //    RequestsList.ItemsSource = UsersRoleRequests;
+        //}
 
-        private void LoadPieChart()
-        {
-            AllUsersPieChart.Series = new List<PieSeries<double>>  // get all users and
-            // group them by permission? manager, user, admin, etc?
-            {
-                new PieSeries<double> { Values = new double[] { 40 }, Name = "Managers" },
-                new PieSeries<double> { Values = new double[] { 25 }, Name = "Users" },
-                new PieSeries<double> { Values = new double[] { 35 }, Name = "Admins" }
-            };
-        }
+        //private void LoadPieChart()
+        //{
+        //    AllUsersPieChart.Series = new List<PieSeries<double>>  // get all users and
+        //    // group them by permission? manager, user, admin, etc?
+        //    {
+        //        new PieSeries<double> { Values = new double[] { 40 }, Name = "Managers" },
+        //        new PieSeries<double> { Values = new double[] { 25 }, Name = "Users" },
+        //        new PieSeries<double> { Values = new double[] { 35 }, Name = "Admins" }
+        //    };
+        //}
 
-        private void LoadStatistics()
-        {
-            LoadPieChart();
-            LoadBarChart();
-        }
+        //private void LoadStatistics()
+        //{
+        //    LoadPieChart();
+        //    LoadBarChart();
+        //}
 
-        private void LoadBarChart()
-        {
-            TotalDataBarChart.Series = new List<ISeries>  // get all data from the tables
-            // all users, all reviews, drinks?? de unde
-            {
-                new ColumnSeries<double>
-                {
-                    Values = new double[] { 10, 20, 30 }, // Your data points
-                }
-            };
+        //private void LoadBarChart()
+        //{
+        //    TotalDataBarChart.Series = new List<ISeries>  // get all data from the tables
+        //    // all users, all reviews, drinks?? de unde
+        //    {
+        //        new ColumnSeries<double>
+        //        {
+        //            Values = new double[] { 10, 20, 30 }, // Your data points
+        //        }
+        //    };
 
-            TotalDataBarChart.XAxes = new List<Axis>
-            {
-                new Axis { Labels = new List<string> { "Users", "Drinks", "Reviews" } }  // X-axis labels
-            };
+        //    TotalDataBarChart.XAxes = new List<Axis>
+        //    {
+        //        new Axis { Labels = new List<string> { "Users", "Drinks", "Reviews" } }  // X-axis labels
+        //    };
 
-            TotalDataBarChart.YAxes = new List<Axis> { new Axis { Name = "Total", MinLimit = 0 } };
-        }
+        //    TotalDataBarChart.YAxes = new List<Axis> { new Axis { Name = "Total", MinLimit = 0 } };
+        //}
 
-        private void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ObservableCollection<Review> AllReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
-            string filter = ReviewSearchTextBox.Text.ToLower();
-            ReviewsList.ItemsSource = new ObservableCollection<Review>(
-                AllReviews.Where(review => review.content.ToLower().Contains(filter))
-            );
-        }
+        //private void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        //{
+        //    ObservableCollection<Review> AllReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
+        //    string filter = ReviewSearchTextBox.Text.ToLower();
+        //    ReviewsList.ItemsSource = new ObservableCollection<Review>(
+        //        AllReviews.Where(review => review.content.ToLower().Contains(filter))
+        //    );
+        //}
 
-        private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ObservableCollection<User> AllAppeals = new ObservableCollection<User>
-            {
-                new User(),
-                new User(22),
-                new User(),
-                new User(2),
-                new User(),
-                new User(12),
-                new User(),
-                new User(4),
-                new User(6),
-                new User(),
-                new User(79)
-            };
-            string filter = BannedUserSearchTextBox.Text.ToLower();
-            AppealsList.ItemsSource = new ObservableCollection<User>(
-                AllAppeals.Where(user => user.email.ToLower().Contains(filter))
-            );
-        }
+        //private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        //{
+        //    ObservableCollection<User> AllAppeals = new ObservableCollection<User>
+        //    {
+        //        new User(),
+        //        new User(22),
+        //        new User(),
+        //        new User(2),
+        //        new User(),
+        //        new User(12),
+        //        new User(),
+        //        new User(4),
+        //        new User(6),
+        //        new User(),
+        //        new User(79)
+        //    };
+        //    string filter = BannedUserSearchTextBox.Text.ToLower();
+        //    AppealsList.ItemsSource = new ObservableCollection<User>(
+        //        AllAppeals.Where(user => user.email.ToLower().Contains(filter))
+        //    );
+        //}
 
-        private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
-            {
-                reviewsService.resetReviewFlags(review.userID);
-            }
-            displayReviews();
+        //private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
+        //    {
+        //        reviewsService.resetReviewFlags(review.userID);
+        //    }
+        //    displayReviews();
 
-        }
+        //}
 
-        private void MenuFlyoutHideReview_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
-            {
-                reviewsService.HideReview(review.userID);
-                reviewsService.resetReviewFlags(review.userID); //Reviews are displayed if they have at least one flag
-            }
-            displayReviews();
-        }
+        //private void MenuFlyoutHideReview_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
+        //    {
+        //        reviewsService.HideReview(review.userID);
+        //        reviewsService.resetReviewFlags(review.userID); //Reviews are displayed if they have at least one flag
+        //    }
+        //    displayReviews();
+        //}
 
-        private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
-        {
-            //TODO
-        }
+        //private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
+        //{
+        //    //TODO
+        //}
     }
 
 }

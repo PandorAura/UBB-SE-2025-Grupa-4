@@ -41,5 +41,10 @@ namespace App1.Services
         {
             return reviewRepo.GetReviews();
         }
+
+        internal List<Review> GetReviewsByUser(int userId)
+        {
+            return reviewRepo.GetReviewsByUser(userId);
+        }
     }
 }
