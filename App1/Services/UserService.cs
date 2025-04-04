@@ -71,6 +71,11 @@ namespace App1.Services
         {
             return _userRepo.GetAppealingUsers();
         }
+
+        public User GetUserBasedOnID(int ID)
+        {
+            return _userRepo.getUserByID(ID);
+        }
     }
 
 

@@ -8,7 +8,7 @@ namespace App1.Repositories
 {
     public class ReviewRepo : IReviewRepository
     {
-        private readonly List<Review> _reviews = new()
+        private List<Review> _reviews = new()
         {
             new Review(
                 reviewId: 1,
@@ -17,7 +17,7 @@ namespace App1.Repositories
                 rating: 5,
                 content: "Great service!",
                 createdDate: DateTime.Now.AddHours(-1),
-                numberOfFlags: 0,
+                numberOfFlags: 1,
                 isHidden: false
             ),
             new Review(
@@ -27,18 +27,18 @@ namespace App1.Repositories
                 rating: 4,
                 content: "Good experience",
                 createdDate: DateTime.Now.AddHours(-5),
-                numberOfFlags: 1,
+                numberOfFlags: 0,
                 isHidden: false
             ),
             new Review(
                 reviewId: 3,
-                userId: 3,
+                userId: 1,
                 userName: "Regular User",
                 rating: 2,
                 content: "Could be better",
                 createdDate: DateTime.Now.AddDays(-1),
                 numberOfFlags: 3,
-                isHidden: true
+                isHidden: false
             ),
             new Review(
                 reviewId: 4,
@@ -47,7 +47,7 @@ namespace App1.Repositories
                 rating: 5,
                 content: "Excellent!",
                 createdDate: DateTime.Now.AddDays(-2),
-                numberOfFlags: 0,
+                numberOfFlags: 1,
                 isHidden: false
             )
         };
@@ -120,22 +120,30 @@ namespace App1.Repositories
 
         public void UpdateHiddenReview(int reviewID, bool isHidden)
         {
-            throw new NotImplementedException();
+            var review = _reviews.FirstOrDefault(r => r.ReviewID == reviewID);
+
+            if(review != null)
+            {
+                review.IsHidden = isHidden;
+            }
         }
 
         public void UpdateFlaggedReview(int reviewID, int numberOfFlags)
         {
-            throw new NotImplementedException();
+            _reviews[reviewID].NumberOfFlags = numberOfFlags;
         }
 
         public List<Review> GetReviewsByUser(int userId)
         {
-            throw new NotImplementedException();
+            return _reviews
+                .Where(r => r.UserID == userId && !r.IsHidden)
+                .OrderByDescending(r => r.CreatedDate)
+                .ToList();
         }
 
         public Review GetReviewByID(int reviewID)
         {
-            throw new NotImplementedException();
+            return _reviews.FirstOrDefault(r => r.ReviewID == reviewID);
         }
     }
 }

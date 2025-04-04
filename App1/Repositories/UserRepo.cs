@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using App1.Models;
+using Windows.System;
 //using Windows.System;
 
 namespace App1.Repositories
@@ -36,10 +37,10 @@ namespace App1.Repositories
                  new User(
                     userId: 2,
                     email: "aurapandor@gmail.com",
-                    name: "Admin One",
+                    name: "Admin Two",
                     numberOfDeletedReviews: 3,
-                    permissionID: 2,
-                    hasAppealed: false,
+                    permissionID: 0,
+                    hasAppealed: true,
                     roles: roles2
 
                 )
@@ -95,7 +96,7 @@ namespace App1.Repositories
         }
 
         public User getUserByID(int ID) { 
-            return _users[ID];
+            return _users.First(user => user.UserId == ID);
         }
 
         public List<User> GetAppealingUsers()

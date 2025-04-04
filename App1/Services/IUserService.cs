@@ -14,5 +14,8 @@ namespace App1.Services
         public List<User> GetAppealingUsers();
         public List<User> GetBannedUsers();
         List<User> GetUsersByPermission(int permissionId);
+
+        public User GetUserBasedOnID(int ID);
+
     }
 }

@@ -172,6 +172,52 @@ namespace App1.Views
                 flyout.ShowAt((FrameworkElement)sender);
             }
         }
+        private void RequestList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is UpgradeRequest selectedRequest)
+            {
+                Flyout flyout = new Flyout();
+                StackPanel panel = new StackPanel { Padding = new Thickness(10) };
+                int userID = selectedRequest.RequestingUserId;
+                User selectedUser = userService.GetUserBasedOnID(userID);
+                selectedUser.PermissionID = 0; // Assuming 0 is the permission ID for banned users
+
+
+                TextBlock userInfo = new TextBlock
+                {
+                    Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\nStatus: Banned",
+                    FontSize = 18
+                };
+
+                // List of reviews for this user
+                List<Review> userReviews = reviewsService.GetReviewsByUser(selectedUser.UserId);
+
+                TextBlock reviewsHeader = new TextBlock
+                {
+                    Text = "User Reviews:",
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 10, 0, 5)
+                };
+
+                ListView reviewsList = new ListView
+                {
+                    ItemsSource = userReviews.Select(r => $"{r.Content}").ToList(),
+                    MaxHeight = 200
+                };
+
+
+
+                // Add items to panel
+                panel.Children.Add(userInfo);
+                panel.Children.Add(reviewsHeader);
+                panel.Children.Add(reviewsList);
+
+
+                flyout.Content = panel;
+                flyout.Placement = FlyoutPlacementMode.Left;
+                flyout.ShowAt((FrameworkElement)sender);
+            }
+        }
 
 
 
@@ -255,20 +301,7 @@ namespace App1.Views
         private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         { 
             //TO DO: GET APPEALING USERS <3
-            ObservableCollection<User> AllAppeals = new ObservableCollection<User>
-            {
-                new User(),
-                //new User(22),
-                //new User(),
-                //new User(2),
-                //new User(),
-                //new User(12),
-                //new User(),
-                //new User(4),
-                //new User(6),
-                //new User(),
-                //new User(79)
-            };
+            
             string filter = BannedUserSearchTextBox.Text.ToLower();
             AppealsList.ItemsSource = new ObservableCollection<User>(
                 userService.GetAppealingUsers()
@@ -279,7 +312,7 @@ namespace App1.Views
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                reviewsService.resetReviewFlags(review.UserID);
+                reviewsService.resetReviewFlags(review.ReviewID);
             }
             displayReviews();
 
@@ -290,7 +323,7 @@ namespace App1.Views
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
                 reviewsService.HideReview(review.UserID);
-                reviewsService.resetReviewFlags(review.UserID); //Reviews are displayed if they have at least one flag
+                reviewsService.resetReviewFlags(review.ReviewID); //Reviews are displayed if they have at least one flag
             }
             displayReviews();
         }
