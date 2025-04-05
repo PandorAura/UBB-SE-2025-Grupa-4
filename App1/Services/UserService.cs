@@ -1,42 +1,87 @@
+using System;
 using System.Collections.Generic;
 using App1.Models;
 using App1.Repositories;
 
 namespace App1.Services
 {
-    internal class UserService
+    public class UserService: IUserService
     {
-        private readonly UserRepo userRepo;
+        private readonly IUserRepository _userRepo;
+        private const int BANNED_PERMISSION_ID = 0;
 
-        public UserService()
+        public UserService(IUserRepository userRepository)
         {
-            userRepo = new UserRepo();
-            userRepo.generateUsers();
+            _userRepo = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
-        public void ChangeUserPermission(int userID, int permissionID)
+        public void ChangeUserPermission(int userId, int permissionId) 
         {
-            userRepo.UpdatePermission(userID, permissionID);
+            try
+            {
+                if (userId <= 0) throw new ArgumentException("Invalid user ID");
+                if (permissionId == 0) throw new ArgumentException("Permission ID cannot be 0");
+
+                _userRepo.UpdatePermission(userId, permissionId);
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException("Failed to change permission", ex);
+            }
         }
 
-        public List<User> GetActiveUsers(int permissionID)
+        public List<User> GetActiveUsers(int permissionId)
         {
-            return userRepo.GetUsersByPermission(permissionID);
+            try
+            {
+                return permissionId switch
+                {
+                    > 0 => _userRepo.GetUsersByPermission(permissionId),
+                    _ => throw new ArgumentException("Permission ID must be positive")
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException("Failed to get active users", ex);
+            }
         }
 
         public List<User> GetBannedUsers()
-        {   //aici sa puneti voi cat inseamna banned
-            return userRepo.GetUsersByPermission(-1);
+        {
+            try
+            {
+                return _userRepo.GetUsersByPermission(BANNED_PERMISSION_ID);
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException("Failed to get banned users", ex);
+            }
         }
+
+        public List<User> GetUsersByPermission(int permissionId)
+        {
+            return  _userRepo.GetUsersByPermission(permissionId); 
+        }
+    
         public string GetUserName(int ID) { 
-            return userRepo.getUserByID(ID).name;
+            return _userRepo.getUserByID(ID).Name;
         }
 
         public List<User> GetAppealingUsers()
         {
-            return userRepo.GetAppealingUsers();
+            return _userRepo.GetAppealingUsers();
         }
 
+        public User GetUserBasedOnID(int ID)
+        {
+            return _userRepo.getUserByID(ID);
+        }
+    }
+
+
+    public class UserServiceException : Exception
+    {
+        public UserServiceException(string message, Exception innerException)
+            : base(message, innerException) { }
     }
 }
-

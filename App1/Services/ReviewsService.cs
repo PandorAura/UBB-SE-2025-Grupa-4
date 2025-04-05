@@ -8,43 +8,62 @@ using App1.Repositories;
 
 namespace App1.Services
 {
-    internal class ReviewsService
+    public class ReviewsService: IReviewService
     {
-        private readonly ReviewsRepo reviewRepo;
+        private readonly IReviewRepository _reviewRepository;
 
-        public ReviewsService() {
-            reviewRepo = new ReviewsRepo();
-            reviewRepo.generateReviews();
-        }
-        public ReviewsService(ReviewsRepo reviewsRepo)
+
+        public ReviewsService() { }
+        public ReviewsService(IReviewRepository reviewRepository)
         {
-            reviewRepo = new ReviewsRepo();
-            this.reviewRepo = reviewsRepo;
+            this._reviewRepository = reviewRepository;
         }
 
         public void resetReviewFlags(int reviewID)
         {
-            reviewRepo.GetReviewByID(reviewID).numberOfFlags = 0;
+            _reviewRepository.GetReviewByID(reviewID).NumberOfFlags = 0;
         }
 
         public void HideReview(int reviewID)
         {
-            reviewRepo.UpdateHiddenReview(reviewID, true);
+            _reviewRepository.UpdateHiddenReview(reviewID, true);
         }
 
         public List<Review> GetFlaggedReviews()
         {
-            return reviewRepo.GetReviews().Where(r => r.numberOfFlags > 0).ToList();
+            return _reviewRepository.GetReviews().Where(r => r.NumberOfFlags > 0).ToList();
         }
 
         public List<Review> GetReviews()
         {
-            return reviewRepo.GetReviews();
+            return _reviewRepository.GetReviews();
         }
+
+
+            public List<Review> GetReviewsSince(DateTime date)
+            {
+                return _reviewRepository.GetReviewsSince(date);
+            }
+
+            public double GetAverageRating()
+            {
+                return _reviewRepository.GetAverageRating();
+            }
+
+            public List<Review> GetRecentReviews(int count)
+            {
+                return _reviewRepository.GetRecentReviews(count);
+            }
+
+            public int GetReviewCountSince(DateTime date)
+            {
+                return _reviewRepository.GetReviewCountSince(date);
+            }
 
         public List<Review> GetReviewsByUser(int userId)
         {
-            return reviewRepo.GetReviewsByUser(userId);
+            return _reviewRepository.GetReviewsByUser(userId);
         }
     }
-}
+    }
+

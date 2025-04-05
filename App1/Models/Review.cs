@@ -10,41 +10,29 @@ namespace App1.Models
 {
     public class Review
     {
+        public Review() { }
 
-        public Review()
+        public Review(int reviewId, int userId, string userName, int rating,
+                     string content, DateTime createdDate, int numberOfFlags = 0,
+                     bool isHidden = false)
         {
-            numberOfFlags = 0;
-            content = "Lorem ipsum";
-            userID = 0;
-            isHidden = false;
+            ReviewID = reviewId;
+            UserID = userId;
+            UserName = userName;
+            Rating = rating;
+            Content = content;
+            CreatedDate = createdDate;
+            NumberOfFlags = numberOfFlags;
+            IsHidden = isHidden;
         }
 
-        public Review(int reviewID, int numberOfFlags, string content, bool isHidden, int userID)
-        { 
-            this.reviewID = reviewID;
-            this.numberOfFlags = numberOfFlags;
-            this.content = content;
-            this.isHidden = isHidden;
-            this.userID = userID;
-        }
-
-        public int reviewID { get; }
-        
-        public int numberOfFlags { get; set; }
-
-        public string content { get; set; }
-        
-        public bool isHidden { get; set; }
-
-        public int userID { get; set; }
-
-        public Review(int id, string text, int user)
-        {
-            reviewID = id;
-            content = text;
-            userID = user;
-            numberOfFlags = 0;
-            isHidden = false;
-        }
+        public int ReviewID { get; }
+        public int UserID { get; }
+        public string UserName { get; }
+        public int Rating { get; }  
+        public string Content { get; set; }
+        public DateTime CreatedDate { get; }  
+        public int NumberOfFlags { get; set; }
+        public bool IsHidden { get; set; }
     }
 }

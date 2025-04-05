@@ -12,6 +12,7 @@ namespace App1.Services
 {
     internal class CheckersService
     {
+        private readonly ReviewRepo reviewsRepo;
         private readonly ReviewsService reviewsService;
         private readonly AutoCheck autoCheck;
         private static readonly string ModelPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "curseword_model.zip");
