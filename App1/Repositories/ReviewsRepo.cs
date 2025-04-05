@@ -49,6 +49,16 @@ namespace App1.Repositories
                 createdDate: DateTime.Now.AddDays(-2),
                 numberOfFlags: 1,
                 isHidden: false
+            ),
+            new Review(
+                reviewId: 5,
+                userId: 3,
+                userName: "Admin Two",
+                rating: 5,
+                content: "dunce",
+                createdDate: DateTime.Now.AddDays(-2),
+                numberOfFlags: 1,
+                isHidden: false
             )
         };
 

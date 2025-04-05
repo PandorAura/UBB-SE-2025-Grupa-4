@@ -129,7 +129,8 @@
                     Background="{StaticResource AccentColor}"
                     Foreground="White"
                     Padding="16,8"
-                    HorizontalAlignment="Stretch"/>
+                    HorizontalAlignment="Stretch"
+                    Click="Button_AutoCheck_Click"/>
         </Grid>
 
         <!-- Middle Column - Statistics and Requests -->

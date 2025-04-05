@@ -13,11 +13,11 @@ namespace App1.Services
     internal class CheckersService
     {
         private readonly ReviewRepo reviewsRepo;
-        private readonly ReviewsService reviewsService;
+        private readonly IReviewService reviewsService;
         private readonly AutoCheck autoCheck;
         private static readonly string ModelPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "curseword_model.zip");
 
-        public CheckersService(ReviewsService reviewsService)
+        public CheckersService(IReviewService reviewsService)
         {
             this.reviewsService = reviewsService;
             this.autoCheck = new AutoCheck();
@@ -31,17 +31,17 @@ namespace App1.Services
             {
                 if (review != null)
                 {
-                    bool isOffensive = autoCheck.AutoCheckReview(review.content);
+                    bool isOffensive = autoCheck.AutoCheckReview(review.Content);
 
                     if (isOffensive)
                     {
-                        messages.Add($"Review {review.reviewID} is offensive. Hiding the review.");
-                        reviewsService.HideReview(review.reviewID);
-                        reviewsService.resetReviewFlags(review.reviewID);
+                        messages.Add($"Review {review.ReviewID} is offensive. Hiding the review.");
+                        reviewsService.HideReview(review.ReviewID);
+                        reviewsService.resetReviewFlags(review.ReviewID);
                     }
                     else
                     {
-                        messages.Add($"Review {review.reviewID} is not offensive.");
+                        messages.Add($"Review {review.ReviewID} is not offensive.");
                     }
                 }
                 else

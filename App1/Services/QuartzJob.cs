@@ -79,7 +79,7 @@ public class EmailJob : IJob
         {
             ReportDate = reportDate,
             AdminUsers = ( _userService.GetActiveUsers(2)).ToList(), // Admins
-            ActiveUsersCount = ( _userService.GetActiveUsers(1)).Count, // Regular users
+            ActiveUsersCount = ( _userService.GetActiveUsers(1)).Count + (_userService.GetActiveUsers(2)).Count, // Regular users
             BannedUsersCount = ( _userService.GetUsersByPermission(-1)).Count,
             NewReviewsCount = ( _reviewService.GetReviewsSince(yesterday)).Count,
             AverageRating =  _reviewService.GetAverageRating(),

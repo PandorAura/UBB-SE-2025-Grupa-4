@@ -43,6 +43,36 @@ namespace App1.Repositories
                     hasAppealed: true,
                     roles: roles2
 
+                ),
+                  new User(
+                    userId: 3,
+                    email: "oanarares2004@gmail.com",
+                    name: "Admin Two",
+                    numberOfDeletedReviews: 3,
+                    permissionID: 2,
+                    hasAppealed: true,
+                    roles: roles2
+
+                ),
+                   new User(
+                    userId: 4,
+                    email: "nimigeanvalentinoficial@gmail.com",
+                    name: "Admin Two",
+                    numberOfDeletedReviews: 3,
+                    permissionID: 2,
+                    hasAppealed: true,
+                    roles: roles2
+
+                ),
+                    new User(
+                    userId: 5,
+                    email: "alinamoca25@gmail.com",
+                    name: "Admin Two",
+                    numberOfDeletedReviews: 3,
+                    permissionID: 2,
+                    hasAppealed: true,
+                    roles: roles2
+
                 )
             };
         }
