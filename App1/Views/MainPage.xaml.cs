@@ -48,6 +48,8 @@ namespace App1.Views
             this.reviewsService = reviewsService;
             this.userService = userService;
             this.requestsService = upgradeRequestsService;
+            checkersService = new CheckersService(reviewsService);
+
             //reviewsService = new ReviewsService();
             //userService = new UserService();
             LoadStatistics();
@@ -55,18 +57,6 @@ namespace App1.Views
             displayAppeal();
             displayRoleRequests();
 
-        }
-        private void TrainModel_Click(object sender, RoutedEventArgs e)
-        {
-            ReviewModelTrainer.TrainModel();
-            ContentDialog dialog = new ContentDialog
-            {
-                Title = "Training Complete",
-                Content = "The model has been trained and saved.",
-                CloseButtonText = "OK",
-                XamlRoot = this.Content.XamlRoot // Set the XamlRoot property
-            };
-            _ = dialog.ShowAsync();
         }
 
         private void displayReviews()
@@ -170,6 +160,8 @@ namespace App1.Views
                 flyout.Content = panel;
                 flyout.Placement = FlyoutPlacementMode.Left;
                 flyout.ShowAt((FrameworkElement)sender);
+
+                LoadStatistics();
             }
         }
         private void RequestList_ItemClick(object sender, ItemClickEventArgs e)
@@ -255,12 +247,14 @@ namespace App1.Views
 
         private void LoadPieChart()
         {
-            AllUsersPieChart.Series = new List<PieSeries<double>>  // get all users and
-            // group them by permission? manager, user, admin, etc?
+            var usersCount = userService.GetActiveUsers(1).Count;
+            var adminsCount = userService.GetActiveUsers(2).Count;
+            var bannedCount = userService.GetBannedUsers().Count;
+            AllUsersPieChart.Series = new List<PieSeries<double>> 
             {
-                new PieSeries<double> { Values = new double[] { 40 }, Name = "Managers" },
-                new PieSeries<double> { Values = new double[] { 25 }, Name = "Users" },
-                new PieSeries<double> { Values = new double[] { 35 }, Name = "Admins" }
+                new PieSeries<double> { Values = new double[] { bannedCount }, Name = "Banned" },
+                new PieSeries<double> { Values = new double[] { usersCount }, Name = "Users" },
+                new PieSeries<double> { Values = new double[] { adminsCount }, Name = "Admins" }
             };
         }
 
@@ -330,7 +324,17 @@ namespace App1.Views
 
         private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
         {
-            //TODO
+            //checkersService.RunAICheck
+        }
+
+
+        private void Button_AutoCheck_Click(object sender, RoutedEventArgs e)
+        {
+            List<Review> reviews = reviewsService.GetFlaggedReviews();
+
+            List<string> messages = checkersService.RunAutoCheck(reviews);
+
+            displayReviews();
         }
     }
 

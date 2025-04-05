@@ -26,6 +26,9 @@ namespace App1
     {
         private IScheduler _scheduler;
 
+        //private UserService userService;
+        //private CheckersService checkersService;
+
         public MainWindow()
         {
             this.InitializeComponent();
