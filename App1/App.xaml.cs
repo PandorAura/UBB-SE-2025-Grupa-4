@@ -33,7 +33,7 @@ namespace App1
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    string connectionString = "Server=MINNIE;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+                    string connectionString = "Server=localhost;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
                     
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewRepository, ReviewRepo>();
