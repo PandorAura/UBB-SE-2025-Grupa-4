@@ -1,4 +1,3 @@
-using App1.Ai_Check;
 using App1.Models;
 using App1.Services;
 using LiveChartsCore.SkiaSharpView;
@@ -8,13 +7,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Windows.Storage;
-using System.Threading.Tasks;
-using System.IO;
 using System.Linq;
 using Microsoft.UI.Text;
 using System;
-using System.Runtime.CompilerServices;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -32,8 +27,6 @@ namespace App1.Views
         private IUserService userService;
         private CheckersService checkersService;
         private IUpgradeRequestsService requestsService;
-
-        //TO DO: Add interface for requests, pass to main Page, same as the others
 
         public MainPage(IReviewService reviewsService,
                    IUserService userService, IUpgradeRequestsService upgradeRequestsService
@@ -53,8 +46,6 @@ namespace App1.Views
             this.requestsService = upgradeRequestsService;
             checkersService = new CheckersService(reviewsService);
 
-            //reviewsService = new ReviewsService();
-            //userService = new UserService();
             LoadStatistics();
             displayReviews();
             displayAppeal();
@@ -84,8 +75,7 @@ namespace App1.Views
                 Flyout flyout = new Flyout();
                 StackPanel panel = new StackPanel { Padding = new Thickness(10) };
 
-                selectedUser.PermissionID = 0; // Assuming 0 is the permission ID for banned users
-
+                selectedUser.Roles.Add(new Role(0, "Banned"));
 
                 TextBlock userInfo = new TextBlock
                 {
@@ -93,7 +83,6 @@ namespace App1.Views
                     FontSize = 18
                 };
 
-                // List of reviews for this user
                 List<Review> userReviews = reviewsService.GetReviewsByUser(selectedUser.UserId);
 
                 TextBlock reviewsHeader = new TextBlock
@@ -109,7 +98,6 @@ namespace App1.Views
                     MaxHeight = 200
                 };
 
-                // Ban Button
                 Button banButton = new Button
                 {
                     Content = "Keep Ban",
@@ -119,11 +107,10 @@ namespace App1.Views
                 };
                 banButton.Click += (s, args) =>
                 {
-                    selectedUser.PermissionID = 0;
+                    selectedUser.Roles.Add(new Role(0, "Banned"));
                     userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\nStatus: Banned";
                 };
 
-                // Appeal Button
                 Button appealButton = new Button
                 {
                     Content = "Accept Appeal",
@@ -133,11 +120,10 @@ namespace App1.Views
                 };
                 appealButton.Click += (s, args) =>
                 {
-                    selectedUser.PermissionID = 1;
+                    selectedUser.Roles.Add(new Role(1, "Banned"));
                     userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\nStatus: Active";
                 };
 
-                // Close Button
                 Button closeButton = new Button
                 {
                     Content = "Close Appeal Case",
@@ -151,7 +137,6 @@ namespace App1.Views
                     flyout.Hide();
                 };
 
-                // Add items to panel
                 panel.Children.Add(userInfo);
                 panel.Children.Add(reviewsHeader);
                 panel.Children.Add(reviewsList);
@@ -199,9 +184,6 @@ namespace App1.Views
                     Height = 100
                 };
 
-
-
-                // Add items to panel
                 panel.Children.Add(userInfo);
                 panel.Children.Add(reviewsHeader);
                 panel.Children.Add(reviewsList);
@@ -268,12 +250,11 @@ namespace App1.Views
 
         private void LoadBarChart()
         {
-            TotalDataBarChart.Series = new List<ISeries>  // get all data from the tables
-            // all users, all reviews, drinks?? de unde
+            TotalDataBarChart.Series = new List<ISeries>  
             {
                 new ColumnSeries<double>
                 {
-                    Values = new double[] { 10, 20, 30 }, // Your data points
+                    Values = new double[] { 10, 20, 30 },
                 }
             };
 
@@ -296,8 +277,6 @@ namespace App1.Views
 
         private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         { 
-            //TO DO: GET APPEALING USERS <3
-            
             string filter = BannedUserSearchTextBox.Text.ToLower();
             AppealsList.ItemsSource = new ObservableCollection<User>(
                 userService.GetAppealingUsers()

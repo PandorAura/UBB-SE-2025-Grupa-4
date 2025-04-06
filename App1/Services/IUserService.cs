@@ -1,24 +1,14 @@
-﻿using App1.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace App1.Services
 {
     public interface IUserService
     {
-        public void ChangeUserPermission(int userId, int permissionId);
         public List<User> GetActiveUsers(int permissionId);
         public List<User> GetAppealingUsers();
         public List<User> GetBannedUsers();
         List<User> GetUsersByPermission(int permissionId);
-
         public User GetUserBasedOnID(int ID);
-
         public int GetHighestRoleBasedOnUserID(int ID);
-
-
     }
 }
