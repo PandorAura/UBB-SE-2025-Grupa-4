@@ -14,7 +14,7 @@
 - dotnet add package MailKit
 
    ## Gmail setup
--enable 2FA on your Google account
+- enable 2FA on your Google account
 - generate an app password:
   - go to Google App Passwords
   - select "Mail" and create a custom app
@@ -22,8 +22,9 @@
     
   ### PowerShell Setup
 Run these commands to set your environment variables:
-[System.Environment]::SetEnvironmentVariable("SMTP_MODERATOR_EMAIL", "example@gmail.com", "User")
-[System.Environment]::SetEnvironmentVariable("SMTP_MODERATOR_PASSWORD", "your_app_passwovrd", "User") 
+    [System.Environment]::SetEnvironmentVariable("SMTP_MODERATOR_EMAIL", "example@gmail.com", "User")
+    [System.Environment]::SetEnvironmentVariable("SMTP_MODERATOR_PASSWORD", "your_app_passwovrd", "User") 
 -to test the network for emails: ping smtp.gmail.com
-  ##Datbase setup 
+
+  ## Datbase setup 
   - check connection string parameters
