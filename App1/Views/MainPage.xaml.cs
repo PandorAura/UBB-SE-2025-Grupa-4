@@ -172,16 +172,15 @@ namespace App1.Views
                 StackPanel panel = new StackPanel { Padding = new Thickness(10) };
                 int userID = selectedRequest.RequestingUserId;
                 User selectedUser = userService.GetUserBasedOnID(userID);
-                selectedUser.PermissionID = 0; // Assuming 0 is the permission ID for banned users
-
-
+                int currentRoleID = userService.GetHighestRoleBasedOnUserID(selectedUser.UserId);
+                string currentRoleName = requestsService.GetRoleNameBasedOnID(currentRoleID);
+                string requiredRoleName = requestsService.GetRoleNameBasedOnID(currentRoleID + 1);
                 TextBlock userInfo = new TextBlock
                 {
-                    Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\nStatus: Banned",
+                    Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\n{currentRoleName} -> {requiredRoleName}",
                     FontSize = 18
                 };
 
-                // List of reviews for this user
                 List<Review> userReviews = reviewsService.GetReviewsByUser(selectedUser.UserId);
 
                 TextBlock reviewsHeader = new TextBlock
@@ -193,8 +192,8 @@ namespace App1.Views
 
                 ListView reviewsList = new ListView
                 {
-                    ItemsSource = userReviews.Select(r => $"{r.Content}").ToList(),
-                    MaxHeight = 200
+                    ItemsSource = userReviews.Select(r => $"{r.Content}\nFlags: {r.NumberOfFlags}").ToList(),
+                    Height = 100
                 };
 
 

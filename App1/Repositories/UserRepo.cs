@@ -23,6 +23,10 @@ namespace App1.Repositories
                 new Role(1, "user"),
                 new Role(2, "admin")
             };
+            List<Role> roles3 = new List<Role>
+            {
+                new Role(0, "banned")
+            };
             _users = new List<User>
             {
                 new User(
@@ -73,6 +77,15 @@ namespace App1.Repositories
                     hasAppealed: true,
                     roles: roles2
 
+                ),
+                    new User(
+                    userId: 6,
+                    email: "mkhenike@gmail.com",
+                    name: "Banned User",
+                    numberOfDeletedReviews: 3,
+                    permissionID: 0,
+                    hasAppealed: true,
+                    roles: roles3
                 )
             };
         }

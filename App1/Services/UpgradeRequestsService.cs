@@ -1,5 +1,6 @@
 ﻿using App1.Models;
 using App1.Repositories;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,8 +22,27 @@ namespace App1.Services
             this.upgradeRequestsRepository = upgradeRequestsRepository;
             this.rolesRepository = rolesRepository;
             this.userRepo = newUserRepo;
+            this.CheckForBannedUserRequests();
         }
-
+        public void CheckForBannedUserRequests()
+        {
+            List<UpgradeRequest> requests = this.GetAllRequests();
+            for(int i=0; i<requests.Count; i++) 
+            {
+                int userId = requests[i].RequestingUserId;
+                if (this.userRepo.getHighestRoleIdBasedOnUserId(userId) == 0)
+                {
+                    this.upgradeRequestsRepository.deleteRequestBasedOnRequestId(requests[i].RequestId);
+                    i--;
+                }
+            }
+        }
+        public string GetRoleNameBasedOnID(int roleId)
+        {
+            List<Role> roles = this.rolesRepository.getRoles();
+            Role role = roles.First(role => role.RoleId == roleId);
+            return role.RoleName;
+        }
         public List<UpgradeRequest> GetAllRequests()
         {
             return this.upgradeRequestsRepository.getAllRequests();

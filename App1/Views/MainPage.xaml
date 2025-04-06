@@ -184,11 +184,12 @@
                     </Grid.RowDefinitions>
                     <TextBlock Text="Role requests" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
                     <ListView x:Name="RequestsList" Grid.Row="1" 
-                              MaxHeight="150"
+                              Height="150"
                               Background="Transparent"
                               BorderThickness="0"
                               IsItemClickEnabled="True" 
-                              ItemClick="RequestList_ItemClick">
+                              ItemClick="RequestList_ItemClick"
+                              >
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>

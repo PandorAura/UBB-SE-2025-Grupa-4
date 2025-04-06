@@ -76,6 +76,11 @@ namespace App1.Services
         {
             return _userRepo.getUserByID(ID);
         }
+
+        public int GetHighestRoleBasedOnUserID(int ID)
+        {
+            return this._userRepo.getHighestRoleIdBasedOnUserId(ID);
+        }
     }
 
 
