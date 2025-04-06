@@ -48,6 +48,8 @@ namespace App1.Views
             this.reviewsService = reviewsService;
             this.userService = userService;
             this.requestsService = upgradeRequestsService;
+            checkersService = new CheckersService(reviewsService);
+
             //reviewsService = new ReviewsService();
             //userService = new UserService();
             LoadStatistics();
@@ -55,18 +57,6 @@ namespace App1.Views
             displayAppeal();
             displayRoleRequests();
 
-        }
-        private void TrainModel_Click(object sender, RoutedEventArgs e)
-        {
-            ReviewModelTrainer.TrainModel();
-            ContentDialog dialog = new ContentDialog
-            {
-                Title = "Training Complete",
-                Content = "The model has been trained and saved.",
-                CloseButtonText = "OK",
-                XamlRoot = this.Content.XamlRoot // Set the XamlRoot property
-            };
-            _ = dialog.ShowAsync();
         }
 
         private void displayReviews()
@@ -170,6 +160,53 @@ namespace App1.Views
                 flyout.Content = panel;
                 flyout.Placement = FlyoutPlacementMode.Left;
                 flyout.ShowAt((FrameworkElement)sender);
+
+                LoadStatistics();
+            }
+        }
+        private void RequestList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is UpgradeRequest selectedRequest)
+            {
+                Flyout flyout = new Flyout();
+                StackPanel panel = new StackPanel { Padding = new Thickness(10) };
+                int userID = selectedRequest.RequestingUserId;
+                User selectedUser = userService.GetUserBasedOnID(userID);
+                int currentRoleID = userService.GetHighestRoleBasedOnUserID(selectedUser.UserId);
+                string currentRoleName = requestsService.GetRoleNameBasedOnID(currentRoleID);
+                string requiredRoleName = requestsService.GetRoleNameBasedOnID(currentRoleID + 1);
+                TextBlock userInfo = new TextBlock
+                {
+                    Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\n{currentRoleName} -> {requiredRoleName}",
+                    FontSize = 18
+                };
+
+                List<Review> userReviews = reviewsService.GetReviewsByUser(selectedUser.UserId);
+
+                TextBlock reviewsHeader = new TextBlock
+                {
+                    Text = "User Reviews:",
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 10, 0, 5)
+                };
+
+                ListView reviewsList = new ListView
+                {
+                    ItemsSource = userReviews.Select(r => $"{r.Content}\nFlags: {r.NumberOfFlags}").ToList(),
+                    Height = 100
+                };
+
+
+
+                // Add items to panel
+                panel.Children.Add(userInfo);
+                panel.Children.Add(reviewsHeader);
+                panel.Children.Add(reviewsList);
+
+
+                flyout.Content = panel;
+                flyout.Placement = FlyoutPlacementMode.Left;
+                flyout.ShowAt((FrameworkElement)sender);
             }
         }
 
@@ -209,12 +246,14 @@ namespace App1.Views
 
         private void LoadPieChart()
         {
-            AllUsersPieChart.Series = new List<PieSeries<double>>  // get all users and
-            // group them by permission? manager, user, admin, etc?
+            var usersCount = userService.GetActiveUsers(1).Count;
+            var adminsCount = userService.GetActiveUsers(2).Count;
+            var bannedCount = userService.GetBannedUsers().Count;
+            AllUsersPieChart.Series = new List<PieSeries<double>> 
             {
-                new PieSeries<double> { Values = new double[] { 40 }, Name = "Managers" },
-                new PieSeries<double> { Values = new double[] { 25 }, Name = "Users" },
-                new PieSeries<double> { Values = new double[] { 35 }, Name = "Admins" }
+                new PieSeries<double> { Values = new double[] { bannedCount }, Name = "Banned" },
+                new PieSeries<double> { Values = new double[] { usersCount }, Name = "Users" },
+                new PieSeries<double> { Values = new double[] { adminsCount }, Name = "Admins" }
             };
         }
 
@@ -255,23 +294,10 @@ namespace App1.Views
         private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         { 
             //TO DO: GET APPEALING USERS <3
-            ObservableCollection<User> AllAppeals = new ObservableCollection<User>
-            {
-                new User(),
-                //new User(22),
-                //new User(),
-                //new User(2),
-                //new User(),
-                //new User(12),
-                //new User(),
-                //new User(4),
-                //new User(6),
-                //new User(),
-                //new User(79)
-            };
+            
             string filter = BannedUserSearchTextBox.Text.ToLower();
             AppealsList.ItemsSource = new ObservableCollection<User>(
-                AllAppeals.Where(user => user.Email.ToLower().Contains(filter))
+                userService.GetAppealingUsers()
             );
         }
 
@@ -279,7 +305,7 @@ namespace App1.Views
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                reviewsService.resetReviewFlags(review.UserID);
+                reviewsService.resetReviewFlags(review.ReviewID);
             }
             displayReviews();
 
@@ -290,14 +316,24 @@ namespace App1.Views
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
                 reviewsService.HideReview(review.UserID);
-                reviewsService.resetReviewFlags(review.UserID); //Reviews are displayed if they have at least one flag
+                reviewsService.resetReviewFlags(review.ReviewID); //Reviews are displayed if they have at least one flag
             }
             displayReviews();
         }
 
         private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
         {
-            //TODO
+            //checkersService.RunAICheck
+        }
+
+
+        private void Button_AutoCheck_Click(object sender, RoutedEventArgs e)
+        {
+            List<Review> reviews = reviewsService.GetFlaggedReviews();
+
+            List<string> messages = checkersService.RunAutoCheck(reviews);
+
+            displayReviews();
         }
     }
 

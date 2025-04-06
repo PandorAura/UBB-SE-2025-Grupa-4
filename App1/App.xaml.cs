@@ -34,10 +34,12 @@ namespace App1
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
+                    string connectionString = "Server=localhost;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+                    
                     // Remove duplicate registration and add missing dependencies
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewRepository, ReviewRepo>();
-                    services.AddSingleton<IUpgradeRequestsRepository, HardcodedUpgradeRequestsRepository>();
+                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
                     services.AddSingleton<IRolesRepository, RolesRepository>();
                     services.AddSingleton<IUserService, UserService>(); 
                     services.AddSingleton<IReviewService, ReviewsService>(); 

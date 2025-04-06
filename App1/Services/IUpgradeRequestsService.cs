@@ -11,6 +11,8 @@ namespace App1.Services
     {
         public List<UpgradeRequest> GetAllRequests();
         public void HandleRequest(bool accepted, int requestId);
+        public string GetRoleNameBasedOnID(int roleId);
+
 
     }
 }

@@ -4,59 +4,78 @@ using App1.Repositories;
 using App1.Services; 
 using Microsoft.ML;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using App1.AutoChecker;
 
 namespace App1.Services
 {
     internal class CheckersService
     {
         private readonly ReviewRepo reviewsRepo;
-        private readonly ReviewsService reviewsService;
+        private readonly IReviewService reviewsService;
+        private readonly AutoCheck autoCheck;
         private static readonly string ModelPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "curseword_model.zip");
 
-        public CheckersService()
+        public CheckersService(IReviewService reviewsService)
         {
-            reviewsRepo = new ReviewRepo();
-            reviewsService = new ReviewsService();
+            this.reviewsService = reviewsService;
+            this.autoCheck = new AutoCheck();
         }
 
-        public void RunAutoCheck(int reviewID)
+        public List<string> RunAutoCheck(List<Review> reviews)
         {
-            var review = reviewsRepo.GetReviewByID(reviewID);
-            if (review != null)
+            List<string> messages = new List<string>();
+
+            foreach (var review in reviews)
             {
-                // partea de auto
-                
+                if (review != null)
+                {
+                    bool isOffensive = autoCheck.AutoCheckReview(review.Content);
+
+                    if (isOffensive)
+                    {
+                        messages.Add($"Review {review.ReviewID} is offensive. Hiding the review.");
+                        reviewsService.HideReview(review.ReviewID);
+                        reviewsService.resetReviewFlags(review.ReviewID);
+                    }
+                    else
+                    {
+                        messages.Add($"Review {review.ReviewID} is not offensive.");
+                    }
+                }
+                else
+                {
+                    messages.Add("Review not found.");
+                }
             }
-            else
-            {
-                Console.WriteLine("Review not found.");
-            }
+            return messages;
         }
 
         public void RunAICheck(int reviewID)
         {
-            // get the specific review from the repository by ID
-            Review review = (Review)reviewsRepo.GetReviewByID(reviewID);
-            if (review != null)
-            {
-                // perform AI-based check
-                bool isOffensive = CheckReviewWithAI(review.Content); 
+            ////get the specific review from the repository by ID
+            //var review = reviewsService.GetReviewsByUser(userID);
+            //if (review != null)
+            //{
+            //    // perform AI-based check
+            //    bool isOffensive = CheckReviewWithAI(review.content);
 
-                // if the review is offensive, hide it
-                if (isOffensive)
-                {
-                    Console.WriteLine($"Review {reviewID} is offensive. Hiding the review.");
-                    reviewsService.HideReview(reviewID); // hide the review
-                }
-                else
-                {
-                    Console.WriteLine($"Review {reviewID} is not offensive.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Review not found.");
-            }
+            //    // if the review is offensive, hide it
+            //    if (isOffensive)
+            //    {
+            //        Console.WriteLine($"Review {reviewID} is offensive. Hiding the review.");
+            //        reviewsService.HideReview(reviewID); // hide the review
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine($"Review {reviewID} is not offensive.");
+            //    }
+            //}
+            //else
+            //{
+            //    Console.WriteLine("Review not found.");
+            //}
         }
 
         private bool CheckReviewWithAI(string reviewText)

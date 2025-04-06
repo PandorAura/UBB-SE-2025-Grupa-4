@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using App1.Models;
+using Windows.System;
 //using Windows.System;
 
 namespace App1.Repositories
@@ -22,6 +23,10 @@ namespace App1.Repositories
                 new Role(1, "user"),
                 new Role(2, "admin")
             };
+            List<Role> roles3 = new List<Role>
+            {
+                new Role(0, "banned")
+            };
             _users = new List<User>
             {
                 new User(
@@ -36,12 +41,51 @@ namespace App1.Repositories
                  new User(
                     userId: 2,
                     email: "aurapandor@gmail.com",
-                    name: "Admin One",
+                    name: "Admin Two",
                     numberOfDeletedReviews: 3,
-                    permissionID: 2,
-                    hasAppealed: false,
+                    permissionID: 0,
+                    hasAppealed: true,
                     roles: roles2
 
+                ),
+                  new User(
+                    userId: 3,
+                    email: "oanarares2004@gmail.com",
+                    name: "Admin Two",
+                    numberOfDeletedReviews: 3,
+                    permissionID: 2,
+                    hasAppealed: true,
+                    roles: roles2
+
+                ),
+                   new User(
+                    userId: 4,
+                    email: "nimigeanvalentinoficial@gmail.com",
+                    name: "Admin Two",
+                    numberOfDeletedReviews: 3,
+                    permissionID: 2,
+                    hasAppealed: true,
+                    roles: roles2
+
+                ),
+                    new User(
+                    userId: 5,
+                    email: "alinamoca25@gmail.com",
+                    name: "Admin Two",
+                    numberOfDeletedReviews: 3,
+                    permissionID: 2,
+                    hasAppealed: true,
+                    roles: roles2
+
+                ),
+                    new User(
+                    userId: 6,
+                    email: "mkhenike@gmail.com",
+                    name: "Banned User",
+                    numberOfDeletedReviews: 3,
+                    permissionID: 0,
+                    hasAppealed: true,
+                    roles: roles3
                 )
             };
         }
@@ -95,7 +139,7 @@ namespace App1.Repositories
         }
 
         public User getUserByID(int ID) { 
-            return _users[ID];
+            return _users.First(user => user.UserId == ID);
         }
 
         public List<User> GetAppealingUsers()

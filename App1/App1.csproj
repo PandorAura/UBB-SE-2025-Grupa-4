@@ -41,6 +41,7 @@
   <ItemGroup>
     <PackageReference Include="CSharpMarkup.WinUI.LiveChartsCore.SkiaSharpView" Version="2.4.18" />
     <PackageReference Include="MailKit" Version="4.11.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
     <PackageReference Include="Microsoft.ML" Version="4.0.2" />
@@ -49,6 +50,7 @@
     <PackageReference Include="Quartz" Version="3.14.0" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.14.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250310001" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Logs\" />
@@ -57,6 +59,11 @@
     <Page Update="Views\MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="AutoChecker\offensive_words.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <!--
