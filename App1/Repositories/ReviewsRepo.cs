@@ -27,7 +27,6 @@ namespace App1.Repositories
                 rating: 4,
                 content: "Good experience",
                 createdDate: DateTime.Now.AddHours(-5),
-                numberOfFlags: 0,
                 isHidden: false
             ),
             new Review(
