@@ -13,7 +13,7 @@ namespace App1.Models
         public Review() { }
 
         public Review(int reviewId, int userId, string userName, int rating,
-                     string content, DateTime createdDate, int numberOfFlags = 0,
+                     string content, DateTime createdDate, int numberOfFlags = 1,
                      bool isHidden = false)
         {
             ReviewID = reviewId;

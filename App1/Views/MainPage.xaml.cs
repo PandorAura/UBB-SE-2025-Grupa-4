@@ -8,10 +8,13 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Windows.Storage;
+using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
 using Microsoft.UI.Text;
 using System;
+using System.Runtime.CompilerServices;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -332,10 +335,55 @@ namespace App1.Views
         {
             List<Review> reviews = reviewsService.GetFlaggedReviews();
 
-            List<string> messages = checkersService.RunAutoCheck(reviews);
+            List<string> messages = checkersService.RunAutoCheck(reviews); //put the messages in a logs file
 
             displayReviews();
         }
-    }
 
+        private void Button_ModifyOffensiveWordsList_Click(object sender, RoutedEventArgs e)
+        {
+            WordsList.ItemsSource = checkersService.autoCheck.getOffensiveWordsList();
+            WordListPopup.Visibility = Visibility.Visible;
+        }
+
+        private async void AddWord_Click(object sender, RoutedEventArgs e)
+        {
+            TextBox input = new TextBox { PlaceholderText = "Enter new word..." };
+
+            ContentDialog dialog = new ContentDialog
+            {
+                Title = "Add New Word",
+                Content = input,
+                PrimaryButtonText = "Add Word",
+                CloseButtonText = "Cancel",
+                XamlRoot = this.XamlRoot
+            };
+
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                var newWord = input.Text.Trim();
+                if (!string.IsNullOrWhiteSpace(newWord))
+                {
+                    checkersService.autoCheck.AddOffensiveWord(newWord);
+                    WordsList.ItemsSource = null;
+                    WordsList.ItemsSource = checkersService.autoCheck.getOffensiveWordsList();
+                }
+            }
+        }
+
+        private void DeleteWord_Click(object sender, RoutedEventArgs e)
+        {
+            if (WordsList.SelectedItem is string selectedWord)
+            {
+                checkersService.autoCheck.DeleteOffensiveWord(selectedWord);
+                WordsList.ItemsSource = null;
+                WordsList.ItemsSource = checkersService.autoCheck.getOffensiveWordsList();
+            }
+        }
+
+        private void CancelWordPopup_Click(object sender, RoutedEventArgs e)
+        {
+            WordListPopup.Visibility = Visibility.Collapsed;
+        }
+    }
 }
