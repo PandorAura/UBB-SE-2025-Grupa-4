@@ -118,6 +118,7 @@ namespace App1.Views
                 {
                     selectedUser.PermissionID = 0;
                     userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\nStatus: Banned";
+                    LoadStatistics();
                 };
 
                 // Appeal Button
@@ -132,6 +133,7 @@ namespace App1.Views
                 {
                     selectedUser.PermissionID = 1;
                     userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\nStatus: Active";
+                    LoadStatistics();
                 };
 
                 // Close Button
@@ -146,6 +148,7 @@ namespace App1.Views
                     AppealsList.ItemsSource = null;
                     AppealsList.ItemsSource = userService.GetAppealingUsers();
                     flyout.Hide();
+                    //LoadStatistics();
                 };
 
                 // Add items to panel
@@ -161,7 +164,7 @@ namespace App1.Views
                 flyout.Placement = FlyoutPlacementMode.Left;
                 flyout.ShowAt((FrameworkElement)sender);
 
-                LoadStatistics();
+                
             }
         }
         private void RequestList_ItemClick(object sender, ItemClickEventArgs e)
@@ -232,6 +235,7 @@ namespace App1.Views
                 }
             }
             this.displayRoleRequests();
+            LoadStatistics();
         }
         private void DeclineButton_Click(object sender, RoutedEventArgs e)
         {
@@ -243,18 +247,22 @@ namespace App1.Views
                 }
             }
             this.displayRoleRequests();
+            LoadStatistics();
         }
 
         private void LoadPieChart()
         {
-            var usersCount = userService.GetActiveUsers(1).Count;
-            var adminsCount = userService.GetActiveUsers(2).Count;
             var bannedCount = userService.GetBannedUsers().Count;
+            var usersCount = userService.GetUsersByPermission(1).Count;
+            var adminsCount = userService.GetUsersByPermission(2).Count;
+            var managerCount = userService.GetUsersByPermission(3).Count;
+            
             AllUsersPieChart.Series = new List<PieSeries<double>> 
             {
                 new PieSeries<double> { Values = new double[] { bannedCount }, Name = "Banned" },
                 new PieSeries<double> { Values = new double[] { usersCount }, Name = "Users" },
-                new PieSeries<double> { Values = new double[] { adminsCount }, Name = "Admins" }
+                new PieSeries<double> { Values = new double[] { adminsCount }, Name = "Admins" },
+                new PieSeries<double> { Values = new double[] { managerCount }, Name = "Managers" }
             };
         }
 
@@ -266,18 +274,21 @@ namespace App1.Views
 
         private void LoadBarChart()
         {
-            TotalDataBarChart.Series = new List<ISeries>  // get all data from the tables
-            // all users, all reviews, drinks?? de unde
+            //flagged reviews = pending, hidden reviews = rejected
+            var rejectedCount = reviewsService.GetHiddenReviews().Count;
+            var pendingCount = reviewsService.GetFlaggedReviews().Count;
+            var totalCount = reviewsService.GetReviews().Count;
+            TotalDataBarChart.Series = new List<ISeries>
             {
                 new ColumnSeries<double>
                 {
-                    Values = new double[] { 10, 20, 30 }, // Your data points
+                    Values = new double[] { rejectedCount, pendingCount, totalCount }, // Your data points
                 }
             };
 
             TotalDataBarChart.XAxes = new List<Axis>
             {
-                new Axis { Labels = new List<string> { "Users", "Drinks", "Reviews" } }  // X-axis labels
+                new Axis { Labels = new List<string> { "rejected", "pending", "total" } }  // X-axis labels
             };
 
             TotalDataBarChart.YAxes = new List<Axis> { new Axis { Name = "Total", MinLimit = 0 } };
@@ -309,7 +320,7 @@ namespace App1.Views
                 reviewsService.resetReviewFlags(review.ReviewID);
             }
             displayReviews();
-
+            LoadStatistics();
         }
 
         private void MenuFlyoutHideReview_Click(object sender, RoutedEventArgs e)
@@ -320,6 +331,7 @@ namespace App1.Views
                 reviewsService.resetReviewFlags(review.ReviewID); //Reviews are displayed if they have at least one flag
             }
             displayReviews();
+            LoadStatistics();
         }
 
         private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
@@ -335,6 +347,7 @@ namespace App1.Views
             List<string> messages = checkersService.RunAutoCheck(reviews);
 
             displayReviews();
+            LoadStatistics();
         }
     }
 

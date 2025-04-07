@@ -23,6 +23,12 @@ namespace App1.Repositories
                 new Role(1, "user"),
                 new Role(2, "admin")
             };
+            List<Role> roles3 = new List<Role>
+            {
+                new Role(1, "user"),
+                new Role(2, "admin"),
+                new Role(3, "manager")
+            };
             _users = new List<User>
             {
                 new User(
@@ -30,18 +36,18 @@ namespace App1.Repositories
                     email: "mkhenike@gmail.com",
                     name: "Admin One",
                     numberOfDeletedReviews: 3,
-                    permissionID: 2,
+                    permissionID: 3,
                     hasAppealed: false,
-                    roles: roles1
+                    roles: roles3
                 ),
                  new User(
-                    userId: 2,
+                    userId: 3,
                     email: "aurapandor@gmail.com",
                     name: "Admin Two",
                     numberOfDeletedReviews: 3,
                     permissionID: 0,
                     hasAppealed: true,
-                    roles: roles2
+                    roles: roles3
 
                 ),
                   new User(

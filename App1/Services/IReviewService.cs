@@ -11,6 +11,7 @@ namespace App1.Services
     {
         public void HideReview(int reviewID);
         public List<Review> GetFlaggedReviews();
+        public List<Review> GetHiddenReviews();
         public List<Review> GetReviews();
 
         List<Review> GetReviewsSince(DateTime date);
