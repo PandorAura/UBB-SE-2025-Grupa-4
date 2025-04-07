@@ -8,6 +8,7 @@ using Quartz.Impl;
 using System;
 using Microsoft.Extensions.Hosting;
 using App1.Views;
+using App1.AutoChecker;
 
 namespace App1
 {
@@ -34,11 +35,13 @@ namespace App1
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    string connectionString = "Server=localhost;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+                    string connectionString = "Server=MINNIE;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
                     
                     // Remove duplicate registration and add missing dependencies
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewRepository, ReviewRepo>();
+                    services.AddSingleton<IAutoCheck, AutoCheck>(provider => new AutoCheck(connectionString));
+                    services.AddSingleton<ICheckersService, CheckersService>();
                     services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
                     services.AddSingleton<IRolesRepository, RolesRepository>();
                     services.AddSingleton<IUserService, UserService>(); 

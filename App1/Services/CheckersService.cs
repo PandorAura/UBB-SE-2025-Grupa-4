@@ -10,17 +10,17 @@ using App1.AutoChecker;
 
 namespace App1.Services
 {
-    internal class CheckersService
+    internal class CheckersService : ICheckersService
     {
         private readonly ReviewRepo reviewsRepo;
         private readonly IReviewService reviewsService;
-        public readonly AutoCheck autoCheck;
+        private IAutoCheck autoCheck;
         private static readonly string ModelPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "curseword_model.zip");
 
-        public CheckersService(IReviewService reviewsService)
+        public CheckersService(IReviewService reviewsService, IAutoCheck autoCheck)
         {
             this.reviewsService = reviewsService;
-            this.autoCheck = new AutoCheck();
+            this.autoCheck = autoCheck;
         }
 
         public List<string> RunAutoCheck(List<Review> reviews)
@@ -51,7 +51,18 @@ namespace App1.Services
             }
             return messages;
         }
-
+        public HashSet<string> getOffensiveWordsList()
+        {
+            return this.autoCheck.GetOffensiveWordsList();
+        }
+        public void AddOffensiveWord(string newWord)
+        {
+            this.autoCheck.AddOffensiveWord(newWord);
+        }
+        public void DeleteOffensiveWord(string word)
+        {
+            this.autoCheck.DeleteOffensiveWord(word);
+        }
         public void RunAICheck(int reviewID)
         {
             ////get the specific review from the repository by ID

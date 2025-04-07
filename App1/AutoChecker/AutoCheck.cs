@@ -1,121 +1,118 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.IO;
+using System.Data;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace App1.AutoChecker
 {
-    public class AutoCheck
+    public class AutoCheck : IAutoCheck
     {
-        private static readonly string ProjectRoot = GetProjectRoot();
-        public static readonly string offensiveWordsFilePath = Path.Combine(ProjectRoot, "AutoChecker", "offensive_words.txt");
-        private static HashSet<string> offensiveWords = LoadOffensiveWords();
+        private readonly HashSet<string> _offensiveWords;
+        private readonly string _connectionString;
 
-        public AutoCheck()
+        public AutoCheck(string connectionString)
         {
-            offensiveWords = LoadOffensiveWords();
+            _connectionString = connectionString;
+            _offensiveWords = LoadOffensiveWords();
         }
 
         public bool AutoCheckReview(string reviewText)
         {
             if (string.IsNullOrWhiteSpace(reviewText))
                 return false;
-            Console.WriteLine("ok");
-            var words = reviewText.Split(new char[] { ' ', ',', '.', '!', '?', ';', ':', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            return words.Any(word => offensiveWords.Contains(word));
+
+            var words = reviewText.Split(
+                new[] { ' ', ',', '.', '!', '?', ';', ':', '\n', '\r', '\t' },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            return words.Any(word => _offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase));
         }
 
-        private static HashSet<string> LoadOffensiveWords()
+        public HashSet<string> LoadOffensiveWords()
         {
-            if (File.Exists(offensiveWordsFilePath))
-            {
-                return new HashSet<string>(File.ReadAllLines(offensiveWordsFilePath), StringComparer.OrdinalIgnoreCase);
-            }
-            return new HashSet<string>();
+            var offensiveWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            // Use this when the Offensive Words are stored in a database table
-            /*
-            HashSet<string> offensiveWords = new HashSet<string>();
-            connection.Open();
-            using (SqlCommand command = new SqlCommand("SELECT Word FROM OffensiveWords", connection))
+            using var connection = new SqlConnection(_connectionString);
+
+            try
             {
-                using (SqlDataReader reader = command.ExecuteReader())
+                connection.Open();
+                using var command = new SqlCommand("SELECT Word FROM OffensiveWords", connection);
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        string word = reader.GetString(0);
-                        offensiveWords.Add(word);
-                    }
+                    offensiveWords.Add(reader.GetString(0));
                 }
             }
-            */
-        }
-
-        private static string GetProjectRoot([CallerFilePath] string filePath = "")
-        {
-            var dir = new FileInfo(filePath).Directory;
-            while (dir != null && !dir.GetFiles("*.csproj").Any())
+            catch (Exception ex)
             {
-                dir = dir.Parent;
+                Console.WriteLine($"Error loading offensive words: {ex.Message}");
+                throw; 
             }
-            return dir?.FullName ?? throw new Exception("Project root not found!");
+
+            return offensiveWords;
         }
 
         public void AddOffensiveWord(string newWord)
         {
-            if (!offensiveWords.Contains(newWord))
-            {
-                offensiveWords.Add(newWord);
-                File.WriteAllLines(offensiveWordsFilePath, offensiveWords);
+            if (string.IsNullOrWhiteSpace(newWord) ||
+                _offensiveWords.Contains(newWord, StringComparer.OrdinalIgnoreCase))
+                return;
 
-                /*
+            using var connection = new SqlConnection(_connectionString);
+
+            try
+            {
                 connection.Open();
-                using (SqlCommand clearCommand = new SqlCommand("DELETE FROM OffensiveWords", connection))
-                {
-                    clearCommand.ExecuteNonQuery();
-                }
-                foreach (var word in offensiveWords)
-                {
-                    using (SqlCommand insertCommand = new SqlCommand("INSERT INTO OffensiveWords(Word) VALUES(@Word)", connection))
-                    {
-                        insertCommand.Parameters.AddWithValue("@Word", word);
-                        insertCommand.ExecuteNonQuery();
-                    }
-                }
-                */
+                using var command = new SqlCommand(
+                    "IF NOT EXISTS (SELECT 1 FROM OffensiveWords WHERE Word = @Word) " +
+                    "INSERT INTO OffensiveWords (Word) VALUES (@Word)",
+                    connection);
+
+                command.Parameters.AddWithValue("@Word", newWord);
+                command.ExecuteNonQuery();
+
+                _offensiveWords.Add(newWord);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding offensive word: {ex.Message}");
+                throw;
             }
         }
 
         public void DeleteOffensiveWord(string word)
-        { 
-            offensiveWords.Remove(word);
-            File.WriteAllLines(offensiveWordsFilePath, offensiveWords);
+        {
+            if (string.IsNullOrWhiteSpace(word) ||
+                !_offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase))
+                return;
 
-            /*
-            connection.Open();
-            using (SqlCommand clearCommand = new SqlCommand("DELETE FROM OffensiveWords", connection))
+            using var connection = new SqlConnection(_connectionString);
+
+            try
             {
-                clearCommand.ExecuteNonQuery();
+                connection.Open();
+                using var command = new SqlCommand(
+                    "DELETE FROM OffensiveWords WHERE Word = @Word",
+                    connection);
+
+                command.Parameters.AddWithValue("@Word", word);
+                command.ExecuteNonQuery();
+
+                _offensiveWords.Remove(word);
             }
-            foreach (var word in offensiveWords)
+            catch (Exception ex)
             {
-                using (SqlCommand insertCommand = new SqlCommand("INSERT INTO OffensiveWords(Word) VALUES(@Word)", connection))
-                {
-                    insertCommand.Parameters.AddWithValue("@Word", word);
-                    insertCommand.ExecuteNonQuery();
-                }
+                Console.WriteLine($"Error deleting offensive word: {ex.Message}");
+                throw;
             }
-            */
         }
 
-        public HashSet<string> getOffensiveWordsList()
+        public HashSet<string> GetOffensiveWordsList()
         {
-            return offensiveWords;
+            return new HashSet<string>(_offensiveWords, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

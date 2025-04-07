@@ -15,6 +15,7 @@ using System.Linq;
 using Microsoft.UI.Text;
 using System;
 using System.Runtime.CompilerServices;
+using App1.AutoChecker;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -30,13 +31,14 @@ namespace App1.Views
 
         private IReviewService reviewsService;
         private IUserService userService;
-        private CheckersService checkersService;
+        private ICheckersService checkersService;
         private IUpgradeRequestsService requestsService;
+        private IAutoCheck autoCheck;
 
         //TO DO: Add interface for requests, pass to main Page, same as the others
 
         public MainPage(IReviewService reviewsService,
-                   IUserService userService, IUpgradeRequestsService upgradeRequestsService
+                   IUserService userService, IUpgradeRequestsService upgradeRequestsService, ICheckersService checkersService, IAutoCheck autoCheck
                    )
         {
             this.InitializeComponent();
@@ -51,7 +53,9 @@ namespace App1.Views
             this.reviewsService = reviewsService;
             this.userService = userService;
             this.requestsService = upgradeRequestsService;
-            checkersService = new CheckersService(reviewsService);
+            this.checkersService = checkersService;
+            this.autoCheck = autoCheck;
+            // checkersService = new CheckersService(reviewsService);
 
             //reviewsService = new ReviewsService();
             //userService = new UserService();
@@ -341,7 +345,7 @@ namespace App1.Views
 
         private void Button_ModifyOffensiveWordsList_Click(object sender, RoutedEventArgs e)
         {
-            WordsList.ItemsSource = checkersService.autoCheck.getOffensiveWordsList();
+            WordsList.ItemsSource = checkersService.getOffensiveWordsList();
             WordListPopup.Visibility = Visibility.Visible;
         }
 
@@ -363,9 +367,9 @@ namespace App1.Views
                 var newWord = input.Text.Trim();
                 if (!string.IsNullOrWhiteSpace(newWord))
                 {
-                    checkersService.autoCheck.AddOffensiveWord(newWord);
+                    checkersService.AddOffensiveWord(newWord);
                     WordsList.ItemsSource = null;
-                    WordsList.ItemsSource = checkersService.autoCheck.getOffensiveWordsList();
+                    WordsList.ItemsSource = checkersService.getOffensiveWordsList();
                 }
             }
         }
@@ -374,9 +378,9 @@ namespace App1.Views
         {
             if (WordsList.SelectedItem is string selectedWord)
             {
-                checkersService.autoCheck.DeleteOffensiveWord(selectedWord);
+                checkersService.DeleteOffensiveWord(selectedWord);
                 WordsList.ItemsSource = null;
-                WordsList.ItemsSource = checkersService.autoCheck.getOffensiveWordsList();
+                WordsList.ItemsSource = checkersService.getOffensiveWordsList();
             }
         }
 
