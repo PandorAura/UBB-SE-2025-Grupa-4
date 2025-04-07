@@ -325,7 +325,10 @@ namespace App1.Views
         private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
+            {
                 checkersService.RunAICheck(review);
+            }
+            displayReviews();
         }
 
 

@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.ML.FastTree;
 
 namespace App1.Ai_Check
 {
@@ -31,8 +33,10 @@ namespace App1.Ai_Check
 
             if (!File.Exists(DataPath))
             {
-                throw new FileNotFoundException($"Missing: {DataPath}");
+                LogToFile($"ERROR: Missing file at {DataPath}");
+                return false;
             }
+
             try
             {
                 // Ensure directories exist
@@ -49,20 +53,49 @@ namespace App1.Ai_Check
                     hasHeader: true
                 );
 
-                // Define pipeline
+                // Define pipeline with FastTreeClassifier
                 var pipeline = mlContext.Transforms.Text.FeaturizeText(
-                        outputColumnName: "Features",
-                        inputColumnName: nameof(ReviewData.Text))
-                    .Append(mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(
-                        labelColumnName: "Label",  // Matches [ColumnName("Label")] in ReviewData
-                        featureColumnName: "Features"
-                    ));
+                    outputColumnName: "Features",
+                    inputColumnName: nameof(ReviewData.Text))
+                .Append(mlContext.BinaryClassification.Trainers.FastTree(
+                    labelColumnName: nameof(ReviewData.IsOffensive),
+                    featureColumnName: "Features",
+                    numberOfTrees: 100,        // Number of trees to use
+                    numberOfLeaves: 50,        // Number of leaves per tree
+                    minimumExampleCountPerLeaf: 10,  // Minimum examples in a leaf
+                    learningRate: 0.1         // Learning rate
+                ));
 
-                // Train and save model
-                var model = pipeline.Fit(data);
+                // Split data into training and testing sets
+                var trainTestSplit = mlContext.Data.TrainTestSplit(data, testFraction: 0.2);
+
+                // Train the model
+                var model = pipeline.Fit(trainTestSplit.TrainSet);
+
+                // Evaluate the model on the test set
+                var predictions = model.Transform(trainTestSplit.TestSet);
+
+                // Convert predictions to a list for easy comparison
+                var predictedResults = mlContext.Data.CreateEnumerable<ReviewPrediction>(predictions, reuseRowObject: false).ToList();
+                var actualResults = mlContext.Data.CreateEnumerable<ReviewData>(trainTestSplit.TestSet, reuseRowObject: false).ToList();
+
+                // Compare predictions with actual values and log mistakes
+                for (int i = 0; i < predictedResults.Count; i++)
+                {
+                    var prediction = predictedResults[i];
+                    var actual = actualResults[i];
+
+                    // If the prediction is incorrect, log it
+                    if (prediction.Prediction != actual.IsOffensive)
+                    {
+                        LogToFile($"Mistake in Review {i + 1}: Predicted {prediction.Prediction}, Actual {actual.IsOffensive}. Text: {actual.Text}");
+                    }
+                }
+
+                // Save the trained model
                 mlContext.Model.Save(model, data.Schema, ModelPath);
 
-                LogToFile("Model trained and saved successfully.");
+                LogToFile($"Model trained and saved successfully at {ModelPath}");
                 return true;
             }
             catch (Exception ex)
