@@ -16,7 +16,7 @@ namespace App1.Services
         private readonly ReviewRepo reviewsRepo;
         private readonly IReviewService reviewsService;
         private readonly AutoCheck autoCheck;
-        private static readonly string ModelPath = Path.Combine(GetProjectRoot(), "Logs", "curseword_model.zip");
+        private static readonly string ModelPath = Path.Combine(GetProjectRoot(), "Models", "curseword_model.zip");
 
         private static string GetProjectRoot([CallerFilePath] string filePath = "")
         {
@@ -105,6 +105,7 @@ namespace App1.Services
             var prediction = predEngine.Predict(review);
 
             // return whether the review is offensive
+            
             return prediction.IsOffensive;
         }
     }
