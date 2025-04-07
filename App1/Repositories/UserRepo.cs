@@ -79,6 +79,15 @@ namespace App1.Repositories
                     hasAppealed: true,
                     roles: roles2
 
+                ),
+                    new User(
+                    userId: 6,
+                    email: "mkhenike@gmail.com",
+                    name: "Banned User",
+                    numberOfDeletedReviews: 3,
+                    permissionID: 0,
+                    hasAppealed: true,
+                    roles: roles3
                 )
             };
         }

@@ -17,5 +17,8 @@ namespace App1.Services
 
         public User GetUserBasedOnID(int ID);
 
+        public int GetHighestRoleBasedOnUserID(int ID);
+
+
     }
 }

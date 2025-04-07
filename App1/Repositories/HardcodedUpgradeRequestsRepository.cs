@@ -14,6 +14,7 @@ namespace App1.Repositories
             _requests = new List<UpgradeRequest>();
             _requests.Add(new UpgradeRequest(1, 1, "Admin One"));
             _requests.Add(new UpgradeRequest(2, 2, "Admin Two"));
+            _requests.Add(new UpgradeRequest(3, 6, "Banned User"));
         }
 
         public List<UpgradeRequest> getAllRequests()

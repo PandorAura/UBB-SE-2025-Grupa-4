@@ -27,7 +27,6 @@ namespace App1.Repositories
                 rating: 4,
                 content: "Good experience",
                 createdDate: DateTime.Now.AddHours(-5),
-                numberOfFlags: 0,
                 isHidden: false
             ),
             new Review(
@@ -53,13 +52,34 @@ namespace App1.Repositories
             new Review(
                 reviewId: 5,
                 userId: 3,
-                userName: "Admin Two",
+                userName: "Admin Three",
                 rating: 5,
                 content: "dunce",
                 createdDate: DateTime.Now.AddDays(-2),
                 numberOfFlags: 1,
                 isHidden: false
+            ),
+            new Review(
+                reviewId: 6,
+                userId: 2,
+                userName: "Admin Two",
+                rating: 5,
+                content: "Amazing",
+                createdDate: DateTime.Now.AddDays(-2),
+                numberOfFlags: 0,
+                isHidden: false
+            ),
+            new Review(
+                reviewId: 7,
+                userId: 2,
+                userName: "Admin Two",
+                rating: 5,
+                content: "My favorite!",
+                createdDate: DateTime.Now.AddDays(-2),
+                numberOfFlags: 0,
+                isHidden: false
             )
+
         };
 
         public List<Review> GetReviewsSince(DateTime date)

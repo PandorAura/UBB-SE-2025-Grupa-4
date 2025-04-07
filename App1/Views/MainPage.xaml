@@ -123,7 +123,8 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <Button Grid.Row="3" 
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Stretch" Spacing="8">
+                <Button 
                     Content="Automatically check reviews" 
                     CornerRadius="{StaticResource ControlCornerRadius}"
                     Background="{StaticResource AccentColor}"
@@ -131,6 +132,15 @@
                     Padding="16,8"
                     HorizontalAlignment="Stretch"
                     Click="Button_AutoCheck_Click"/>
+                <Button
+                    Content="Modify the offensive words list"
+                    CornerRadius="{StaticResource ControlCornerRadius}"
+                    Background="{StaticResource AccentColor}"
+                    Foreground="White"
+                    Padding="16,8"
+                    HorizontalAlignment="Stretch"
+                    Click="Button_ModifyOffensiveWordsList_Click"/>
+            </StackPanel>
         </Grid>
 
         <!-- Middle Column - Statistics and Requests -->
@@ -184,11 +194,12 @@
                     </Grid.RowDefinitions>
                     <TextBlock Text="Role requests" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
                     <ListView x:Name="RequestsList" Grid.Row="1" 
-                              MaxHeight="150"
+                              Height="150"
                               Background="Transparent"
                               BorderThickness="0"
                               IsItemClickEnabled="True" 
-                              ItemClick="RequestList_ItemClick">
+                              ItemClick="RequestList_ItemClick"
+                              >
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -292,6 +303,30 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+        </Grid>
+
+        <!-- Forbidden Words Popup -->
+        <Grid x:Name="WordListPopup" Visibility="Collapsed" Background="#80000000" Grid.RowSpan="2" Grid.ColumnSpan="3">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefault}"
+            CornerRadius="{StaticResource ControlCornerRadius}"
+            Padding="20" Width="400" Height="400"
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+            BorderBrush="{ThemeResource CardStrokeColorDefault}"
+            BorderThickness="{StaticResource CardBorderThickness}">
+                <StackPanel>
+                    <TextBlock Text="Forbidden Words" FontSize="18" FontWeight="Bold" Margin="0,0,0,12"/>
+
+                    <ListView x:Name="WordsList" Height="200"
+                      SelectionMode="Single"
+                      BorderThickness="1" Margin="0,0,0,12"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Add" Width="100" Margin="0,0,8,0" Click="AddWord_Click"/>
+                        <Button Content="Delete" Width="100" Click="DeleteWord_Click"/>
+                        <Button Content="Cancel" Width="100" Click="CancelWordPopup_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </Page>
