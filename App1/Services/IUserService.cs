@@ -11,6 +11,7 @@ namespace App1.Services
     {
         public void ChangeUserPermission(int userId, int permissionId);
         public List<User> GetActiveUsers(int permissionId);
+        public List<User> GetAllUsers();
         public List<User> GetAppealingUsers();
         public List<User> GetBannedUsers();
         List<User> GetUsersByPermission(int permissionId);

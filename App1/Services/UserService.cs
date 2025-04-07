@@ -30,6 +30,11 @@ namespace App1.Services
             }
         }
 
+        public List<User> GetAllUsers()
+        {
+            return _userRepo.GetUsers();
+        }
+
         public List<User> GetActiveUsers(int permissionId)
         {
             try

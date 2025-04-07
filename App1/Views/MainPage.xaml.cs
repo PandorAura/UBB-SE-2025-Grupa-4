@@ -254,10 +254,19 @@ namespace App1.Views
 
         private void LoadPieChart()
         {
-            var bannedCount = userService.GetBannedUsers().Count;
-            var usersCount = userService.GetUsersByPermission(1).Count;
-            var adminsCount = userService.GetUsersByPermission(2).Count;
-            var managerCount = userService.GetUsersByPermission(3).Count;
+            int bannedCount, usersCount, adminsCount, managerCount;
+            bannedCount = usersCount = adminsCount = managerCount = 0;
+
+            List<User> users = userService.GetAllUsers();
+            foreach (var user in users) { 
+                var count = user.Roles.Count;
+                switch (count) { 
+                    case 0: bannedCount++; break;
+                    case 1: usersCount++; break;
+                    case 2: adminsCount++; break;
+                    case 3: managerCount++; break;
+                }
+            }
             
             AllUsersPieChart.Series = new List<PieSeries<double>> 
             {
