@@ -28,3 +28,17 @@ Run these commands to set your environment variables:
 
   ## Datbase setup 
   - check connection string parameters
+
+  - CREATE DATABASE DrinksImdb;
+
+USE DrinksImdb;
+CREATE TABLE UpgradeRequests (
+    RequestId INT PRIMARY KEY IDENTITY(1,1),
+    RequestingUserId INT NOT NULL,
+    RequestingUserName NVARCHAR(100) NOT NULL
+);
+GO
+
+INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (1, 'Admin One');
+INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (2, 'Admin Two');
+INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (6, 'Banned User');
