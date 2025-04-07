@@ -11,7 +11,7 @@ namespace App1.Ai_Check
         private static readonly string ProjectRoot = GetProjectRoot();
 
         private static readonly string DataPath = Path.Combine(ProjectRoot, "Ai_Check", "review_data.csv");
-        private static readonly string ModelPath = Path.Combine(ProjectRoot, "Logs", "curseword_model.zip");
+        private static readonly string ModelPath = Path.Combine(ProjectRoot, "Models", "curseword_model.zip");
         private static readonly string LogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
 
         private static string GetProjectRoot([CallerFilePath] string filePath = "")
