@@ -31,6 +31,11 @@ namespace App1.Services
             return _reviewRepository.GetReviews().Where(r => r.NumberOfFlags > 0).ToList();
         }
 
+        public List<Review> GetHiddenReviews()
+        {
+            return _reviewRepository.GetReviews().Where(r => r.IsHidden == true).ToList();
+        }
+
         public List<Review> GetReviews()
         {
             return _reviewRepository.GetReviews();

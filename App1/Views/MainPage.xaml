@@ -123,8 +123,12 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Stretch" Spacing="12" 
-            Margin="0,16,0,0" Padding="8">
+            <Grid Grid.Row="3" HorizontalAlignment="Stretch" Margin="0,16,0,0" Padding="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                        
                 <Button 
                     Content="Automatically check reviews" 
                     CornerRadius="8"
@@ -144,7 +148,7 @@
                             </Button.Resources> 
                 </Button>
 
-                <Button
+                <Button Grid.Column="1"
                     Content="Modify offensive words list"
                     CornerRadius="8"
                     Background="{StaticResource SystemControlBackgroundBaseLowBrush}"
@@ -164,7 +168,7 @@
                         </Style>
                     </Button.Resources>
                 </Button>
-            </StackPanel>
+            </Grid>
         </Grid>
 
         <!-- Middle Column - Statistics and Requests -->

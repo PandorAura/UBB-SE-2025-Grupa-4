@@ -15,6 +15,11 @@ namespace App1.Services
             _userRepo = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
+        public List<User> GetAllUsers()
+        {
+            return _userRepo.GetUsers();
+        }
+
         public List<User> GetActiveUsers(int permissionId)
         {
             try
