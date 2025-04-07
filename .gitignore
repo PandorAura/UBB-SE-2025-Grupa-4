@@ -82,7 +82,6 @@ ScaffoldingReadMe.txt
 # StyleCop
 StyleCopReport.xml
 
-*.txt
 
 Assests/
 node_modules/

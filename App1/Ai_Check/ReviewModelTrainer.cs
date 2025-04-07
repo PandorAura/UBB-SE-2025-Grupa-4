@@ -1,83 +1,88 @@
 ﻿using System;
-using Microsoft.ML;
-using Microsoft.ML.Data;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using Microsoft.ML;
 
 namespace App1.Ai_Check
 {
     public class ReviewModelTrainer
     {
-        private static readonly string DataPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.Parent.FullName,"Ai_Check", "review_data.csv");
-        private static readonly string ModelPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.Parent.FullName, "Logs", "curseword_model.zip");
-        private static readonly string LogFilePath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.Parent.Parent.FullName, "Logs", "training_log.txt");
+        private static readonly string ProjectRoot = GetProjectRoot();
 
-        public static void TrainModel()
+        private static readonly string DataPath = Path.Combine(ProjectRoot, "Ai_Check", "review_data.csv");
+        private static readonly string ModelPath = Path.Combine(ProjectRoot, "Models", "curseword_model.zip");
+        private static readonly string LogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
+
+        private static string GetProjectRoot([CallerFilePath] string filePath = "")
         {
-            var context = new MLContext(seed: 0);
-
-            // load the data from csv file
-            var data = context.Data.LoadFromTextFile<ReviewData>(
-                path: DataPath,
-                separatorChar: '}',
-                hasHeader: true,
-                trimWhitespace: true);
-
-            // pipeline with text featurization and logistic regression
-            var pipeline = context.Transforms.Text.FeaturizeText("Features", nameof(ReviewData.Text))
-                .Append(context.BinaryClassification.Trainers.SdcaLogisticRegression(
-                    labelColumnName: nameof(ReviewData.IsOffensive),
-                    featureColumnName: "Features",
-                    maximumNumberOfIterations: 100,
-                    l2Regularization: (float?)0.001));
-
-            // cross-validation (in folds)
-            var crossValidationResults = context.BinaryClassification.CrossValidate(data, pipeline, numberOfFolds: 5, labelColumnName: nameof(ReviewData.IsOffensive));
-
-
-            // log the metrics from each fold
-            foreach (var fold in crossValidationResults)
+            var dir = new FileInfo(filePath).Directory;
+            while (dir != null && !dir.GetFiles("*.csproj").Any())
             {
-                LogToFile($"Fold Accuracy: {fold.Metrics.Accuracy:P2}");
-                LogToFile($"Fold Precision: {fold.Metrics.PositivePrecision:P2}");
-                LogToFile($"Fold Recall: {fold.Metrics.PositiveRecall:P2}");
-                LogToFile($"Fold F1 Score: {fold.Metrics.F1Score:P2}");
+                dir = dir.Parent;
             }
+            return dir?.FullName ?? throw new Exception("Project root not found!");
+        }
 
-            // calculate and log average metrics
-            var averageAccuracy = crossValidationResults.Average(result => result.Metrics.Accuracy);
-            var averagePrecision = crossValidationResults.Average(result => result.Metrics.PositivePrecision);
-            var averageRecall = crossValidationResults.Average(result => result.Metrics.PositiveRecall);
-            var averageF1Score = crossValidationResults.Average(result => result.Metrics.F1Score);
+        public static bool TrainModel()
+        {
+            Console.WriteLine($"Project root: {ProjectRoot}");
+            Console.WriteLine($"Looking for data at: {DataPath}");
 
-            LogToFile($"Average Accuracy: {averageAccuracy:P2}");
-            LogToFile($"Average Precision: {averagePrecision:P2}");
-            LogToFile($"Average Recall: {averageRecall:P2}");
-            LogToFile($"Average F1 Score: {averageF1Score:P2}");
+            if (!File.Exists(DataPath))
+            {
+                throw new FileNotFoundException($"Missing: {DataPath}");
+            }
+            try
+            {
+                // Ensure directories exist
+                Directory.CreateDirectory(Path.GetDirectoryName(ModelPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(LogPath));
 
-            // save the final model
-            var finalModel = pipeline.Fit(data);
-            context.Model.Save(finalModel, data.Schema, ModelPath);
+                // Initialize MLContext
+                var mlContext = new MLContext(seed: 0);
 
-            LogToFile("Model training with cross-validation complete.");
+                // Load data (ensure separator matches your CSV)
+                var data = mlContext.Data.LoadFromTextFile<ReviewData>(
+                    path: DataPath,
+                    separatorChar: '}',
+                    hasHeader: true
+                );
+
+                // Define pipeline
+                var pipeline = mlContext.Transforms.Text.FeaturizeText(
+                        outputColumnName: "Features",
+                        inputColumnName: nameof(ReviewData.Text))
+                    .Append(mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(
+                        labelColumnName: "Label",  // Matches [ColumnName("Label")] in ReviewData
+                        featureColumnName: "Features"
+                    ));
+
+                // Train and save model
+                var model = pipeline.Fit(data);
+                mlContext.Model.Save(model, data.Schema, ModelPath);
+
+                LogToFile("Model trained and saved successfully.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogToFile($"ERROR: {ex.Message}");
+                return false;
+            }
         }
 
         private static void LogToFile(string message)
         {
-                try
-                {
-                    // append the message to the log file
-                    using (StreamWriter writer = new StreamWriter(LogFilePath, append: true))
-                    {
-                        writer.WriteLine($"{DateTime.Now}: {message}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"error writing to log file: {ex.Message}");
-                }
+            try
+            {
+                File.AppendAllText(LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}\n");
+            }
+            catch
+            {
+                // Fallback to console if logging fails
+                Console.WriteLine($"LOG FAILED: {message}");
+            }
         }
-       
     }
 }
