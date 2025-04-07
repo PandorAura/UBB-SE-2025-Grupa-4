@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using App1.Models;
 using App1.Repositories;
 
@@ -11,7 +9,6 @@ namespace App1.Services
     public class ReviewsService: IReviewService
     {
         private readonly IReviewRepository _reviewRepository;
-
 
         public ReviewsService() { }
         public ReviewsService(IReviewRepository reviewRepository)
@@ -39,31 +36,30 @@ namespace App1.Services
             return _reviewRepository.GetReviews();
         }
 
+        public List<Review> GetReviewsSince(DateTime date)
+        {
+            return _reviewRepository.GetReviewsSince(date);
+        }
 
-            public List<Review> GetReviewsSince(DateTime date)
-            {
-                return _reviewRepository.GetReviewsSince(date);
-            }
+        public double GetAverageRating()
+        {
+            return _reviewRepository.GetAverageRating();
+        }
 
-            public double GetAverageRating()
-            {
-                return _reviewRepository.GetAverageRating();
-            }
+        public List<Review> GetRecentReviews(int count)
+        {
+            return _reviewRepository.GetRecentReviews(count);
+        }
 
-            public List<Review> GetRecentReviews(int count)
-            {
-                return _reviewRepository.GetRecentReviews(count);
-            }
-
-            public int GetReviewCountSince(DateTime date)
-            {
-                return _reviewRepository.GetReviewCountSince(date);
-            }
+        public int GetReviewCountSince(DateTime date)
+        {
+            return _reviewRepository.GetReviewCountSince(date);
+        }
 
         public List<Review> GetReviewsByUser(int userId)
         {
             return _reviewRepository.GetReviewsByUser(userId);
         }
     }
-    }
+}
 

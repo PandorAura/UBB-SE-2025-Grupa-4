@@ -1,9 +1,5 @@
 ﻿using App1.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace App1.Services
 {
@@ -12,7 +8,5 @@ namespace App1.Services
         public List<UpgradeRequest> GetAllRequests();
         public void HandleRequest(bool accepted, int requestId);
         public string GetRoleNameBasedOnID(int roleId);
-
-
     }
 }

@@ -1,18 +1,15 @@
 ﻿using System;
 using App1.Models;
 using App1.Repositories;
-using App1.Services; 
 using Microsoft.ML;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using App1.AutoChecker;
 
 namespace App1.Services
 {
     internal class CheckersService
     {
-        private readonly ReviewRepo reviewsRepo;
         private readonly IReviewService reviewsService;
         public readonly AutoCheck autoCheck;
         private static readonly string ModelPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "curseword_model.zip");
