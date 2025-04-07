@@ -56,14 +56,15 @@ namespace App1.Repositories
             };
         }
 
-        public void UpdatePermission(int userID, int permissionID)
-        {
-            var user = _users.FirstOrDefault(u => u.UserId == userID);
-            if (user != null)
-            {
-                user.PermissionID = permissionID;
-            }
-        }
+        //public void UpdateRole(int userID, int roleID)
+        //{
+        //    var user = _users.FirstOrDefault(u => u.UserId == userID);
+        //    if (user != null)
+        //    {
+        //        Role role = user.Roles.FirstOrDefault(r => r.RoleId == roleID);
+        //        user.Roles.Add(new Role(roleID, "New Role"));
+        //    }
+        //}
         public List<User> GetAppealedUsers()
         {
             return _users.Where(u => u.HasAppealed).ToList();
@@ -74,10 +75,11 @@ namespace App1.Repositories
             return _users.Where(u => u.HasAppealed).ToList();
         }
 
-        public List<User> GetUsersByPermission(int permissionID)
+        public List<User> GetUsersByRole(int roleID)
         {
-            return _users.Where(u => u.PermissionID == permissionID).ToList();
+            return _users.Where(u => u.Roles.Any(r => r.RoleId == roleID)).ToList();
         }
+
         public int getHighestRoleIdBasedOnUserId(int userId)
         {
             User user = _users.First(user => user.UserId == userId);

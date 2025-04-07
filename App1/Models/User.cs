@@ -7,7 +7,7 @@ public class User
     public string Email { get; set; }
     public string Name { get; set; }
     public int NumberOfDeletedReviews { get; set; }
-    public int PermissionID { get; set; }
+    //public int PermissionID { get; set; }
     public bool HasAppealed { get; set; }
     public List<Role> Roles { get; set; }
 
@@ -20,7 +20,7 @@ public class User
         Email = email;
         Name = name;
         NumberOfDeletedReviews = numberOfDeletedReviews;
-        PermissionID = permissionID;
+        //PermissionID = permissionID;
         HasAppealed = hasAppealed;
         Roles = roles;
 
