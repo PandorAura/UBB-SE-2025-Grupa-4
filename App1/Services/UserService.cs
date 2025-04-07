@@ -15,19 +15,9 @@ namespace App1.Services
             _userRepo = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
-        public void ChangeUserPermission(int userId, int permissionId) 
+        public List<User> GetAllUsers()
         {
-            try
-            {
-                if (userId <= 0) throw new ArgumentException("Invalid user ID");
-                if (permissionId == 0) throw new ArgumentException("Permission ID cannot be 0");
-
-                _userRepo.UpdatePermission(userId, permissionId);
-            }
-            catch (Exception ex)
-            {
-                throw new UserServiceException("Failed to change permission", ex);
-            }
+            return _userRepo.GetUsers();
         }
 
         public List<User> GetActiveUsers(int permissionId)
@@ -36,7 +26,7 @@ namespace App1.Services
             {
                 return permissionId switch
                 {
-                    > 0 => _userRepo.GetUsersByPermission(permissionId),
+                    > 0 => _userRepo.GetUsersByRole(permissionId),
                     _ => throw new ArgumentException("Permission ID must be positive")
                 };
             }
@@ -50,7 +40,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepo.GetUsersByPermission(BANNED_PERMISSION_ID);
+                return _userRepo.GetUsersByRole(BANNED_PERMISSION_ID);
             }
             catch (Exception ex)
             {
@@ -60,7 +50,7 @@ namespace App1.Services
 
         public List<User> GetUsersByPermission(int permissionId)
         {
-            return  _userRepo.GetUsersByPermission(permissionId); 
+            return  _userRepo.GetUsersByRole(permissionId); 
         }
     
         public string GetUserName(int ID) { 

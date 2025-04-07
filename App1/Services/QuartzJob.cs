@@ -121,7 +121,7 @@ public class EmailJob : IJob
         if (!reviews.Any()) return "<p>No recent reviews</p>";
 
         return "<table border='1' cellpadding='5' style='border-collapse: collapse; width: 100%;'>" +
-               "<tr><th>User</th><th>Rating</th><th>Comment</th><th>Date</th></tr>" +
+               "<tr><th>User</th><th>Rating</th><th>Date</th></tr>" +
                string.Join("", reviews.Select(r =>
                    $"<tr>" +
                    $"<td>{r.UserName}</td>" +
@@ -135,21 +135,16 @@ public class EmailJob : IJob
     {
         return $@"ADMIN REPORT - {data.ReportDate:yyyy-MM-dd}
 
-User Statistics:
-- Active Users: {data.ActiveUsersCount}
-- Banned Users: {data.BannedUsersCount}
+                User Statistics:
+                - Active Users: {data.ActiveUsersCount}
+                - Banned Users: {data.BannedUsersCount}
 
-Review Statistics:
-- New Reviews: {data.NewReviewsCount}
-- Average Rating: {data.AverageRating:0.0}
+                Review Statistics:
+                - New Reviews: {data.NewReviewsCount}
+                - Average Rating: {data.AverageRating:0.0}
 
-Generated at {DateTime.Now:yyyy-MM-dd HH:mm}";
+                Generated at {DateTime.Now:yyyy-MM-dd HH:mm}";
     }
-
-    private string Truncate(string value, int maxLength) =>
-        string.IsNullOrEmpty(value) ? "" :
-        value.Length <= maxLength ? value :
-        value.Substring(0, maxLength) + "...";
 }
 
 public class AdminReportData

@@ -1,16 +1,10 @@
 ﻿using App1.Models;
 using App1.Repositories;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.System;
 
 namespace App1.Services
 {
-
     public class UpgradeRequestsService: IUpgradeRequestsService
     {
         private IUpgradeRequestsRepository upgradeRequestsRepository;
@@ -24,6 +18,7 @@ namespace App1.Services
             this.userRepo = newUserRepo;
             this.CheckForBannedUserRequests();
         }
+
         public void CheckForBannedUserRequests()
         {
             List<UpgradeRequest> requests = this.GetAllRequests();
@@ -43,10 +38,12 @@ namespace App1.Services
             Role role = roles.First(role => role.RoleId == roleId);
             return role.RoleName;
         }
+
         public List<UpgradeRequest> GetAllRequests()
         {
             return this.upgradeRequestsRepository.getAllRequests();
         }
+
         public void HandleRequest(bool accepted, int requestId)
         {
             if (accepted)

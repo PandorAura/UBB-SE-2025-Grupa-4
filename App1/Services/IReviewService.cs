@@ -1,9 +1,6 @@
 ﻿using App1.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace App1.Services
 {
@@ -11,6 +8,7 @@ namespace App1.Services
     {
         public void HideReview(int reviewID);
         public List<Review> GetFlaggedReviews();
+        public List<Review> GetHiddenReviews();
         public List<Review> GetReviews();
 
         List<Review> GetReviewsSince(DateTime date);

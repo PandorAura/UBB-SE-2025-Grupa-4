@@ -5,7 +5,6 @@ using App1.Services;
 using App1.Repositories;
 using Quartz;
 using Quartz.Impl;
-using System;
 using Microsoft.Extensions.Hosting;
 using App1.Views;
 using App1.AutoChecker;
@@ -37,7 +36,6 @@ namespace App1
 
                     string connectionString = "Server=MINNIE;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
                     
-                    // Remove duplicate registration and add missing dependencies
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewRepository, ReviewRepo>();
                     services.AddSingleton<IAutoCheck, AutoCheck>(provider => new AutoCheck(connectionString));
@@ -70,9 +68,8 @@ namespace App1
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-            // Initialize Quartz scheduler first
             var scheduler = Host.Services.GetRequiredService<IScheduler>();
-            scheduler.Start().Wait(); // Start immediately
+            scheduler.Start().Wait(); 
 
             MainWindow = Host.Services.GetRequiredService<MainWindow>();
             MainWindow.Activate();
