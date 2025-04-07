@@ -24,7 +24,7 @@ namespace App1.Ai_Check
             return dir?.FullName ?? throw new Exception("Project root not found!");
         }
 
-        public static bool TrainModel()
+        public bool TrainModel()
         {
             Console.WriteLine($"Project root: {ProjectRoot}");
             Console.WriteLine($"Looking for data at: {DataPath}");

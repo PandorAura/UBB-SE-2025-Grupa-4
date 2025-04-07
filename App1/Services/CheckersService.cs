@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using App1.AutoChecker;
 using System.Runtime.CompilerServices;
+using App1.Ai_Check;
 
 namespace App1.Services
 {
@@ -65,6 +66,8 @@ namespace App1.Services
 
         public void RunAICheck(Review review)
         {
+            ReviewModelTrainer rmt = new ReviewModelTrainer();
+            rmt.TrainModel();
             //get the specific review from the repository by ID
             if (review != null)
             {

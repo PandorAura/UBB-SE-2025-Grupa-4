@@ -35,7 +35,7 @@ namespace App1.Repositories
                 userId: 1,
                 userName: "Regular User",
                 rating: 2,
-                content: "Could be better",
+                content: "Such a bitter aftertaste",
                 createdDate: DateTime.Now.AddDays(-1),
                 numberOfFlags: 3,
                 isHidden: false
