@@ -24,7 +24,10 @@
 Run these commands to set your environment variables:
     [System.Environment]::SetEnvironmentVariable("SMTP_MODERATOR_EMAIL", "example@gmail.com", "User")
     [System.Environment]::SetEnvironmentVariable("SMTP_MODERATOR_PASSWORD", "your_app_passwovrd", "User") 
--to test the network for emails: ping smtp.gmail.com
+- to test the network for emails: ping smtp.gmail.com
+
+  ## AI Check
+- requires an API key
 
   ## Datbase setup 
   - check connection string parameters
@@ -39,6 +42,24 @@ CREATE TABLE UpgradeRequests (
 );
 GO
 
-INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (1, 'Admin One');
-INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (2, 'Admin Two');
-INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (6, 'Banned User');
+INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (3, 'Admin One');
+INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (5, 'Admin Two');
+
+
+CREATE TABLE OffensiveWords (
+    OffensiveWordId INT PRIMARY KEY IDENTITY(1,1),
+    Word NVARCHAR(100) NOT NULL
+);
+
+INSERT INTO OffensiveWords (Word)
+VALUES 
+    ('stupid'),
+    ('dumb'),
+    ('fool'),
+    ('loser'),
+    ('jerk'),
+    ('imbecile'),
+    ('dunce'),
+    ('bonehead'),
+    ('nitwit'),
+    ('blockhead');
