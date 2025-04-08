@@ -8,7 +8,7 @@ namespace App1.Ai_Check
         public string Text { get; set; }  // Review text
 
         [LoadColumn(1)]
-        [ColumnName("Label")]  // ML.NET expects "Label" for binary classification
+        [ColumnName("IsOffensive")]  // ML.NET expects "Label" for binary classification
         public bool IsOffensive { get; set; }  // True = offensive, False = not offensive
     }
 
