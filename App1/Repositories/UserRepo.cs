@@ -37,26 +37,22 @@ namespace App1.Repositories
                     email: "mkhenike@gmail.com",
                     name: "Admin One",
                     numberOfDeletedReviews: 3,
-                    permissionID: 1,
                     hasAppealed: false,
                     roles: roles4
                 ),
                  new User(
                     userId: 2,
-                    email: "aurapandor@gmail.com",
+                    email: "bianca.georgiana.cirnu@gmail.com",
                     name: "Admin Two",
                     numberOfDeletedReviews: 3,
-                    permissionID: 2,
                     hasAppealed: true,
-                    roles: roles3
-
+                    roles: roles1
                 ),
                   new User(
                     userId: 3,
                     email: "oanarares2004@gmail.com",
                     name: "Admin Two",
                     numberOfDeletedReviews: 3,
-                    permissionID: 1,
                     hasAppealed: true,
                     roles: roles2
 
@@ -66,7 +62,6 @@ namespace App1.Repositories
                     email: "nimigeanvalentinoficial@gmail.com",
                     name: "Admin Two",
                     numberOfDeletedReviews: 3,
-                    permissionID: 1,
                     hasAppealed: true,
                     roles: roles2
 
@@ -76,7 +71,6 @@ namespace App1.Repositories
                     email: "alinamoca25@gmail.com",
                     name: "Admin Two",
                     numberOfDeletedReviews: 3,
-                    permissionID: 1,
                     hasAppealed: true,
                     roles: roles2
 
@@ -86,7 +80,6 @@ namespace App1.Repositories
                     email: "mkhenike@gmail.com",
                     name: "Banned User",
                     numberOfDeletedReviews: 3,
-                    permissionID: 0,
                     hasAppealed: true,
                     roles: roles4
                 )

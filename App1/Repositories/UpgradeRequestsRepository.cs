@@ -1,7 +1,6 @@
 ﻿using App1.Models;
 using System;
 using System.Collections.Generic;
-//using System.Data.SqlClient;
 using Microsoft.Data.SqlClient;
 namespace App1.Repositories
 {
