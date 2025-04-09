@@ -1,13 +1,21 @@
 ﻿namespace App1.Models
 {
+    public enum RoleType
+    {
+        Banned = 0,
+        User = 1,
+        Admin = 2,
+        Manager = 3
+    }
+
     public class Role
     {
-        public int RoleId { get; set; }
+        public RoleType RoleType { get; set; }
         public string RoleName { get; set; }
 
-        public Role(int roleId, string roleName)
+        public Role(RoleType roleType, string roleName)
         {
-            RoleId = roleId;
+            RoleType = roleType;
             RoleName = roleName;
         }
     }

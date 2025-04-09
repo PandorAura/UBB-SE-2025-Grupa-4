@@ -13,21 +13,21 @@ namespace App1.Repositories
         public RolesRepository() {
             _roles = new List<Role>();
 
-            _roles.Add(new Role(0, "banned"));
-            _roles.Add(new Role(1, "user"));
-            _roles.Add(new Role(2, "admin"));
-            _roles.Add(new Role(3, "manager"));
+            _roles.Add(new Role(RoleType.Banned, "Banned"));
+            _roles.Add(new Role(RoleType.User, "User"));
+            _roles.Add(new Role(RoleType.Admin, "Admin"));
+            _roles.Add(new Role(RoleType.Manager, "Manager"));
         }
 
-        public List<Role> getRoles()
+        public List<Role> GetAllRoles()
         {
             return _roles;
         }
 
-        public Role getUpgradedRoleBasedOnCurrentId(int currentRoleId)
+        public Role GetNextRole(RoleType currentRoleType)
         {
-            Role upgradedRole = _roles.First( role => role.RoleId ==  currentRoleId + 1 );
-            return upgradedRole;
+            Role nextRole = _roles.First(role => role.RoleType == currentRoleType + 1);
+            return nextRole;
         }
     }
 }
