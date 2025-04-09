@@ -10,12 +10,17 @@ using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Windows.ApplicationModel.Contacts;
 
 public class EmailJob : IJob
 {
     private readonly IUserService _userService;
     private readonly IReviewService _reviewService;
     private readonly IConfiguration _config;
+
+    private static string EmailTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "EmailContentTemplate.html");
+    private static string PlainTextTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "PlainTextContentTemplate.txt");
+    private static string ReviewTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "RecentReviewForReportTemplate.html");
 
     public EmailJob(IUserService userService, IReviewService reviewService, IConfiguration configuration)
     {
@@ -79,11 +84,12 @@ public class EmailJob : IJob
         int numberOfNewReviews = _reviewService.GetReviewsSince(yesterday).Count;
         double averageRating = _reviewService.GetAverageRating();
         List<Review> recentReviews = _reviewService.GetReviewsForReport();
+
         return new AdminReportData(reportDate, adminUsers, activeUsersCount, bannedUsersCount, numberOfNewReviews, averageRating, recentReviews);
     }
     private string GenerateEmailContent(AdminReportData data)
     {
-        string emailTemplate = File.ReadAllText("../Templates/EmailContentTemplate.html");
+        string emailTemplate = File.ReadAllText(EmailTemplatePath);
         emailTemplate = emailTemplate.Replace("{{ReportDate}}", data.ReportDate.ToString("yyyy-MM-dd"));
         emailTemplate = emailTemplate.Replace("{{ActiveUsersCount}}", data.ActiveUsersCount.ToString());
         emailTemplate = emailTemplate.Replace("{{BannedUsersCount}}", data.BannedUsersCount.ToString());
@@ -101,7 +107,7 @@ public class EmailJob : IJob
         StringBuilder recentReviewsTable = new StringBuilder("<table border='1' cellpadding='5' style='border-collapse: collapse; width: 100%;'> <tr><th>User</th><th>Rating</th><th>Date</th></tr>");
         foreach (Review review in reviews)
         {
-            string row = File.ReadAllText("../Templates/RecentReviewForEmailTemplate.html");
+            string row = File.ReadAllText(ReviewTemplatePath);
             row.Replace("{{userName}}", review.UserName);
             row.Replace("{{rating}}", review.Rating.ToString());
             row.Replace("{{creationDate}}", review.CreatedDate.ToString("yyyy-MM-dd"));
@@ -113,7 +119,7 @@ public class EmailJob : IJob
 
     private string GeneratePlainTextContent(AdminReportData data)
     {
-        string textTemplate = File.ReadAllText("../Templates/PlainTextContentTemplate.txt");
+        string textTemplate = File.ReadAllText(PlainTextTemplatePath);
 
         textTemplate = textTemplate.Replace("{{ReportDate}}", data.ReportDate.ToString("yyyy-MM-dd"));
         textTemplate = textTemplate.Replace("{{ActiveUsersCount}}", data.ActiveUsersCount.ToString());
