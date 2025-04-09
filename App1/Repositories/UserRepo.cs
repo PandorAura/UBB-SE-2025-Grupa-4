@@ -34,55 +34,12 @@ namespace App1.Repositories
             {
                 new User(
                     userId: 1,
-                    email: "mkhenike@gmail.com",
-                    name: "Admin One",
-                    numberOfDeletedReviews: 3,
-                    hasAppealed: false,
-                    roles: roles4
-                ),
-                 new User(
-                    userId: 2,
                     email: "bianca.georgiana.cirnu@gmail.com",
-                    name: "Admin Two",
-                    numberOfDeletedReviews: 3,
+                    name: "bianca",
+                    numberOfDeletedReviews: 2,
                     hasAppealed: true,
                     roles: roles1
-                ),
-                  new User(
-                    userId: 3,
-                    email: "oanarares2004@gmail.com",
-                    name: "Admin Two",
-                    numberOfDeletedReviews: 3,
-                    hasAppealed: true,
-                    roles: roles2
-
-                ),
-                   new User(
-                    userId: 4,
-                    email: "nimigeanvalentinoficial@gmail.com",
-                    name: "Admin Two",
-                    numberOfDeletedReviews: 3,
-                    hasAppealed: true,
-                    roles: roles2
-
-                ),
-                    new User(
-                    userId: 5,
-                    email: "alinamoca25@gmail.com",
-                    name: "Admin Two",
-                    numberOfDeletedReviews: 3,
-                    hasAppealed: true,
-                    roles: roles2
-
-                ),
-                    new User(
-                    userId: 6,
-                    email: "mkhenike@gmail.com",
-                    name: "Banned User",
-                    numberOfDeletedReviews: 3,
-                    hasAppealed: true,
-                    roles: roles4
-                )
+                    )
             };
         }
 
