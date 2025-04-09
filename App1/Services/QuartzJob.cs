@@ -8,6 +8,9 @@ using App1.Services;
 using App1.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using Windows.ApplicationModel.Contacts;
 
 public class EmailJob : IJob
 {
@@ -15,35 +18,36 @@ public class EmailJob : IJob
     private readonly IReviewService _reviewService;
     private readonly IConfiguration _config;
 
+    private static string EmailTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "EmailContentTemplate.html");
+    private static string PlainTextTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "PlainTextContentTemplate.txt");
+    private static string ReviewTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "RecentReviewForReportTemplate.html");
+
     public EmailJob(IUserService userService, IReviewService reviewService, IConfiguration configuration)
     {
-        _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-        _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
-        _config = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        System.Diagnostics.Debug.WriteLine("EmailJob initialized with all dependencies");
+        _userService = userService;
+        _reviewService = reviewService;
+        _config = configuration;
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
-        System.Diagnostics.Debug.WriteLine($"EmailJob started at {DateTime.Now}");
-
         try
         {
-            var smtpEmail = _config["SMTP_MODERATOR_EMAIL"];
-            var smtpPassword = _config["SMTP_MODERATOR_PASSWORD"];
+            string? smtpEmail = _config["SMTP_MODERATOR_EMAIL"];
+            string? smtpPassword = _config["SMTP_MODERATOR_PASSWORD"];
 
             if (string.IsNullOrEmpty(smtpEmail) || string.IsNullOrEmpty(smtpPassword))
                 throw new Exception("SMTP credentials not configured in appsettings.json");
 
             var reportData = await GatherReportData();
 
-            var emailContent = GenerateEmailContent(reportData);
+            string emailContent = GenerateEmailContent(reportData);
 
-            using var client = new SmtpClient();
+            SmtpClient client = new SmtpClient();
             await client.ConnectAsync("smtp.gmail.com", 587, false);
             await client.AuthenticateAsync(smtpEmail, smtpPassword);
 
-            foreach (var admin in reportData.AdminUsers)
+            foreach (User admin in reportData.AdminUsers)
             {
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress("System Admin", smtpEmail));
@@ -72,83 +76,75 @@ public class EmailJob : IJob
 
     private async Task<AdminReportData> GatherReportData()
     {
-        var reportDate = DateTime.Now;
-        var yesterday = reportDate.AddDays(-1);
+        DateTime reportDate = DateTime.Now;
+        DateTime yesterday = reportDate.AddDays(DAYS_FROM_TODAY_TO_YESTERDAY);
+        List<User> adminUsers = _userService.GetAdminUsers();
+        int activeUsersCount = _userService.GetAdminUsers().Count() + _userService.GetRegularUsers().Count();
+        int bannedUsersCount = _userService.GetBannedUsers().Count();
+        int numberOfNewReviews = _reviewService.GetReviewsSince(yesterday).Count;
+        double averageRating = _reviewService.GetAverageRating();
+        List<Review> recentReviews = _reviewService.GetReviewsForReport();
 
-        return new AdminReportData
-        {
-            ReportDate = reportDate,
-            AdminUsers = ( _userService.GetActiveUsers(2)).ToList(), // Admins
-            ActiveUsersCount = ( _userService.GetActiveUsers(1)).Count + (_userService.GetActiveUsers(2)).Count, // Regular users
-            BannedUsersCount = ( _userService.GetUsersByPermission(-1)).Count,
-            NewReviewsCount = ( _reviewService.GetReviewsSince(yesterday)).Count,
-            AverageRating =  _reviewService.GetAverageRating(),
-            RecentReviews = ( _reviewService.GetRecentReviews(5)).ToList()
-        };
+        return new AdminReportData(reportDate, adminUsers, activeUsersCount, bannedUsersCount, numberOfNewReviews, averageRating, recentReviews);
     }
-
     private string GenerateEmailContent(AdminReportData data)
     {
-        return $@"
-        <html>
-            <body style='font-family: Arial, sans-serif;'>
-                <h1>Admin Report - {data.ReportDate:yyyy-MM-dd}</h1>
-                
-                <h2>User Statistics</h2>
-                <ul>
-                    <li>Active Users: {data.ActiveUsersCount}</li>
-                    <li>Banned Users: {data.BannedUsersCount}</li>
-                </ul>
-                
-                <h2>Review Statistics</h2>
-                <ul>
-                    <li>New Reviews (last 24h): {data.NewReviewsCount}</li>
-                    <li>Average Rating: {data.AverageRating:0.0}/5</li>
-                </ul>
-                
-                <h2>Recent Reviews</h2>
-                {GenerateRecentReviewsHtml(data.RecentReviews)}
-                
-                <footer style='margin-top: 20px; color: #666;'>
-                    Generated at {DateTime.Now:yyyy-MM-dd HH:mm}
-                </footer>
-            </body>
-        </html>";
+        string emailTemplate = File.ReadAllText(EmailTemplatePath);
+        emailTemplate = emailTemplate.Replace("{{ReportDate}}", data.ReportDate.ToString("yyyy-MM-dd"));
+        emailTemplate = emailTemplate.Replace("{{ActiveUsersCount}}", data.ActiveUsersCount.ToString());
+        emailTemplate = emailTemplate.Replace("{{BannedUsersCount}}", data.BannedUsersCount.ToString());
+        emailTemplate = emailTemplate.Replace("{{NewReviewsCount}}", data.NewReviewsCount.ToString());
+        emailTemplate = emailTemplate.Replace("{{AverageRating}}", data.AverageRating.ToString("0.0"));
+        emailTemplate = emailTemplate.Replace("{{RecentReviewsHtml}}", GenerateRecentReviewsHtml(data.RecentReviews));
+        emailTemplate = emailTemplate.Replace("{{GeneratedAt}}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+        return emailTemplate;
     }
 
     private string GenerateRecentReviewsHtml(List<Review> reviews)
     {
-        if (!reviews.Any()) return "<p>No recent reviews</p>";
-
-        return "<table border='1' cellpadding='5' style='border-collapse: collapse; width: 100%;'>" +
-               "<tr><th>User</th><th>Rating</th><th>Date</th></tr>" +
-               string.Join("", reviews.Select(r =>
-                   $"<tr>" +
-                   $"<td>{r.UserName}</td>" +
-                   $"<td>{r.Rating}/5</td>" +
-                   $"<td>{r.CreatedDate:yyyy-MM-dd}</td>" +
-                   $"</tr>")) +
-               "</table>";
+        if (!reviews.Any())
+            return "<p>No recent reviews</p>";
+        StringBuilder recentReviewsTable = new StringBuilder("<table border='1' cellpadding='5' style='border-collapse: collapse; width: 100%;'> <tr><th>User</th><th>Rating</th><th>Date</th></tr>");
+        foreach (Review review in reviews)
+        {
+            string row = File.ReadAllText(ReviewTemplatePath);
+            row.Replace("{{userName}}", review.UserName);
+            row.Replace("{{rating}}", review.Rating.ToString());
+            row.Replace("{{creationDate}}", review.CreatedDate.ToString("yyyy-MM-dd"));
+            recentReviewsTable.Append(row);
+        }
+        recentReviewsTable.Append("</table>");
+        return recentReviewsTable.ToString();
     }
 
     private string GeneratePlainTextContent(AdminReportData data)
     {
-        return $@"ADMIN REPORT - {data.ReportDate:yyyy-MM-dd}
+        string textTemplate = File.ReadAllText(PlainTextTemplatePath);
 
-                User Statistics:
-                - Active Users: {data.ActiveUsersCount}
-                - Banned Users: {data.BannedUsersCount}
-
-                Review Statistics:
-                - New Reviews: {data.NewReviewsCount}
-                - Average Rating: {data.AverageRating:0.0}
-
-                Generated at {DateTime.Now:yyyy-MM-dd HH:mm}";
+        textTemplate = textTemplate.Replace("{{ReportDate}}", data.ReportDate.ToString("yyyy-MM-dd"));
+        textTemplate = textTemplate.Replace("{{ActiveUsersCount}}", data.ActiveUsersCount.ToString());
+        textTemplate = textTemplate.Replace("{{BannedUsersCount}}", data.BannedUsersCount.ToString());
+        textTemplate = textTemplate.Replace("{{AverageRating}}", data.AverageRating.ToString("0.0"));
+        textTemplate = textTemplate.Replace("{{GeneratedAt}}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+        return textTemplate;
     }
+
+    private const int DAYS_FROM_TODAY_TO_YESTERDAY = -1;
 }
 
 public class AdminReportData
 {
+    public AdminReportData(DateTime reportDate, List<User> adminUsers, int activeUsersCount, int bannedUsersCount, int newReviewsCount, double averageRating, List<Review> recentReviews)
+    {
+        this.ReportDate = reportDate;
+        this.AdminUsers = adminUsers;
+        this.ActiveUsersCount = activeUsersCount;
+        this.BannedUsersCount = bannedUsersCount;
+        this.NewReviewsCount  = newReviewsCount;
+        this.AverageRating = averageRating;
+        this.RecentReviews = recentReviews;
+
+    }
     public DateTime ReportDate { get; set; }
     public List<User> AdminUsers { get; set; }
     public int ActiveUsersCount { get; set; }
