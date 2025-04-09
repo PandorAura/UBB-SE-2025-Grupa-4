@@ -7,20 +7,18 @@ public class User
     public string Email { get; set; }
     public string Name { get; set; }
     public int NumberOfDeletedReviews { get; set; }
-    //public int PermissionID { get; set; }
     public bool HasAppealed { get; set; }
     public List<Role> Roles { get; set; }
 
     public User() { }
 
-    public User(int userId, string email, string name, int numberOfDeletedReviews, int permissionID, bool hasAppealed, List<Role> roles)
+    public User(int userId, string email, string name, int numberOfDeletedReviews, bool hasAppealed, List<Role> roles)
     
         {
         UserId = userId;
         Email = email;
         Name = name;
         NumberOfDeletedReviews = numberOfDeletedReviews;
-        //PermissionID = permissionID;
         HasAppealed = hasAppealed;
         Roles = roles;
 
