@@ -32,10 +32,10 @@ namespace App1.Services
                 }
             }
         }
-        public string GetRoleNameBasedOnID(int roleId)
+        public string GetRoleNameBasedOnID(RoleType roleType)
         {
-            List<Role> roles = this.rolesRepository.getRoles();
-            Role role = roles.First(role => role.RoleId == roleId);
+            List<Role> roles = this.rolesRepository.GetAllRoles();
+            Role role = roles.First(role => role.RoleType == roleType);
             return role.RoleName;
         }
 
@@ -52,9 +52,9 @@ namespace App1.Services
 
                 int requestingUserId = currentRequest.RequestingUserId;
 
-                int highestRoleId = this.userRepo.GetHighestRoleTypeForUser(requestingUserId);
+                int highestRoleId = (int)this.userRepo.GetHighestRoleTypeForUser(requestingUserId);
 
-                Role upgradedRole = rolesRepository.getUpgradedRoleBasedOnCurrentId(highestRoleId);
+                Role upgradedRole = rolesRepository.GetNextRole((RoleType)highestRoleId);
 
                 this.userRepo.AddRoleToUser(requestingUserId, upgradedRole);
             }
