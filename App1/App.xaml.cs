@@ -34,7 +34,7 @@ namespace App1
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    string connectionString = "Server=DESKTOP-KEB351O\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+                    string connectionString = "Server=KYLIAN-MBAPPÉ-P;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
 
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewRepository, ReviewRepo>();
