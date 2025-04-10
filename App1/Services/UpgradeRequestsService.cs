@@ -25,7 +25,7 @@ namespace App1.Services
             for(int i=0; i<requests.Count; i++) 
             {
                 int userId = requests[i].RequestingUserId;
-                if (this.userRepo.getHighestRoleIdBasedOnUserId(userId) == 0)
+                if (this.userRepo.GetHighestRoleTypeForUser(userId) == 0)
                 {
                     this.upgradeRequestsRepository.deleteRequestBasedOnRequestId(requests[i].RequestId);
                     i--;
@@ -52,11 +52,11 @@ namespace App1.Services
 
                 int requestingUserId = currentRequest.RequestingUserId;
 
-                int highestRoleId = this.userRepo.getHighestRoleIdBasedOnUserId(requestingUserId);
+                int highestRoleId = this.userRepo.GetHighestRoleTypeForUser(requestingUserId);
 
                 Role upgradedRole = rolesRepository.getUpgradedRoleBasedOnCurrentId(highestRoleId);
 
-                this.userRepo.addRoleToUser(requestingUserId, upgradedRole);
+                this.userRepo.AddRoleToUser(requestingUserId, upgradedRole);
             }
             this.upgradeRequestsRepository.deleteRequestBasedOnRequestId(requestId);
         }
