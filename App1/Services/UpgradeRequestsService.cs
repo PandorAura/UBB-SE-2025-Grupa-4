@@ -14,8 +14,8 @@ namespace App1.Services
         private const int BANNED_USER_ROLE_IDENTIFIER = 0;
 
         public UpgradeRequestsService(
-            IUpgradeRequestsRepository upgradeRequestsRepository, 
-            IRolesRepository rolesRepository, 
+            IUpgradeRequestsRepository upgradeRequestsRepository,
+            IRolesRepository rolesRepository,
             IUserRepository userRepository)
         {
             this.upgradeRequestsRepository = upgradeRequestsRepository;

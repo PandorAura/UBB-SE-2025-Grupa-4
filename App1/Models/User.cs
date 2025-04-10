@@ -13,8 +13,8 @@ public class User
     public User() { }
 
     public User(int userId, string email, string name, int numberOfDeletedReviews, bool hasAppealed, List<Role> roles)
-    
-        {
+
+    {
         UserId = userId;
         Email = email;
         Name = name;

@@ -39,14 +39,6 @@ namespace App1.Repositories
                     numberOfDeletedReviews: 2,
                     hasAppealed: true,
                     roles: roles1
-                    ),
-                new User(
-                    userId: 2,
-                    email: "ciobanueduarda77@gmail.com",
-                    name: "eduarda",
-                    numberOfDeletedReviews: 2,
-                    hasAppealed: true,
-                    roles: roles1
                     )
             };
         }
@@ -79,7 +71,8 @@ namespace App1.Repositories
             return maxId;
         }
 
-        public User getUserByID(int ID) { 
+        public User getUserByID(int ID)
+        {
             return _users.First(user => user.UserId == ID);
         }
 

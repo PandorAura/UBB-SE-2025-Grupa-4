@@ -5,7 +5,7 @@ using App1.Repositories;
 
 namespace App1.Services
 {
-    public class UserService: IUserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository _userRepo;
         private const int BANNED_PERMISSION_ID = 0;
@@ -53,10 +53,11 @@ namespace App1.Services
 
         public List<User> GetUsersByPermission(int permissionId)
         {
-            return  _userRepo.GetUsersByRole(permissionId); 
+            return _userRepo.GetUsersByRole(permissionId);
         }
-    
-        public string GetUserName(int ID) { 
+
+        public string GetUserName(int ID)
+        {
             return _userRepo.getUserByID(ID).Name;
         }
 

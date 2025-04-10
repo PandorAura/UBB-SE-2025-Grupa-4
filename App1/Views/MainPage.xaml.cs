@@ -37,7 +37,8 @@ namespace App1.Views
         {
             this.InitializeComponent();
 
-            if ( reviewsService == null ) {
+            if (reviewsService == null)
+            {
                 throw new ArgumentNullException(nameof(reviewsService));
             }
             if (userService == null)
@@ -157,7 +158,7 @@ namespace App1.Views
                 flyout.Placement = FlyoutPlacementMode.Left;
                 flyout.ShowAt((FrameworkElement)sender);
 
-                
+
             }
         }
         private void UpgradeRequestList_ItemClick(object sender, ItemClickEventArgs e)
@@ -243,17 +244,19 @@ namespace App1.Views
             bannedCount = usersCount = adminsCount = managerCount = 0;
 
             List<User> users = userService.GetAllUsers();
-            foreach (var user in users) { 
+            foreach (var user in users)
+            {
                 var count = user.Roles.Count;
-                switch (count) { 
+                switch (count)
+                {
                     case 0: bannedCount++; break;
                     case 1: usersCount++; break;
                     case 2: adminsCount++; break;
                     case 3: managerCount++; break;
                 }
             }
-            
-            AllUsersPieChart.Series = new List<PieSeries<double>> 
+
+            AllUsersPieChart.Series = new List<PieSeries<double>>
             {
                 new PieSeries<double> { Values = new double[] { bannedCount }, Name = "Banned" },
                 new PieSeries<double> { Values = new double[] { usersCount }, Name = "Users" },
@@ -300,7 +303,7 @@ namespace App1.Views
         }
 
         private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        { 
+        {
             string filter = BannedUserSearchTextBox.Text.ToLower();
             AppealsList.ItemsSource = new ObservableCollection<User>(
                 userService.GetAppealingUsers()

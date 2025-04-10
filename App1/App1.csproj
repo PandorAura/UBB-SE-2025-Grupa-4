@@ -14,8 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Templates\PlainTextContentTemplate.txt" />
-    <None Remove="Templates\RecentReviewFor
-		  Template.html" />
+    <None Remove="Templates\RecentReviewFor&#xD;&#xA;		  Template.html" />
     <None Remove="Views\MainPage.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +61,7 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
     <PackageReference Include="Quartz" Version="3.14.0" />
+    <PackageReference Include="Quartz.AspNetCore" Version="3.14.0" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.14.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250310001" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />

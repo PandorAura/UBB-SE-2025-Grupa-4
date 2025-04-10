@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace App1.Repositories
 {
-    public class RolesRepository: IRolesRepository
+    public class RolesRepository : IRolesRepository
     {
         private readonly List<Role> _roles;
-        public RolesRepository() {
+        public RolesRepository()
+        {
             _roles = new List<Role>();
 
             _roles.Add(new Role(0, "banned"));
@@ -26,7 +27,7 @@ namespace App1.Repositories
 
         public Role getUpgradedRoleBasedOnCurrentId(int currentRoleId)
         {
-            Role upgradedRole = _roles.First( role => role.RoleId ==  currentRoleId + 1 );
+            Role upgradedRole = _roles.First(role => role.RoleId == currentRoleId + 1);
             return upgradedRole;
         }
     }
