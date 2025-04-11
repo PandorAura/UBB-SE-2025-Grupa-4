@@ -7,7 +7,7 @@ using System.IO;
 using System.Collections.Generic;
 using App1.AutoChecker;
 using System.Runtime.CompilerServices;
-using App1.Ai_Check;
+using App1.AiCheck;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text;
@@ -84,7 +84,7 @@ namespace App1.Services
             }
             return messages;
         }
-        public HashSet<string> getOffensiveWordsList()
+        public HashSet<string> GetOffensiveWordsList()
         {
             return this.autoCheck.GetOffensiveWordsList();
         }
@@ -120,7 +120,7 @@ namespace App1.Services
             }
         }
 
-        private bool CheckReviewWithAI(string reviewText)
+        private static bool CheckReviewWithAI(string reviewText)
         {
             
             var result = OffensiveTextDetector.DetectOffensiveContent(reviewText);
@@ -131,7 +131,7 @@ namespace App1.Services
             return score >= threshold;
         }
 
-        private float GetConfidenceScore(string result)
+        private static float GetConfidenceScore(string result)
         {
             try
             {
@@ -165,7 +165,7 @@ namespace App1.Services
     public static class OffensiveTextDetector
     {
         private static readonly string HuggingFaceApiUrl = "https://api-inference.huggingface.co/models/facebook/roberta-hate-speech-dynabench-r1-target";
-        private static readonly string HuggingFaceApiToken = "INSERT YOUR OWN API KEY HERE from https://huggingface.co"; 
+        private static readonly string HuggingFaceApiToken = ""; 
 
         public static string DetectOffensiveContent(string text)
         {

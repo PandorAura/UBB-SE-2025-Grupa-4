@@ -25,7 +25,6 @@ namespace App1.Views
 
     public sealed partial class MainPage : Page
     {
-
         private IReviewService reviewsService;
         private IUserService userService;
         private ICheckersService checkersService;
@@ -355,7 +354,7 @@ namespace App1.Views
 
         private void Button_ModifyOffensiveWordsList_Click(object sender, RoutedEventArgs e)
         {
-            WordsList.ItemsSource = checkersService.getOffensiveWordsList();
+            WordsList.ItemsSource = checkersService.GetOffensiveWordsList();
             WordListPopup.Visibility = Visibility.Visible;
         }
 
@@ -379,7 +378,7 @@ namespace App1.Views
                 {
                     checkersService.AddOffensiveWord(newWord);
                     WordsList.ItemsSource = null;
-                    WordsList.ItemsSource = checkersService.getOffensiveWordsList();
+                    WordsList.ItemsSource = checkersService.GetOffensiveWordsList();
                 }
             }
         }
@@ -390,7 +389,7 @@ namespace App1.Views
             {
                 checkersService.DeleteOffensiveWord(selectedWord);
                 WordsList.ItemsSource = null;
-                WordsList.ItemsSource = checkersService.getOffensiveWordsList();
+                WordsList.ItemsSource = checkersService.GetOffensiveWordsList();
             }
         }
 

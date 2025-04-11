@@ -27,12 +27,12 @@ namespace App1.Services
 
         public List<Review> GetFlaggedReviews()
         {
-            return _reviewsRepository.GetAllReviews().Where(r => r.NumberOfFlags > 0).ToList();
+            return _reviewsRepository.GetAllReviews().Where(review => review.NumberOfFlags > 0).ToList();
         }
 
         public List<Review> GetHiddenReviews()
         {
-            return _reviewsRepository.GetAllReviews().Where(r => r.IsHidden == true).ToList();
+            return _reviewsRepository.GetAllReviews().Where(review => review.IsHidden == true).ToList();
         }
 
         public List<Review> GetAllReviews()
