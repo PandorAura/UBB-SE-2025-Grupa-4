@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using App1.Models;
 using App1.Repositories;
-using Moq;
 using Xunit;
 
 namespace UnitTests.Roles
