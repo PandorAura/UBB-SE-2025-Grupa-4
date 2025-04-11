@@ -41,6 +41,22 @@ namespace App1.Repositories
                     numberOfDeletedReviews: 2,
                     HasSubmittedAppeal: true,
                     assignedRoles: basicUserRoles
+                    ),
+                new User(
+                    userId: 3,
+                    emailAddress: "user3@example.com",
+                    fullName: "User Three",
+                    numberOfDeletedReviews: 0,
+                    HasSubmittedAppeal: false,
+                    assignedRoles: adminRoles
+                    ),
+                new User(
+                    userId: 5,
+                    emailAddress: "user5@example.com",
+                    fullName: "User Five",
+                    numberOfDeletedReviews: 1,
+                    HasSubmittedAppeal: false,
+                    assignedRoles: managerRoles
                     )
             };
         }

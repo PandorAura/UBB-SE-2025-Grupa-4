@@ -24,10 +24,22 @@ namespace App1.Repositories
             return _roles;
         }
 
-        public Role GetNextRole(RoleType currentRoleType)
+        public Role GetNextRoleInHierarchy(RoleType currentRoleType)
         {
-            Role nextRole = _roles.First(role => role.RoleType == currentRoleType + 1);
-            return nextRole;
+            if ((int)currentRoleType < 0)
+            {
+                throw new ArgumentException("Role type must be non-negative");
+            }
+
+            try
+            {
+                Role nextRole = _roles.First(role => role.RoleType == currentRoleType + 1);
+                return nextRole;
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException($"No next role exists for {currentRoleType}");
+            }
         }
     }
 }

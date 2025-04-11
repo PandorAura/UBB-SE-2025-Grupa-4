@@ -54,7 +54,7 @@ namespace App1.Services
 
                 int highestRoleId = (int)this.userRepo.GetHighestRoleTypeForUser(requestingUserId);
 
-                Role upgradedRole = rolesRepository.GetNextRole((RoleType)highestRoleId);
+                Role upgradedRole = rolesRepository.GetNextRoleInHierarchy((RoleType)highestRoleId);
 
                 this.userRepo.AddRoleToUser(requestingUserId, upgradedRole);
             }
