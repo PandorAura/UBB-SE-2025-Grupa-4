@@ -14,7 +14,7 @@ namespace UnitTests.UpgradeRequests
     public class UpgradeRequestsRepositoryTests
     {
         
-        private readonly string _testConnectionString = "Server=192.168.0.87;Database=gitIss;User Id=SA;Password=reallyStrongPwd123;TrustServerCertificate=True;";
+        private readonly string _testConnectionString = "Server=10.220.28.196;Database=gitIss;User Id=SA;Password=reallyStrongPwd123;TrustServerCertificate=True;";
         private readonly Mock<SqlConnection> _mockSqlConnection;
         private readonly Mock<SqlCommand> _mockSqlCommand;
         private readonly Mock<SqlDataReader> _mockSqlDataReader;
