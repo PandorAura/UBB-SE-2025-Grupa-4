@@ -14,6 +14,7 @@ namespace App1.Services
         List<Review> GetReviewsSince(DateTime date);
         double GetAverageRating();
         List<Review> GetRecentReviews(int count);
+        List<Review> GetReviewsForReport();
         int GetReviewCountSince(DateTime date);
         List<Review> GetReviewsByUser(int userId);
         void resetReviewFlags(int userID);

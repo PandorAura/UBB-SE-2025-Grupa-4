@@ -65,6 +65,11 @@ namespace App1.Services
         {
             return _reviewRepository.GetReviewsByUser(userId);
         }
+
+        public List<Review> GetReviewsForReport()
+        {
+            return GetRecentReviews(GetReviewCountSince(DateTime.Now.AddDays(-1)));
+        }
     }
 }
 

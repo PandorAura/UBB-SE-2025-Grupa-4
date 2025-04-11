@@ -5,10 +5,13 @@ using App1.Repositories;
 
 namespace App1.Services
 {
-    public class UserService: IUserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository _userRepo;
         private const int BANNED_PERMISSION_ID = 0;
+        private const int USER_PERMISSION_ID = 1;
+        private const int ADMIN_PERMISSION_ID = 2;
+        private const int MANAGER_PERMISSION_ID = 3;
 
         public UserService(IUserRepository userRepository)
         {
@@ -50,10 +53,11 @@ namespace App1.Services
 
         public List<User> GetUsersByPermission(int permissionId)
         {
-            return  _userRepo.GetUsersByRole(permissionId); 
+            return _userRepo.GetUsersByRole(permissionId);
         }
-    
-        public string GetUserName(int ID) { 
+
+        public string GetUserName(int ID)
+        {
             return _userRepo.getUserByID(ID).Name;
         }
 
@@ -70,6 +74,21 @@ namespace App1.Services
         public int GetHighestRoleBasedOnUserID(int ID)
         {
             return this._userRepo.getHighestRoleIdBasedOnUserId(ID);
+        }
+
+        public List<User> GetAdminUsers()
+        {
+            return _userRepo.GetUsersByRole(ADMIN_PERMISSION_ID);
+        }
+
+        public List<User> GetRegularUsers()
+        {
+            return _userRepo.GetUsersByRole(USER_PERMISSION_ID);
+        }
+
+        public List<User> GetManagers()
+        {
+            return _userRepo.GetUsersByRole(MANAGER_PERMISSION_ID);
         }
     }
 

@@ -2,20 +2,20 @@
 {
     public class UpgradeRequest
     {
-        public UpgradeRequest(int newRequestId, int newRequestingUserId, string newRequestingUserName) { 
-            RequestId = newRequestId;
-            RequestingUserId = newRequestingUserId;
-            RequestingUserName = newRequestingUserName;
+        public UpgradeRequest(int upgradeRequestId, int requestingUserIdentifier, string requestingUserDisplayName)
+        {
+            UpgradeRequestId = upgradeRequestId;
+            RequestingUserIdentifier = requestingUserIdentifier;
+            RequestingUserDisplayName = requestingUserDisplayName;
         }
-        public int RequestId { get; set; }
 
-        public int RequestingUserId { get; set; }
-
-        public string RequestingUserName {  get; set; }
+        public int UpgradeRequestId { get; set; }
+        public int RequestingUserIdentifier { get; set; }
+        public string RequestingUserDisplayName { get; set; }
 
         public override string ToString()
         {
-            return this.RequestingUserName;
+            return RequestingUserDisplayName;
         }
     }
 }
