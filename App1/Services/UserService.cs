@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using App1.Models;
 using App1.Repositories;
+using static App1.Repositories.UserRepo;
 
 namespace App1.Services
 {
@@ -16,7 +17,14 @@ namespace App1.Services
 
         public List<User> GetAllUsers()
         {
-            return _userRepository.GetAllUsers();
+            try
+            {
+                return _userRepository.GetAllUsers();
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException("Failed to retrieve all users.", ex);
+            }
         }
 
         public List<User> GetActiveUsersByRoleType(RoleType roleType)
@@ -29,7 +37,7 @@ namespace App1.Services
                     _ => throw new ArgumentException("Permission ID must be positive")
                 };
             }
-            catch (Exception ex)
+            catch (RepositoryException ex)
             {
                 throw new UserServiceException("Failed to get active users", ex);
             }
@@ -41,7 +49,7 @@ namespace App1.Services
             {
                 return _userRepository.GetUsersByRoleType(RoleType.Banned);
             }
-            catch (Exception ex)
+            catch (RepositoryException ex)
             {
                 throw new UserServiceException("Failed to get banned users", ex);
             }
@@ -49,41 +57,98 @@ namespace App1.Services
 
         public List<User> GetUsersByRoleType(RoleType roleType)
         {
-            return  _userRepository.GetUsersByRoleType(roleType); 
+            try
+            {
+                return _userRepository.GetUsersByRoleType(roleType);
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException($"Failed to retrieve users by role type '{roleType}'.", ex);
+            }
         }
     
-        public string GetUserFullNameById(int userId) { 
-            return _userRepository.GetUserByID(userId).FullName;
+        public string GetUserFullNameById(int userId) 
+        {
+            try
+            {
+                return _userRepository.GetUserByID(userId).FullName;
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", ex);
+            }
         }
 
         public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
         {
-            return _userRepository.GetBannedUsersWhoHaveSubmittedAppeals();
+            try
+            {
+                return _userRepository.GetBannedUsersWhoHaveSubmittedAppeals();
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException("Failed to retrieve banned users who have submitted appeals.", ex);
+            }
         }
 
         public User GetUserById(int userId)
         {
-            return _userRepository.GetUserByID(userId);
+            try
+            {
+                return _userRepository.GetUserByID(userId);
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException($"Failed to retrieve user with ID {userId}.", ex);
+            }
         }
 
         public RoleType GetHighestRoleTypeForUser(int userId)
         {
-            return this._userRepository.GetHighestRoleTypeForUser(userId);
+            try
+            {
+                return _userRepository.GetHighestRoleTypeForUser(userId);
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException($"Failed to retrieve the highest role type for user with ID {userId}.", ex);
+            }
         }
 
         public List<User> GetAdminUsers()
         {
-            return _userRepository.GetUsersByRoleType(RoleType.Admin);
+            try
+            {
+                return _userRepository.GetUsersByRoleType(RoleType.Admin);
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException("Failed to retrieve admin users.", ex);
+            }
         }
 
         public List<User> GetRegularUsers()
         {
-            return _userRepository.GetUsersByRoleType(RoleType.User);
+            try
+            {
+                return _userRepository.GetUsersByRoleType(RoleType.User);
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException("Failed to retrieve regular users.", ex);
+            }
         }
 
         public List<User> GetManagers()
         {
-            return _userRepository.GetUsersByRoleType(RoleType.Manager);
+            try
+            {
+                return _userRepository.GetUsersByRoleType(RoleType.Manager);
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException("Failed to retrieve manager users.", ex);
+            }
         }
     }
 
