@@ -41,7 +41,40 @@ namespace App1.Repositories
                     numberOfDeletedReviews: 2,
                     HasSubmittedAppeal: true,
                     assignedRoles: basicUserRoles
+                    ),
+            new User(
+                    userId: 2,
+                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
+                    fullName: "Bianca Georgiana Cirnu",
+                    numberOfDeletedReviews: 2,
+                    HasSubmittedAppeal: true,
+                    assignedRoles: basicUserRoles
+                    ),
+            new User(
+                    userId: 3,
+                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
+                    fullName: "Bianca Georgiana Cirnu",
+                    numberOfDeletedReviews: 2,
+                    HasSubmittedAppeal: true,
+                    assignedRoles: basicUserRoles
+                    ),
+            new User(
+                    userId: 4,
+                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
+                    fullName: "Bianca Georgiana Cirnu",
+                    numberOfDeletedReviews: 2,
+                    HasSubmittedAppeal: true,
+                    assignedRoles: basicUserRoles
+                    ),
+            new User(
+                    userId: 5,
+                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
+                    fullName: "Bianca Georgiana Cirnu",
+                    numberOfDeletedReviews: 2,
+                    HasSubmittedAppeal: true,
+                    assignedRoles: basicUserRoles
                     )
+
             };
         }
 
