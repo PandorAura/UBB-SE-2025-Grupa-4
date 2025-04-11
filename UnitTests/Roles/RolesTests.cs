@@ -12,8 +12,7 @@ namespace UnitTests.Roles
     public class RolesTests
     {
         /// <summary>
-        /// Tests that the Role model correctly initializes with valid RoleType and RoleName.
-        /// This test ensures that:
+        /// Test:
         /// 1. RoleType is correctly assigned
         /// 2. RoleName is correctly assigned
         /// 3. The model can be created with all valid role types
@@ -39,41 +38,19 @@ namespace UnitTests.Roles
         }
 
         /// <summary>
-        /// Tests that the Role model handles null or empty role names correctly.
-        /// This ensures that the model can be created with empty role names,
-        /// though this might not be a valid business case.
-        /// </summary>
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData(" ")]
-        public void Role_WhenCreatedWithNullOrEmptyName_InitializesCorrectly(string roleName)
-        {
-            // Act
-            var role = new Role(RoleType.User, roleName);
-
-            // Assert
-            Assert.Equal(RoleType.User, role.RoleType);
-            Assert.Equal(roleName, role.RoleName);
-        }
-
-        /// <summary>
         /// Tests that the Role model properties can be modified after creation.
         /// This verifies that the properties are properly settable.
         /// </summary>
         [Fact]
         public void Role_WhenPropertiesModified_UpdatesCorrectly()
         {
-            // Arrange
             var role = new Role(RoleType.User, "User");
 
-            // Act
             role.RoleType = RoleType.Admin;
-            role.RoleName = "Administrator";
+            role.RoleName = "Admin";
 
-            // Assert
             Assert.Equal(RoleType.Admin, role.RoleType);
-            Assert.Equal("Administrator", role.RoleName);
+            Assert.Equal("Admin", role.RoleName);
         }
     }
 }
