@@ -34,7 +34,7 @@ namespace App1.Services
             }
         }
 
-        private readonly ReviewRepo reviewsRepo;
+        private readonly ReviewsRepository reviewsRepo;
         private readonly IReviewService reviewsService;
         private readonly IAutoCheck autoCheck;
         private static readonly string ModelPath = Path.Combine(GetProjectRoot(), "Models", "curseword_model.zip");
@@ -68,13 +68,13 @@ namespace App1.Services
 
                     if (isOffensive)
                     {
-                        messages.Add($"Review {review.ReviewID} is offensive. Hiding the review.");
-                        reviewsService.HideReview(review.ReviewID);
-                        reviewsService.resetReviewFlags(review.ReviewID);
+                        messages.Add($"Review {review.ReviewId} is offensive. Hiding the review.");
+                        reviewsService.HideReview(review.ReviewId);
+                        reviewsService.ResetReviewFlags(review.ReviewId);
                     }
                     else
                     {
-                        messages.Add($"Review {review.ReviewID} is not offensive.");
+                        messages.Add($"Review {review.ReviewId} is not offensive.");
                     }
                 }
                 else
@@ -105,13 +105,13 @@ namespace App1.Services
 
                 if (isOffensive)
                 {
-                    Console.WriteLine($"Review {review.ReviewID} is offensive. Hiding the review.");
-                    reviewsService.HideReview(review.ReviewID);
-                    reviewsService.resetReviewFlags(review.ReviewID);
+                    Console.WriteLine($"Review {review.ReviewId} is offensive. Hiding the review.");
+                    reviewsService.HideReview(review.ReviewId);
+                    reviewsService.ResetReviewFlags(review.ReviewId);
                 }
                 else
                 {
-                    Console.WriteLine($"Review {review.ReviewID} is not offensive.");
+                    Console.WriteLine($"Review {review.ReviewId} is not offensive.");
                 }
             }
             else

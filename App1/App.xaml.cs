@@ -37,7 +37,7 @@ namespace App1
                     string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
 
                     services.AddSingleton<IUserRepository, UserRepo>();
-                    services.AddSingleton<IReviewRepository, ReviewRepo>();
+                    services.AddSingleton<IReviewsRepository, ReviewsRepository>();
                     services.AddSingleton<IAutoCheck, AutoCheck>(provider => new AutoCheck(connectionString));
                     services.AddSingleton<ICheckersService, CheckersService>();
                     services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));

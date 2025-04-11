@@ -8,67 +8,66 @@ namespace App1.Services
 {
     public class ReviewsService: IReviewService
     {
-        private readonly IReviewRepository _reviewRepository;
+        private readonly IReviewsRepository _reviewsRepository;
 
-        public ReviewsService() { }
-        public ReviewsService(IReviewRepository reviewRepository)
+        public ReviewsService(IReviewsRepository reviewsRepository)
         {
-            this._reviewRepository = reviewRepository;
+            this._reviewsRepository = reviewsRepository;
         }
 
-        public void resetReviewFlags(int reviewID)
+        public void ResetReviewFlags(int reviewId)
         {
-            _reviewRepository.GetReviewByID(reviewID).NumberOfFlags = 0;
+            _reviewsRepository.GetReviewById(reviewId).NumberOfFlags = 0;
         }
 
-        public void HideReview(int reviewID)
+        public void HideReview(int reviewId)
         {
-            _reviewRepository.UpdateHiddenReview(reviewID, true);
+            _reviewsRepository.UpdateReviewVisibility(reviewId, true);
         }
 
         public List<Review> GetFlaggedReviews()
         {
-            return _reviewRepository.GetReviews().Where(r => r.NumberOfFlags > 0).ToList();
+            return _reviewsRepository.GetAllReviews().Where(r => r.NumberOfFlags > 0).ToList();
         }
 
         public List<Review> GetHiddenReviews()
         {
-            return _reviewRepository.GetReviews().Where(r => r.IsHidden == true).ToList();
+            return _reviewsRepository.GetAllReviews().Where(r => r.IsHidden == true).ToList();
         }
 
-        public List<Review> GetReviews()
+        public List<Review> GetAllReviews()
         {
-            return _reviewRepository.GetReviews();
+            return _reviewsRepository.GetAllReviews();
         }
 
         public List<Review> GetReviewsSince(DateTime date)
         {
-            return _reviewRepository.GetReviewsSince(date);
+            return _reviewsRepository.GetReviewsSince(date);
         }
 
-        public double GetAverageRating()
+        public double GetAverageRatingForVisibleReviews()
         {
-            return _reviewRepository.GetAverageRating();
+            return _reviewsRepository.GetAverageRatingForVisibleReviews();
         }
 
-        public List<Review> GetRecentReviews(int count)
+        public List<Review> GetMostRecentReviews(int count)
         {
-            return _reviewRepository.GetRecentReviews(count);
+            return _reviewsRepository.GetMostRecentReviews(count);
         }
 
-        public int GetReviewCountSince(DateTime date)
+        public int GetReviewCountAfterDate(DateTime date)
         {
-            return _reviewRepository.GetReviewCountSince(date);
+            return _reviewsRepository.GetReviewCountAfterDate(date);
         }
 
         public List<Review> GetReviewsByUser(int userId)
         {
-            return _reviewRepository.GetReviewsByUser(userId);
+            return _reviewsRepository.GetReviewsByUser(userId);
         }
 
         public List<Review> GetReviewsForReport()
         {
-            return GetRecentReviews(GetReviewCountSince(DateTime.Now.AddDays(-1)));
+            return GetMostRecentReviews(GetReviewCountAfterDate(DateTime.Now.AddDays(-1)));
         }
     }
 }
