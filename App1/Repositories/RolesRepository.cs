@@ -26,11 +26,6 @@ namespace App1.Repositories
 
         public Role GetNextRoleInHierarchy(RoleType currentRoleType)
         {
-            if ((int)currentRoleType < 0)
-            {
-                throw new ArgumentException("Role type must be non-negative");
-            }
-
             try
             {
                 Role nextRole = _roles.First(role => role.RoleType == currentRoleType + 1);

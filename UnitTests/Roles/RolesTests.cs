@@ -11,12 +11,6 @@ namespace UnitTests.Roles
 {
     public class RolesTests
     {
-        /// <summary>
-        /// Test:
-        /// 1. RoleType is correctly assigned
-        /// 2. RoleName is correctly assigned
-        /// 3. The model can be created with all valid role types
-        /// </summary>
         [Fact]
         public void Role_WhenCreated_InitializesCorrectly()
         {
@@ -37,10 +31,6 @@ namespace UnitTests.Roles
             }
         }
 
-        /// <summary>
-        /// Tests that the Role model properties can be modified after creation.
-        /// This verifies that the properties are properly settable.
-        /// </summary>
         [Fact]
         public void Role_WhenPropertiesModified_UpdatesCorrectly()
         {
