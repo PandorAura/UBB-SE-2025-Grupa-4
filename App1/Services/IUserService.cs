@@ -15,5 +15,6 @@ namespace App1.Services
         List<User> GetUsersByRoleType(RoleType roleType);
         public User GetUserById(int ID);
         public RoleType GetHighestRoleTypeForUser(int ID);
+        public string GetUserFullNameById(int userId);
     }
 }

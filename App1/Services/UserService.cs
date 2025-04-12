@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using App1.Models;
 using App1.Repositories;
+using Windows.System;
 using static App1.Repositories.UserRepo;
 
 namespace App1.Services
@@ -71,7 +72,12 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetUserByID(userId).FullName;
+                var user = _userRepository.GetUserByID(userId);
+                if (user == null)
+                {
+                    throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", new ArgumentNullException(nameof(user)));
+                }
+                return user.FullName;
             }
             catch (RepositoryException ex)
             {
@@ -95,7 +101,12 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetUserByID(userId);
+                var user = _userRepository.GetUserByID(userId);
+                if (user == null)
+                {
+                    throw new UserServiceException($"Failed to retrieve user with ID {userId}.", new ArgumentNullException(nameof(user)));
+                }
+                return user;
             }
             catch (RepositoryException ex)
             {
