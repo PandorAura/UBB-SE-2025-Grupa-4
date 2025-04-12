@@ -12,6 +12,7 @@ using Microsoft.UI.Text;
 using System;
 using System.Runtime.CompilerServices;
 using App1.AutoChecker;
+using App1.Converters;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -24,7 +25,6 @@ namespace App1.Views
 
     public sealed partial class MainPage : Page
     {
-
         private IReviewService reviewsService;
         private IUserService userService;
         private ICheckersService checkersService;
@@ -51,6 +51,8 @@ namespace App1.Views
             this.checkersService = checkersService;
             this.autoCheck = autoCheck;
             // checkersService = new CheckersService(reviewsService);
+
+            UserIdToNameConverter.Initialize(userService); // !!!
 
             LoadStatistics();
             displayReviews();
@@ -279,7 +281,7 @@ namespace App1.Views
             //flagged reviews = pending, hidden reviews = rejected
             var rejectedCount = reviewsService.GetHiddenReviews().Count;
             var pendingCount = reviewsService.GetFlaggedReviews().Count;
-            var totalCount = reviewsService.GetReviews().Count;
+            var totalCount = reviewsService.GetAllReviews().Count;
             TotalDataBarChart.Series = new List<ISeries>
             {
                 new ColumnSeries<double>
@@ -318,7 +320,7 @@ namespace App1.Views
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                reviewsService.resetReviewFlags(review.ReviewID);
+                reviewsService.ResetReviewFlags(review.ReviewId);
             }
             displayReviews();
             LoadStatistics();
@@ -328,8 +330,8 @@ namespace App1.Views
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                reviewsService.HideReview(review.UserID);
-                reviewsService.resetReviewFlags(review.ReviewID); //Reviews are displayed if they have at least one flag
+                reviewsService.HideReview(review.UserId);
+                reviewsService.ResetReviewFlags(review.ReviewId); //Reviews are displayed if they have at least one flag
             }
             displayReviews();
             LoadStatistics();
@@ -357,7 +359,7 @@ namespace App1.Views
 
         private void Button_ModifyOffensiveWordsList_Click(object sender, RoutedEventArgs e)
         {
-            WordsList.ItemsSource = checkersService.getOffensiveWordsList();
+            WordsList.ItemsSource = checkersService.GetOffensiveWordsList();
             WordListPopup.Visibility = Visibility.Visible;
         }
 
@@ -381,7 +383,7 @@ namespace App1.Views
                 {
                     checkersService.AddOffensiveWord(newWord);
                     WordsList.ItemsSource = null;
-                    WordsList.ItemsSource = checkersService.getOffensiveWordsList();
+                    WordsList.ItemsSource = checkersService.GetOffensiveWordsList();
                 }
             }
         }
@@ -392,7 +394,7 @@ namespace App1.Views
             {
                 checkersService.DeleteOffensiveWord(selectedWord);
                 WordsList.ItemsSource = null;
-                WordsList.ItemsSource = checkersService.getOffensiveWordsList();
+                WordsList.ItemsSource = checkersService.GetOffensiveWordsList();
             }
         }
 

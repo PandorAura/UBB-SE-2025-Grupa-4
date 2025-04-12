@@ -10,6 +10,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     xmlns:models="using:App1.Models" 
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:converters="using:App1.Converters"
 >
 
     <Page.Resources>
@@ -23,6 +24,8 @@
         <SolidColorBrush x:Key="HeaderBackgroundColor" Color="#1f3d7a" />
         <SolidColorBrush x:Key="AcceptButtonColor" Color="#107C10" />
         <SolidColorBrush x:Key="DeclineButtonColor" Color="#D13438" />
+        
+        <converters:UserIdToNameConverter x:Key="UserIdToNameConverter"/>
     </Page.Resources>
 
     <!--main grid-->
@@ -110,7 +113,7 @@
                                 </Border.ContextFlyout>
                                 <StackPanel>
                                     <TextBlock FontWeight="SemiBold" Margin="0,0,0,4">
-                                        <Run Text="{x:Bind UserID}"/>
+                                        <Run Text="{x:Bind UserId, Converter={StaticResource UserIdToNameConverter}}"/>
                                     </TextBlock>
                                     <TextBlock TextWrapping="Wrap" Text="{x:Bind Content}"/>
                                 </StackPanel>
