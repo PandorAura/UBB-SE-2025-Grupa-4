@@ -20,9 +20,6 @@ using System.ComponentModel;
 
 namespace App1.Views
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
 
     public sealed partial class MainPage : Page
     {
@@ -33,7 +30,6 @@ namespace App1.Views
         {
             this.InitializeComponent();
 
-            // Initialize ViewModel with services
             ViewModel = new MainPageViewModel(
                 reviewsService,
                 userService,
@@ -42,19 +38,15 @@ namespace App1.Views
                 autoCheck
             );
 
-            // Subscribe to property changes to update UI
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
-            // Set DataContext for binding
             this.DataContext = ViewModel;
             
-            // Handle unloaded event to clean up event subscriptions
             this.Unloaded += MainPage_Unloaded;
         }
 
         private void MainPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            // Unsubscribe from events to prevent memory leaks
             ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
         }
 
@@ -70,43 +62,45 @@ namespace App1.Views
         {
             if (e.ClickedItem is User selectedUser)
             {
-                // Set the selected user in the ViewModel which triggers loading of details
                 ViewModel.SelectedAppealUser = selectedUser;
                 
-                // Create and show UI elements
                 ShowAppealDetailsUI(sender);
             }
         }
         
         private void ShowAppealDetailsUI(object anchor)
         {
-            // This method still creates UI dynamically, which is not ideal MVVM
-            // In a better solution, we'd use a DataTemplate and Binding
             Flyout flyout = new Flyout();
             StackPanel panel = new StackPanel { Padding = new Thickness(10) };
-
-            // Display user status from ViewModel property
             TextBlock userInfo = new TextBlock
             {
-                Text = ViewModel.UserStatusDisplay,
                 FontSize = 18
             };
-
+            userInfo.SetBinding(TextBlock.TextProperty, new Microsoft.UI.Xaml.Data.Binding
+            {
+                Path = new PropertyPath("UserStatusDisplay"),
+                Source = ViewModel,
+                Mode = Microsoft.UI.Xaml.Data.BindingMode.OneWay
+            });
+            
             TextBlock reviewsHeader = new TextBlock
             {
                 Text = "User Reviews:",
                 FontWeight = FontWeights.Bold,
                 Margin = new Thickness(0, 10, 0, 5)
             };
-
-            // Use the formatted reviews from ViewModel
+            
             ListView reviewsList = new ListView
             {
-                ItemsSource = ViewModel.UserReviewsFormatted,
                 MaxHeight = 200
             };
-
-            // Create buttons that use commands
+            reviewsList.SetBinding(ListView.ItemsSourceProperty, new Microsoft.UI.Xaml.Data.Binding
+            {
+                Path = new PropertyPath("UserReviewsFormatted"),
+                Source = ViewModel,
+                Mode = Microsoft.UI.Xaml.Data.BindingMode.OneWay
+            });
+            
             Button banButton = new Button
             {
                 Content = "Keep Ban",
@@ -115,7 +109,7 @@ namespace App1.Views
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Command = ViewModel.KeepBanCommand
             };
-
+            
             Button appealButton = new Button
             {
                 Content = "Accept Appeal",
@@ -124,7 +118,7 @@ namespace App1.Views
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Command = ViewModel.AcceptAppealCommand
             };
-
+            
             Button closeButton = new Button
             {
                 Content = "Close Appeal Case",
@@ -132,16 +126,16 @@ namespace App1.Views
                 Command = ViewModel.CloseAppealCaseCommand
             };
             
-            // Add manual close event for the flyout
             closeButton.Click += (s, args) => { flyout.Hide(); };
 
             panel.Children.Add(userInfo);
+
             panel.Children.Add(reviewsHeader);
             panel.Children.Add(reviewsList);
             panel.Children.Add(banButton);
             panel.Children.Add(appealButton);
             panel.Children.Add(closeButton);
-
+            
             flyout.Content = panel;
             flyout.Placement = FlyoutPlacementMode.Left;
             flyout.ShowAt((FrameworkElement)anchor);
@@ -151,10 +145,7 @@ namespace App1.Views
         {
             if (e.ClickedItem is UpgradeRequest selectedRequest)
             {
-                // Set the selected request in the ViewModel which triggers loading of details
                 ViewModel.SelectedUpgradeRequest = selectedRequest;
-                
-                // Create and show UI elements
                 ShowUpgradeRequestDetailsUI(sender);
             }
         }
@@ -164,7 +155,6 @@ namespace App1.Views
             Flyout flyout = new Flyout();
             StackPanel panel = new StackPanel { Padding = new Thickness(10) };
             
-            // Display user upgrade info from ViewModel property
             TextBlock userInfo = new TextBlock
             {
                 Text = ViewModel.UserUpgradeInfo,
@@ -178,7 +168,6 @@ namespace App1.Views
                 Margin = new Thickness(0, 10, 0, 5)
             };
 
-            // Use the formatted reviews with flags from ViewModel
             ListView reviewsList = new ListView
             {
                 ItemsSource = ViewModel.UserReviewsWithFlags,

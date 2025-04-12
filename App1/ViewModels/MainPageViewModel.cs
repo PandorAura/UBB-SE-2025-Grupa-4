@@ -338,7 +338,6 @@ namespace App1.ViewModels
 
         public void FilterAppeals(string filter)
         {
-            // If user filtering service is implemented, we could use it here
             if (string.IsNullOrEmpty(filter))
             {
                 LoadAppeals();
@@ -346,7 +345,6 @@ namespace App1.ViewModels
             }
 
             filter = filter.ToLower();
-            // Filter the appeals users by their properties
             AppealsUsers = new ObservableCollection<User>(
                 _userService.GetBannedUsersWhoHaveSubmittedAppeals()
                     .Where(user => 
@@ -518,26 +516,7 @@ namespace App1.ViewModels
 
         private void UpdateUserRole(User user, RoleType roleType)
         {
-            // This method should properly update the user's role through the service layer
-            // instead of directly modifying the model
-            // In a real application, this would call a service method
-            
-            // Simulate updating the user's role for now
-            if (roleType == RoleType.Banned)
-            {
-                // Keep ban logic
-                if (!user.AssignedRoles.Any(r => r.RoleType == RoleType.Banned))
-                {
-                    user.AssignedRoles.Clear();
-                    user.AssignedRoles.Add(new Role(RoleType.Banned, "Banned"));
-                }
-            }
-            else
-            {
-                // Unban logic
-                user.AssignedRoles.Clear();
-                user.AssignedRoles.Add(new Role(RoleType.User, "User"));
-            }
+            _userService.UpdateUserRole(user.UserId, roleType);
         }
 
         public void LoadUpgradeRequestDetails(UpgradeRequest request)
@@ -561,32 +540,26 @@ namespace App1.ViewModels
         public string GetUserStatusDisplay(User user, bool isBanned)
         {
             if (user == null) return string.Empty;
-            // Create user status display string
             return $"User ID: {user.UserId}\nEmail: {user.EmailAddress}\nStatus: {(isBanned ? "Banned" : "Active")}";
         }
 
         public string FormatUserUpgradeInfo(User user, string currentRoleName, string requiredRoleName) 
         {
             if (user == null) return string.Empty;
-            // Format user upgrade request information
             return $"User ID: {user.UserId}\nEmail: {user.EmailAddress}\n{currentRoleName} -> {requiredRoleName}";
         }
 
         public string FormatReviewContent(Review review)
         {
             if (review == null) return string.Empty;
-            // Format review content
             return $"{review.Content}";
         }
 
         public string FormatReviewWithFlags(Review review)
         {
             if (review == null) return string.Empty;
-            // Format review content with flags
             return $"{review.Content}\nFlags: {review.NumberOfFlags}";
         }
-
-        #region Word List Management
 
         public void ShowWordListPopup()
         {
@@ -598,17 +571,11 @@ namespace App1.ViewModels
             IsWordListVisible = false;
         }
 
-        #endregion
-
-        #region INotifyPropertyChanged
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        #endregion
     }
 } 

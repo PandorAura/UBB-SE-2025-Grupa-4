@@ -132,13 +132,12 @@
                 </Grid.ColumnDefinitions>
                         
                 <Button 
-                    Content="Automatically check reviews" 
                     CornerRadius="8"
                     Background="{StaticResource AccentColor}"
                     Foreground="White"
-                    Padding="24,12"
-                    MinWidth="150"
-                    FontSize="14"
+                    Padding="12,8"
+                    MinWidth="120"
+                    FontSize="13"
                     FontWeight="SemiBold"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
@@ -147,17 +146,19 @@
                                 <Style TargetType="Border">
                                     <Setter Property="CornerRadius" Value="8"/>
                                 </Style>
-                            </Button.Resources> 
+                            </Button.Resources>
+                            <Button.Content>
+                                <TextBlock Text="Automatically check reviews" TextWrapping="Wrap" TextAlignment="Center"/>
+                            </Button.Content>
                 </Button>
 
                 <Button Grid.Column="1"
-                    Content="Modify offensive words list"
                     CornerRadius="8"
                     Background="{StaticResource SystemControlBackgroundBaseLowBrush}"
                     Foreground="{StaticResource SystemControlForegroundBaseHighBrush}"
-                    Padding="24,12"
-                    MinWidth="150"
-                    FontSize="14"
+                    Padding="12,8"
+                    MinWidth="120"
+                    FontSize="13"
                     FontWeight="SemiBold"
                     BorderThickness="1"
                     BorderBrush="{StaticResource SystemControlForegroundBaseMediumBrush}"
@@ -169,6 +170,9 @@
                             <Setter Property="CornerRadius" Value="8"/>
                         </Style>
                     </Button.Resources>
+                    <Button.Content>
+                        <TextBlock Text="Modify offensive words list" TextWrapping="Wrap" TextAlignment="Center"/>
+                    </Button.Content>
                 </Button>
             </Grid>
         </Grid>
