@@ -82,7 +82,7 @@ public class EmailJob : IJob
         int activeUsersCount = _userService.GetAdminUsers().Count() + _userService.GetRegularUsers().Count();
         int bannedUsersCount = _userService.GetBannedUsers().Count();
         int numberOfNewReviews = _reviewService.GetReviewsSince(yesterday).Count;
-        double averageRating = _reviewService.GetAverageRating();
+        double averageRating = _reviewService.GetAverageRatingForVisibleReviews();
         List<Review> recentReviews = _reviewService.GetReviewsForReport();
 
         return new AdminReportData(reportDate, adminUsers, activeUsersCount, bannedUsersCount, numberOfNewReviews, averageRating, recentReviews);
@@ -104,13 +104,15 @@ public class EmailJob : IJob
     {
         if (!reviews.Any())
             return "<p>No recent reviews</p>";
+            
         StringBuilder recentReviewsTable = new StringBuilder("<table border='1' cellpadding='5' style='border-collapse: collapse; width: 100%;'> <tr><th>User</th><th>Rating</th><th>Date</th></tr>");
         foreach (Review review in reviews)
         {
             string row = File.ReadAllText(ReviewTemplatePath);
-            row.Replace("{{userName}}", review.UserName);
-            row.Replace("{{rating}}", review.Rating.ToString());
-            row.Replace("{{creationDate}}", review.CreatedDate.ToString("yyyy-MM-dd"));
+            string userName = _userService.GetUserById(review.UserId).FullName;
+            row = row.Replace("{{userName}}", userName);
+            row = row.Replace("{{rating}}", review.Rating.ToString());
+            row = row.Replace("{{creationDate}}", review.CreatedDate.ToString("yyyy-MM-dd"));
             recentReviewsTable.Append(row);
         }
         recentReviewsTable.Append("</table>");
@@ -140,7 +142,7 @@ public class AdminReportData
         this.AdminUsers = adminUsers;
         this.ActiveUsersCount = activeUsersCount;
         this.BannedUsersCount = bannedUsersCount;
-        this.NewReviewsCount  = newReviewsCount;
+        this.NewReviewsCount = newReviewsCount;
         this.AverageRating = averageRating;
         this.RecentReviews = recentReviews;
 

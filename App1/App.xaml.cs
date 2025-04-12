@@ -34,11 +34,15 @@ namespace App1
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    string connectionString = "Server=;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
-
+                    string connectionString = "Server=DESKTOP-E65E5LS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+                    
                     services.AddSingleton<IUserRepository, UserRepo>();
-                    services.AddSingleton<IReviewRepository, ReviewRepo>();
-                    services.AddSingleton<IAutoCheck, AutoCheck>(provider => new AutoCheck(connectionString));
+                    services.AddSingleton<IReviewsRepository, ReviewsRepository>();
+                    services.AddSingleton<IOffensiveWordsRepository>(provider =>
+                    {
+                        return new OffensiveWordsRepository(connectionString);
+                    });
+                    services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
                     services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
                     services.AddSingleton<IRolesRepository, RolesRepository>();

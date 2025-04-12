@@ -12,6 +12,7 @@ using Microsoft.UI.Text;
 using System;
 using System.Runtime.CompilerServices;
 using App1.AutoChecker;
+using App1.Converters;
 using App1.ViewModels;
 using System.ComponentModel;
 
@@ -143,9 +144,9 @@ namespace App1.Views
         
         private void RequestList_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is UpgradeRequest selectedRequest)
+            if (e.ClickedItem is UpgradeRequest selectedUpgradeRequest)
             {
-                ViewModel.SelectedUpgradeRequest = selectedRequest;
+                ViewModel.SelectedUpgradeRequest = selectedUpgradeRequest;
                 ShowUpgradeRequestDetailsUI(sender);
             }
         }
@@ -183,7 +184,7 @@ namespace App1.Views
             flyout.ShowAt((FrameworkElement)anchor);
         }
         
-        private void AcceptButton_Click(object sender, RoutedEventArgs e)
+        private void AcceptUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int requestId)
             {
@@ -191,7 +192,7 @@ namespace App1.Views
             }
         }
         
-        private void DeclineButton_Click(object sender, RoutedEventArgs e)
+        private void DeclineUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int requestId)
             {
@@ -209,11 +210,12 @@ namespace App1.Views
             ViewModel.FilterAppeals(BannedUserSearchTextBox.Text);
         }
 
+
         private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                ViewModel.ResetReviewFlags(review.ReviewID);
+                ViewModel.ResetReviewFlags(review.ReviewId);
             }
         }
 
@@ -221,7 +223,7 @@ namespace App1.Views
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                ViewModel.HideReview(review.UserID, review.ReviewID);
+                ViewModel.HideReview(review.UserId, review.ReviewId);
             }
         }
 

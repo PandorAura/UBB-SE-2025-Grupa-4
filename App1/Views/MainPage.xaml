@@ -10,6 +10,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     xmlns:models="using:App1.Models" 
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:converters="using:App1.Converters"
     xmlns:viewmodels="using:App1.ViewModels"
 >
 
@@ -24,6 +25,8 @@
         <SolidColorBrush x:Key="HeaderBackgroundColor" Color="#1f3d7a" />
         <SolidColorBrush x:Key="AcceptButtonColor" Color="#107C10" />
         <SolidColorBrush x:Key="DeclineButtonColor" Color="#D13438" />
+        
+        <converters:UserIdToNameConverter x:Key="UserIdToNameConverter"/>
     </Page.Resources>
 
     <!--main grid-->
@@ -112,7 +115,7 @@
                                 </Border.ContextFlyout>
                                 <StackPanel>
                                     <TextBlock FontWeight="SemiBold" Margin="0,0,0,4">
-                                        <Run Text="{x:Bind UserID}"/>
+                                        <Run Text="{x:Bind UserId, Converter={StaticResource UserIdToNameConverter}}"/>
                                     </TextBlock>
                                     <TextBlock TextWrapping="Wrap" Text="{x:Bind Content}"/>
                                 </StackPanel>
@@ -215,7 +218,7 @@
                 </Grid>
             </Border>
 
-            <!-- Role Requests Grid -->
+            <!-- Role Upgrade Requests Grid -->
             <Border Grid.Row="1"
                     Background="{ThemeResource CardBackgroundFillColorDefault}"
                     BorderBrush="{ThemeResource CardStrokeColorDefault}"
@@ -230,8 +233,8 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="Role requests" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                    <ListView x:Name="RequestsList" Grid.Row="1" 
+                    <TextBlock Text="Role Upgrade Requests" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                    <ListView x:Name="UpgradeRequestsList" Grid.Row="1" 
                               Height="150"
                               Background="Transparent"
                               BorderThickness="0"
@@ -267,25 +270,27 @@
                                                    TextWrapping="Wrap"
                                                    Margin="0,0,8,0"/>
 
-                                        <Button Content="Accept" 
-                                                Background="{StaticResource AcceptButtonColor}" 
-                                                Foreground="White" 
-                                                CornerRadius="{StaticResource ControlCornerRadius}"
-                                                Padding="8,4"
-                                                Grid.Column="1" 
+                                        <Button x:Name="AcceptUpgradeRequestButton"
+                                                Content="Accept"
+                                                Tag="{Binding UpgradeRequestId}"
+                                                Background="{StaticResource AcceptButtonColor}"
+                                                Foreground="White"
+                                                HorizontalAlignment="Stretch"
+                                                Grid.Column="1"
                                                 Margin="4,0"
-                                                Click="AcceptButton_Click" 
-                                                Tag="{Binding RequestId}"/>
+                                                Click="AcceptUpgradeRequestButton_Click"
+                                                />
 
-                                        <Button Content="Decline" 
-                                                Background="{StaticResource DeclineButtonColor}" 
-                                                Foreground="White" 
-                                                CornerRadius="{StaticResource ControlCornerRadius}"
-                                                Padding="8,4"
-                                                Grid.Column="2" 
+                                        <Button x:Name="DeclineUpgradeRequestButton"
+                                                Content="Decline"
+                                                Tag="{Binding UpgradeRequestId}"
+                                                Background="{StaticResource DeclineButtonColor}"
+                                                Foreground="White"
+                                                HorizontalAlignment="Stretch"
+                                                Grid.Column="2"
                                                 Margin="4,0"
-                                                Click="DeclineButton_Click" 
-                                                Tag="{Binding RequestId}"/>
+                                                Click="DeclineUpgradeRequestButton_Click"
+                                                />
                                     </Grid>
                                 </Border>
                             </DataTemplate>

@@ -6,7 +6,7 @@ using App1.Repositories;
 
 namespace App1.Services
 {
-    public class UserService: IUserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
 
@@ -50,10 +50,11 @@ namespace App1.Services
 
         public List<User> GetUsersByRoleType(RoleType roleType)
         {
-            return  _userRepository.GetUsersByRoleType(roleType); 
+            return _userRepository.GetUsersByRoleType(roleType);
         }
-    
-        public string GetUserFullNameById(int userId) { 
+
+        public string GetUserFullNameById(int userId)
+        {
             return _userRepository.GetUserByID(userId).FullName;
         }
 

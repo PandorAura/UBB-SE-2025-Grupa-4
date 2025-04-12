@@ -315,12 +315,12 @@ namespace App1.ViewModels
 
         public void LoadRoleRequests()
         {
-            UpgradeRequests = new ObservableCollection<UpgradeRequest>(_requestsService.GetAllRequests());
+            UpgradeRequests = new ObservableCollection<UpgradeRequest>(_requestsService.RetrieveAllUpgradeRequests());
         }
 
         public void LoadOffensiveWords()
         {
-            OffensiveWords = new ObservableCollection<string>(_checkersService.getOffensiveWordsList());
+            OffensiveWords = new ObservableCollection<string>(_checkersService.GetOffensiveWordsList());
         }
 
         public void LoadStatistics()
@@ -357,7 +357,7 @@ namespace App1.ViewModels
 
         public void ResetReviewFlags(int reviewId)
         {
-            _reviewsService.resetReviewFlags(reviewId);
+            _reviewsService.ResetReviewFlags(reviewId);
             LoadFlaggedReviews();
             LoadStatistics();
         }
@@ -365,7 +365,7 @@ namespace App1.ViewModels
         public void HideReview(int userId, int reviewId)
         {
             _reviewsService.HideReview(userId);
-            _reviewsService.resetReviewFlags(reviewId);
+            _reviewsService.ResetReviewFlags(reviewId);
             LoadFlaggedReviews();
             LoadStatistics();
         }
@@ -402,7 +402,7 @@ namespace App1.ViewModels
 
         public void HandleUpgradeRequest(bool approve, int requestId)
         {
-            _requestsService.HandleRequest(approve, requestId);
+            _requestsService.ProcessUpgradeRequest(approve, requestId);
             LoadRoleRequests();
             LoadStatistics();
         }
@@ -430,7 +430,7 @@ namespace App1.ViewModels
 
         public string GetRoleNameBasedOnID(RoleType roleType)
         {
-            return _requestsService.GetRoleNameBasedOnID(roleType);
+            return _requestsService.GetRoleNameBasedOnIdentifier(roleType);
         }
 
         private void LoadPieChart()
@@ -463,7 +463,7 @@ namespace App1.ViewModels
         {
             var rejectedCount = _reviewsService.GetHiddenReviews().Count;
             var pendingCount = _reviewsService.GetFlaggedReviews().Count;
-            var totalCount = _reviewsService.GetReviews().Count;
+            var totalCount = _reviewsService.GetAllReviews().Count;
 
             BarChartSeries = new ISeries[]
             {
@@ -523,7 +523,7 @@ namespace App1.ViewModels
         {
             SelectedUpgradeRequest = request;
             
-            int userId = request.RequestingUserId;
+            int userId = request.RequestingUserIdentifier;
             User selectedUser = GetUserById(userId);
             RoleType currentRoleID = GetHighestRoleTypeForUser(selectedUser.UserId);
             string currentRoleName = GetRoleNameBasedOnID(currentRoleID);
