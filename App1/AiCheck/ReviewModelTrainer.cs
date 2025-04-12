@@ -15,9 +15,9 @@ namespace App1.AiCheck
     {
         // File paths
         private static readonly string ProjectRoot = GetProjectRoot();
-        private static readonly string DataPath = Path.Combine(ProjectRoot, "AiCheck", "review_data.csv");
-        private static readonly string ModelPath = Path.Combine(ProjectRoot, "Models", "curseword_model.zip");
-        private static readonly string LogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
+        private static readonly string DefaultDataPath = Path.Combine(ProjectRoot, "AiCheck", "review_data.csv");
+        private static readonly string DefaultModelPath = Path.Combine(ProjectRoot, "Models", "curseword_model.zip");
+        private static readonly string DefaultLogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
 
         // Model training parameters
         private const int NumberOfTrees = 100;
@@ -49,25 +49,49 @@ namespace App1.AiCheck
         /// <returns>True if training was successful, false otherwise.</returns>
         public static bool TrainModel()
         {
-            LogToFile($"Starting model training process. Project root: {ProjectRoot}");
-            LogToFile($"Looking for training data at: {DataPath}");
+            return TrainModel(DefaultDataPath, DefaultModelPath, DefaultLogPath);
+        }
 
-            if (!File.Exists(DataPath))
+        /// <summary>
+        /// Trains a binary classification model to detect offensive content in reviews using a custom data path.
+        /// </summary>
+        /// <param name="customDataPath">Optional custom path to the training data file.</param>
+        /// <returns>True if training was successful, false otherwise.</returns>
+        public static bool TrainModel(string customDataPath)
+        {
+            var modelPath = Path.Combine(Path.GetDirectoryName(customDataPath), "test_model.zip");
+            var logPath = Path.Combine(Path.GetDirectoryName(customDataPath), "test_training_log.txt");
+            return TrainModel(customDataPath, modelPath, logPath);
+        }
+
+        /// <summary>
+        /// Trains a binary classification model to detect offensive content in reviews using custom paths.
+        /// </summary>
+        /// <param name="dataPath">Path to the training data file.</param>
+        /// <param name="modelPath">Path where the trained model will be saved.</param>
+        /// <param name="logPath">Path where the training log will be saved.</param>
+        /// <returns>True if training was successful, false otherwise.</returns>
+        public static bool TrainModel(string dataPath, string modelPath, string logPath)
+        {
+            LogToFile($"Starting model training process. Project root: {ProjectRoot}", logPath);
+            LogToFile($"Looking for training data at: {dataPath}", logPath);
+
+            if (!File.Exists(dataPath))
             {
-                LogToFile($"ERROR: Missing training data file at {DataPath}");
+                LogToFile($"ERROR: Missing training data file at {dataPath}", logPath);
                 return false;
             }
 
             try
             {
                 // Ensure directories exist
-                EnsureDirectoriesExist();
+                EnsureDirectoriesExist(modelPath, logPath);
 
                 // Initialize MLContext with a fixed seed for reproducibility
                 var machineLearningContext = new MLContext(seed: 0);
 
                 // Load and prepare the training data
-                var trainingData = LoadTrainingData(machineLearningContext);
+                var trainingData = LoadTrainingData(machineLearningContext, dataPath);
 
                 // Create and configure the model pipeline
                 var modelPipeline = CreateModelPipeline(machineLearningContext);
@@ -79,27 +103,27 @@ namespace App1.AiCheck
                 var trainedModel = modelPipeline.Fit(trainTestSplit.TrainSet);
 
                 // Evaluate the model on the test set
-                EvaluateModel(machineLearningContext, trainedModel, trainTestSplit.TestSet);
+                EvaluateModel(machineLearningContext, trainedModel, trainTestSplit.TestSet, logPath);
 
                 // Save the trained model
-                machineLearningContext.Model.Save(trainedModel, trainingData.Schema, ModelPath);
+                machineLearningContext.Model.Save(trainedModel, trainingData.Schema, modelPath);
 
-                LogToFile($"Model trained and saved successfully at {ModelPath}");
+                LogToFile($"Model trained and saved successfully at {modelPath}", logPath);
                 return true;
             }
             catch (FileNotFoundException fileNotFoundException)
             {
-                LogToFile($"File not found error: {fileNotFoundException.Message}");
+                LogToFile($"File not found error: {fileNotFoundException.Message}", logPath);
                 return false;
             }
             catch (InvalidOperationException invalidOperationException)
             {
-                LogToFile($"Invalid operation error: {invalidOperationException.Message}");
+                LogToFile($"Invalid operation error: {invalidOperationException.Message}", logPath);
                 return false;
             }
             catch (Exception exception)
             {
-                LogToFile($"Unexpected error during model training: {exception.Message}");
+                LogToFile($"Unexpected error during model training: {exception.Message}", logPath);
                 return false;
             }
         }
@@ -107,24 +131,97 @@ namespace App1.AiCheck
         /// <summary>
         /// Ensures that all required directories exist.
         /// </summary>
-        private static void EnsureDirectoriesExist()
+        private static void EnsureDirectoriesExist(string modelPath, string logPath)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(ModelPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(LogPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(modelPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath));
         }
 
         /// <summary>
         /// Loads the training data from the CSV file.
         /// </summary>
         /// <param name="machineLearningContext">The ML.NET context.</param>
+        /// <param name="dataPath">The path to the training data file.</param>
         /// <returns>The loaded training data.</returns>
-        private static IDataView LoadTrainingData(MLContext machineLearningContext)
+        private static IDataView LoadTrainingData(MLContext machineLearningContext, string dataPath)
         {
+            // Validate the data format before attempting to load it
+            if (!ValidateDataFormat(dataPath))
+            {
+                throw new InvalidOperationException("Invalid data format. Expected separator character is '" + CsvSeparator + "'.");
+            }
+
             return machineLearningContext.Data.LoadFromTextFile<ReviewData>(
-                path: DataPath,
+                path: dataPath,
                 separatorChar: CsvSeparator,
                 hasHeader: true
             );
+        }
+
+        /// <summary>
+        /// Validates the format of the training data file.
+        /// </summary>
+        /// <param name="dataPath">The path to the training data file.</param>
+        /// <returns>True if the data format is valid, false otherwise.</returns>
+        private static bool ValidateDataFormat(string dataPath)
+        {
+            try
+            {
+                // Read the first line to check the header format
+                string firstLine = File.ReadLines(dataPath).FirstOrDefault();
+                if (string.IsNullOrEmpty(firstLine))
+                {
+                    return false;
+                }
+
+                // Check if the header contains the expected separator
+                if (!firstLine.Contains(CsvSeparator))
+                {
+                    return false;
+                }
+
+                // Check if the header has the expected columns
+                string[] headerColumns = firstLine.Split(CsvSeparator);
+                if (headerColumns.Length < 2 || 
+                    !headerColumns[0].Trim().Equals("ReviewContent", StringComparison.OrdinalIgnoreCase) || 
+                    !headerColumns[1].Trim().Equals("IsOffensiveContent", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                // Check at least one data row
+                bool hasDataRow = false;
+                foreach (string line in File.ReadLines(dataPath).Skip(1))
+                {
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    if (!line.Contains(CsvSeparator))
+                        return false;
+
+                    string[] columns = line.Split(CsvSeparator);
+                    if (columns.Length < 2)
+                        return false;
+
+                    // Check if the second column is a valid boolean value (0 or 1)
+                    bool isBoolean = bool.TryParse(columns[1].Trim(), out _);
+                    bool isInteger = int.TryParse(columns[1].Trim(), out int value);
+                    
+                    if (!isBoolean && (!isInteger || (value != 0 && value != 1)))
+                    {
+                        return false;
+                    }
+
+                    hasDataRow = true;
+                    break;
+                }
+
+                return hasDataRow;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -153,7 +250,8 @@ namespace App1.AiCheck
         /// <param name="machineLearningContext">The ML.NET context.</param>
         /// <param name="trainedModel">The trained model.</param>
         /// <param name="testData">The test dataset.</param>
-        private static void EvaluateModel(MLContext machineLearningContext, ITransformer trainedModel, IDataView testData)
+        /// <param name="logPath">Path to the log file.</param>
+        private static void EvaluateModel(MLContext machineLearningContext, ITransformer trainedModel, IDataView testData, string logPath)
         {
             // Transform the test data using the trained model
             var predictions = trainedModel.Transform(testData);
@@ -174,7 +272,7 @@ namespace App1.AiCheck
                 // If the prediction is incorrect, log it
                 if (prediction.IsPredictedOffensive != actual.IsOffensiveContent)
                 {
-                    LogToFile($"Mistake in Review {index + 1}: Predicted {prediction.IsPredictedOffensive}, Actual {actual.IsOffensiveContent}. Text: {actual.ReviewContent}");
+                    LogToFile($"Mistake in Review {index + 1}: Predicted {prediction.IsPredictedOffensive}, Actual {actual.IsOffensiveContent}. Text: {actual.ReviewContent}", logPath);
                 }
                 else
                 {
@@ -184,19 +282,20 @@ namespace App1.AiCheck
 
             // Log overall accuracy
             float accuracy = (float)correctPredictions / totalPredictions * 100;
-            LogToFile($"Model evaluation complete. Accuracy: {accuracy:F2}% ({correctPredictions}/{totalPredictions} correct predictions)");
+            LogToFile($"Model evaluation complete. Accuracy: {accuracy:F2}% ({correctPredictions}/{totalPredictions} correct predictions)", logPath);
         }
 
         /// <summary>
         /// Logs a message to the log file with a timestamp.
         /// </summary>
         /// <param name="message">The message to log.</param>
-        private static void LogToFile(string message)
+        /// <param name="logPath">Path to the log file.</param>
+        private static void LogToFile(string message, string logPath)
         {
             try
             {
                 string timestampedMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
-                File.AppendAllText(LogPath, timestampedMessage + Environment.NewLine);
+                File.AppendAllText(logPath, timestampedMessage + Environment.NewLine);
                 Console.WriteLine(timestampedMessage);
             }
             catch (Exception exception)

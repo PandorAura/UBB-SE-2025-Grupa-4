@@ -17,7 +17,7 @@ namespace App1.Services
 
         public void ResetReviewFlags(int reviewId)
         {
-            _reviewsRepository.GetReviewById(reviewId).NumberOfFlags = 0;
+            _reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
         }
 
         public void HideReview(int reviewId)
@@ -67,7 +67,11 @@ namespace App1.Services
 
         public List<Review> GetReviewsForReport()
         {
-            return GetMostRecentReviews(GetReviewCountAfterDate(DateTime.Now.AddDays(-1)));
+            var date = DateTime.Now.AddDays(-1);
+            var count = _reviewsRepository.GetReviewCountAfterDate(date);
+
+            var reviews = _reviewsRepository.GetMostRecentReviews(count);
+            return reviews ?? [];
         }
     }
 }

@@ -11,13 +11,14 @@ namespace App1.AiCheck
         /// The text content of the review.
         /// </summary>
         [LoadColumn(0)]
+        [ColumnName("ReviewContent")]
         public string ReviewContent { get; set; }
 
         /// <summary>
         /// Indicates whether the review contains offensive content.
         /// </summary>
         [LoadColumn(1)]
-        [ColumnName("IsOffensive")]
+        [ColumnName("IsOffensiveContent")]
         public bool IsOffensiveContent { get; set; }
     }
 
