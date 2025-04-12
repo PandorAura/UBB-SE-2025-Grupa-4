@@ -11,16 +11,16 @@ namespace App1.Repositories
     {
         //public void UpdateRole(int userID, int permissionID);
 
-        public List<User> GetAppealedUsers();
-        List<User> GetAppealingUsers();
-        User getUserByID(int iD);
-        public List<User> GetUsersByRole(int permissionID);
+        public List<User> GetUsersWhoHaveSubmittedAppeals();
+        List<User> GetBannedUsersWhoHaveSubmittedAppeals();
+        User GetUserByID(int iD);
+        public List<User> GetUsersByRoleType(RoleType roleType);
 
-        public int getHighestRoleIdBasedOnUserId(int userId);
+        public RoleType GetHighestRoleTypeForUser(int userId);
 
-        public void addRoleToUser(int userID, Role roleToAdd);
+        public void AddRoleToUser(int userID, Role roleToAdd);
 
-        public List<User> GetUsers();
+        public List<User> GetAllUsers();
 
     }
 }

@@ -51,7 +51,7 @@ public class EmailJob : IJob
             {
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress("System Admin", smtpEmail));
-                message.To.Add(new MailboxAddress(admin.Name, admin.Email));
+                message.To.Add(new MailboxAddress(admin.FullName, admin.EmailAddress));
                 message.Subject = $"Admin Report - {reportData.ReportDate:yyyy-MM-dd}";
 
                 var bodyBuilder = new BodyBuilder
@@ -62,7 +62,7 @@ public class EmailJob : IJob
 
                 message.Body = bodyBuilder.ToMessageBody();
                 await client.SendAsync(message);
-                System.Diagnostics.Debug.WriteLine($"Sent report to {admin.Email}");
+                System.Diagnostics.Debug.WriteLine($"Sent report to {admin.EmailAddress}");
             }
 
             await client.DisconnectAsync(true);

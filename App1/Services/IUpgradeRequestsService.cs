@@ -7,6 +7,6 @@ namespace App1.Services
     {
         List<UpgradeRequest> RetrieveAllUpgradeRequests();
         void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier);
-        string GetRoleNameBasedOnIdentifier(int roleIdentifier);
+        string GetRoleNameBasedOnIdentifier(RoleType roleType);
     }
 }

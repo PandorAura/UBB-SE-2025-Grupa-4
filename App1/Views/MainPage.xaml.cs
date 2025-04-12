@@ -68,10 +68,11 @@ namespace App1.Views
 
         private void displayAppeal()
         {
-            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetAppealingUsers());
+            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals());
 
             AppealsList.ItemsSource = UsersWhichAppealed;
         }
+
 
 
         private void AppealsList_ItemClick(object sender, ItemClickEventArgs e)
@@ -81,11 +82,11 @@ namespace App1.Views
                 Flyout flyout = new Flyout();
                 StackPanel panel = new StackPanel { Padding = new Thickness(10) };
 
-                selectedUser.Roles.Add(new Role(0, "Banned"));
+                selectedUser.AssignedRoles.Add(new Role(0, "Banned"));
 
                 TextBlock userInfo = new TextBlock
                 {
-                    Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\nStatus: Banned",
+                    Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.EmailAddress}\nStatus: Banned",
                     FontSize = 18
                 };
 
@@ -113,8 +114,8 @@ namespace App1.Views
                 };
                 banButton.Click += (s, args) =>
                 {
-                    selectedUser.Roles.Add(new Role(0, "Banned"));
-                    userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\nStatus: Banned";
+                    selectedUser.AssignedRoles.Add(new Role(0, "Banned"));
+                    userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.EmailAddress}\nStatus: Banned";
                     LoadStatistics();
                 };
 
@@ -127,8 +128,8 @@ namespace App1.Views
                 };
                 appealButton.Click += (s, args) =>
                 {
-                    selectedUser.Roles.Add(new Role(1, "Banned"));
-                    userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.Email}\nStatus: Active";
+                    selectedUser.AssignedRoles.Add(new Role(RoleType.Banned, "Banned"));
+                    userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.EmailAddress}\nStatus: Active";
                     LoadStatistics();
                 };
 
@@ -139,9 +140,9 @@ namespace App1.Views
                 };
                 closeButton.Click += (s, args) =>
                 {
-                    selectedUser.HasAppealed = false;
+                    selectedUser.HasSubmittedAppeal = false;
                     AppealsList.ItemsSource = null;
-                    AppealsList.ItemsSource = userService.GetAppealingUsers();
+                    AppealsList.ItemsSource = userService.GetBannedUsersWhoHaveSubmittedAppeals();
                     flyout.Hide();
                     //LoadStatistics();
                 };
@@ -168,13 +169,13 @@ namespace App1.Views
                 Flyout upgradeRequestDetailsFlyout = new Flyout();
                 StackPanel upgradeRequestDetailsPanel = new StackPanel { Padding = new Thickness(10) };
                 int requestingUserIdentifier = selectedUpgradeRequest.RequestingUserIdentifier;
-                User requestingUser = userService.GetUserBasedOnID(requestingUserIdentifier);
-                int currentRoleIdentifier = userService.GetHighestRoleBasedOnUserID(requestingUser.UserId);
+                User requestingUser = userService.GetUserById(requestingUserIdentifier);
+                RoleType currentRoleIdentifier = userService.GetHighestRoleTypeForUser(requestingUser.UserId);
                 string currentRoleDisplayName = upgradeRequestsService.GetRoleNameBasedOnIdentifier(currentRoleIdentifier);
                 string nextRoleDisplayName = upgradeRequestsService.GetRoleNameBasedOnIdentifier(currentRoleIdentifier + 1);
                 TextBlock userInformationTextBlock = new TextBlock
                 {
-                    Text = $"User ID: {requestingUser.UserId}\nEmail: {requestingUser.Email}\n{currentRoleDisplayName} -> {nextRoleDisplayName}",
+                    Text = $"User ID: {requestingUser.UserId}\nEmail: {requestingUser.EmailAddress}\n{currentRoleDisplayName} -> {nextRoleDisplayName}",
                     FontSize = 18
                 };
 
@@ -238,6 +239,7 @@ namespace App1.Views
             LoadStatistics();
         }
 
+
         private void LoadPieChart()
         {
             int bannedCount, usersCount, adminsCount, managerCount;
@@ -246,7 +248,7 @@ namespace App1.Views
             List<User> users = userService.GetAllUsers();
             foreach (var user in users)
             {
-                var count = user.Roles.Count;
+                var count = user.AssignedRoles.Count;
                 switch (count)
                 {
                     case 0: bannedCount++; break;
@@ -264,6 +266,7 @@ namespace App1.Views
                 new PieSeries<double> { Values = new double[] { managerCount }, Name = "Managers" }
             };
         }
+
 
         private void LoadStatistics()
         {
@@ -306,9 +309,10 @@ namespace App1.Views
         {
             string filter = BannedUserSearchTextBox.Text.ToLower();
             AppealsList.ItemsSource = new ObservableCollection<User>(
-                userService.GetAppealingUsers()
+                userService.GetBannedUsersWhoHaveSubmittedAppeals()
             );
         }
+
 
         private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
         {
