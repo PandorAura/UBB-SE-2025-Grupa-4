@@ -1,3 +1,4 @@
+using App1.Infrastructure;
 using App1.Models;
 using App1.Repositories;
 using Microsoft.Data.SqlClient;
@@ -5,118 +6,133 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace UnitTests.UpgradeRequests
 {
     public class UpgradeRequestsRepositoryTests
     {
-        
-        private readonly string _testConnectionString = "Server=10.220.28.196;Database=gitIss;User Id=SA;Password=reallyStrongPwd123;TrustServerCertificate=True;";
-        private readonly Mock<SqlConnection> _mockSqlConnection;
-        private readonly Mock<SqlCommand> _mockSqlCommand;
-        private readonly Mock<SqlDataReader> _mockSqlDataReader;
-        private readonly Mock<SqlDataAdapter> _mockSqlDataAdapter;
+        private readonly Mock<ISqlConnectionFactory> _mockConnectionFactory;
+        private readonly Mock<ISqlConnection> _mockConnection;
+        private readonly Mock<ISqlCommand> _mockCommand;
+        private readonly Mock<ISqlDataReader> _mockDataReader;
+        private readonly Mock<ISqlParameterCollection> _mockParameters;
+        private readonly Mock<ISqlDataAdapter> _mockDataAdapter;
+        private readonly UpgradeRequestsRepository _repository;
 
         public UpgradeRequestsRepositoryTests()
         {
             // Setup mocks
-            _mockSqlConnection = new Mock<SqlConnection>();
-            _mockSqlCommand = new Mock<SqlCommand>();
-            _mockSqlDataReader = new Mock<SqlDataReader>();
-            _mockSqlDataAdapter = new Mock<SqlDataAdapter>();
+            _mockConnectionFactory = new Mock<ISqlConnectionFactory>();
+            _mockConnection = new Mock<ISqlConnection>();
+            _mockCommand = new Mock<ISqlCommand>();
+            _mockDataReader = new Mock<ISqlDataReader>();
+            _mockParameters = new Mock<ISqlParameterCollection>();
+            _mockDataAdapter = new Mock<ISqlDataAdapter>();
 
-            // Setup SqlConnection mock
-            _mockSqlConnection.Setup(c => c.Open()).Verifiable();
-            _mockSqlConnection.Setup(c => c.Close()).Verifiable();
+            // Setup connection factory to return mock connection
+            _mockConnectionFactory.Setup(f => f.CreateConnection()).Returns(_mockConnection.Object);
 
-            // Setup SqlCommand mock
-            _mockSqlCommand.Setup(c => c.ExecuteReader()).Returns(_mockSqlDataReader.Object);
-            _mockSqlCommand.Setup(c => c.ExecuteNonQuery()).Returns(1);
+            // Setup connection mock behavior
+            _mockConnection.Setup(c => c.Open()).Verifiable();
+            _mockConnection.Setup(c => c.Close()).Verifiable();
+            _mockConnection.Setup(c => c.CreateCommand()).Returns(_mockCommand.Object);
 
-            // Setup SqlDataReader mock
-            _mockSqlDataReader.Setup(r => r.Read()).Returns(true);
-            _mockSqlDataReader.Setup(r => r.GetInt32(0)).Returns(1);
-            _mockSqlDataReader.Setup(r => r.GetInt32(1)).Returns(100);
-            _mockSqlDataReader.Setup(r => r.GetString(2)).Returns("Test User");
-            _mockSqlDataReader.Setup(r => r.Close()).Verifiable();
+            // Setup command mock
+            _mockCommand.SetupGet(c => c.Parameters).Returns(_mockParameters.Object);
+            _mockCommand.Setup(c => c.ExecuteReader()).Returns(_mockDataReader.Object);
+            _mockCommand.Setup(c => c.ExecuteNonQuery()).Returns(1);
 
-            // Setup SqlDataAdapter mock
-            _mockSqlDataAdapter.Setup(a => a.DeleteCommand).Returns(_mockSqlCommand.Object);
-        }
+            // Setup parameter collection mock
+            _mockParameters.Setup(p => p.AddWithValue(It.IsAny<string>(), It.IsAny<object>()))
+                .Returns(Mock.Of<ISqlParameter>());
 
-        [Fact]
-        public void Constructor_WithValidConnectionString_CreatesRepository()
-        {
-            // Act
-            var repository = new UpgradeRequestsRepository(_testConnectionString);
+            // Setup data reader mock for returning data
+            _mockDataReader.Setup(r => r.Read()).Returns(true);
+            _mockDataReader.Setup(r => r.GetInt32(0)).Returns(1);
+            _mockDataReader.Setup(r => r.GetInt32(1)).Returns(100);
+            _mockDataReader.Setup(r => r.GetString(2)).Returns("Test User");
+            _mockDataReader.Setup(r => r.Close()).Verifiable();
 
-            // Assert
-            Assert.NotNull(repository);
+            // Create repository with mocked dependencies
+            _repository = new UpgradeRequestsRepository(_mockConnectionFactory.Object, _mockDataAdapter.Object);
         }
 
         [Fact]
         public void RetrieveAllUpgradeRequests_ReturnsListOfUpgradeRequests()
         {
-            // Arrange
-            var repository = new UpgradeRequestsRepository(_testConnectionString);
-
             // Act
-            var result = repository.RetrieveAllUpgradeRequests();
+            var result = _repository.RetrieveAllUpgradeRequests();
 
             // Assert
             Assert.NotNull(result);
             Assert.IsType<List<UpgradeRequest>>(result);
+            Assert.Single(result);
+
+            var request = result[0];
+            Assert.Equal(1, request.UpgradeRequestId);
+            Assert.Equal(100, request.RequestingUserIdentifier);
+            Assert.Equal("Test User", request.RequestingUserDisplayName);
+
+            _mockConnection.Verify(c => c.Open(), Times.Once);
+            _mockConnection.Verify(c => c.Close(), Times.Once);
+            _mockCommand.Verify(c => c.ExecuteReader(), Times.Once);
         }
 
         [Fact]
         public void RemoveUpgradeRequestByIdentifier_DeletesRequest()
         {
             // Arrange
-            var repository = new UpgradeRequestsRepository(_testConnectionString);
             int upgradeRequestIdentifier = 1;
 
             // Act
-            repository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+            _repository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
 
             // Assert
-            // Verify that the repository attempted to delete the request
-            // Note: In a real test, we would verify the SQL command was executed with the correct parameters
+            _mockConnection.Verify(c => c.Open(), Times.Once);
+            _mockConnection.Verify(c => c.Close(), Times.Once);
+            _mockCommand.Verify(c => c.ExecuteNonQuery(), Times.Once);
+            _mockParameters.Verify(p => p.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier), Times.Once);
         }
 
         [Fact]
         public void RetrieveUpgradeRequestByIdentifier_ReturnsUpgradeRequest()
         {
             // Arrange
-            var repository = new UpgradeRequestsRepository(_testConnectionString);
             int upgradeRequestIdentifier = 1;
 
             // Act
-            var result = repository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+            var result = _repository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
 
             // Assert
             Assert.NotNull(result);
             Assert.IsType<UpgradeRequest>(result);
-            Assert.Equal(upgradeRequestIdentifier, result.UpgradeRequestId);
+            Assert.Equal(1, result.UpgradeRequestId);
+            Assert.Equal(100, result.RequestingUserIdentifier);
+            Assert.Equal("Test User", result.RequestingUserDisplayName);
+
+            _mockConnection.Verify(c => c.Open(), Times.Once);
+            _mockConnection.Verify(c => c.Close(), Times.Once);
+            _mockParameters.Verify(p => p.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier), Times.Once);
         }
 
         [Fact]
         public void RetrieveUpgradeRequestByIdentifier_WhenRequestNotFound_ReturnsNull()
         {
             // Arrange
-            var repository = new UpgradeRequestsRepository(_testConnectionString);
             int upgradeRequestIdentifier = 999; // Non-existent ID
 
-            // Setup the mock to return false for Read() to simulate no results
-            _mockSqlDataReader.Setup(r => r.Read()).Returns(false);
+            // Setup reader to return no results for this specific test
+            _mockDataReader.Setup(r => r.Read()).Returns(false);
 
             // Act
-            var result = repository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+            var result = _repository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
 
             // Assert
             Assert.Null(result);
+            _mockConnection.Verify(c => c.Open(), Times.Once);
+            _mockConnection.Verify(c => c.Close(), Times.Once);
+            _mockParameters.Verify(p => p.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier), Times.Once);
         }
     }
-} 
+}

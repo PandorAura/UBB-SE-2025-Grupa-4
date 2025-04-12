@@ -11,8 +11,6 @@ namespace App1.Services
         private readonly IRolesRepository rolesRepository;
         private readonly IUserRepository userRepository;
 
-        private const int BANNED_USER_ROLE_IDENTIFIER = 0;
-
         public UpgradeRequestsService(
             IUpgradeRequestsRepository upgradeRequestsRepository,
             IRolesRepository rolesRepository,
@@ -24,13 +22,13 @@ namespace App1.Services
             this.RemoveUpgradeRequestsFromBannedUsers();
         }
 
-        public void RemoveUpgradeRequestsFromBannedUsers()
+        protected void RemoveUpgradeRequestsFromBannedUsers()
         {
             List<UpgradeRequest> pendingUpgradeRequests = this.RetrieveAllUpgradeRequests();
             for (int requestIndex = 0; requestIndex < pendingUpgradeRequests.Count; requestIndex++)
             {
                 int requestingUserIdentifier = pendingUpgradeRequests[requestIndex].RequestingUserIdentifier;
-                if (this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier) == BANNED_USER_ROLE_IDENTIFIER)
+                if (this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier) == RoleType.Banned)
                 {
                     this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[requestIndex].UpgradeRequestId);
                     requestIndex--;
@@ -56,8 +54,8 @@ namespace App1.Services
             {
                 UpgradeRequest currentUpgradeRequest = this.upgradeRequestsRepository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
                 int requestingUserIdentifier = currentUpgradeRequest.RequestingUserIdentifier;
-                int currentHighestRoleIdentifier = (int)this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier);
-                Role nextRoleLevel = rolesRepository.GetNextRole((RoleType)currentHighestRoleIdentifier);
+                RoleType currentHighestRoleType = this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier);
+                Role nextRoleLevel = rolesRepository.GetNextRole(currentHighestRoleType);
                 this.userRepository.AddRoleToUser(requestingUserIdentifier, nextRoleLevel);
             }
             this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);

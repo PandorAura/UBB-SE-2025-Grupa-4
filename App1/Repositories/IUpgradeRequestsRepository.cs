@@ -10,6 +10,7 @@ namespace App1.Repositories
     public interface IUpgradeRequestsRepository
     {
         List<UpgradeRequest> RetrieveAllUpgradeRequests();
+       
         void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
         UpgradeRequest RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
     }
