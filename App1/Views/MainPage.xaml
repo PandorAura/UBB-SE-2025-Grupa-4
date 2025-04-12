@@ -208,7 +208,7 @@
                 </Grid>
             </Border>
 
-            <!-- Role Requests Grid -->
+            <!-- Role Upgrade Requests Grid -->
             <Border Grid.Row="1"
                     Background="{ThemeResource CardBackgroundFillColorDefault}"
                     BorderBrush="{ThemeResource CardStrokeColorDefault}"
@@ -223,13 +223,13 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="Role requests" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                    <ListView x:Name="RequestsList" Grid.Row="1" 
+                    <TextBlock Text="Role Upgrade Requests" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                    <ListView x:Name="UpgradeRequestsList" Grid.Row="1" 
                               Height="150"
                               Background="Transparent"
                               BorderThickness="0"
                               IsItemClickEnabled="True" 
-                              ItemClick="RequestList_ItemClick"
+                              ItemClick="UpgradeRequestList_ItemClick"
                               >
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
@@ -260,25 +260,27 @@
                                                    TextWrapping="Wrap"
                                                    Margin="0,0,8,0"/>
 
-                                        <Button Content="Accept" 
-                                                Background="{StaticResource AcceptButtonColor}" 
-                                                Foreground="White" 
-                                                CornerRadius="{StaticResource ControlCornerRadius}"
-                                                Padding="8,4"
-                                                Grid.Column="1" 
+                                        <Button x:Name="AcceptUpgradeRequestButton"
+                                                Content="Accept"
+                                                Tag="{Binding UpgradeRequestId}"
+                                                Background="{StaticResource AcceptButtonColor}"
+                                                Foreground="White"
+                                                HorizontalAlignment="Stretch"
+                                                Grid.Column="1"
                                                 Margin="4,0"
-                                                Click="AcceptButton_Click" 
-                                                Tag="{Binding RequestId}"/>
+                                                Click="AcceptUpgradeRequestButton_Click"
+                                                />
 
-                                        <Button Content="Decline" 
-                                                Background="{StaticResource DeclineButtonColor}" 
-                                                Foreground="White" 
-                                                CornerRadius="{StaticResource ControlCornerRadius}"
-                                                Padding="8,4"
-                                                Grid.Column="2" 
+                                        <Button x:Name="DeclineUpgradeRequestButton"
+                                                Content="Decline"
+                                                Tag="{Binding UpgradeRequestId}"
+                                                Background="{StaticResource DeclineButtonColor}"
+                                                Foreground="White"
+                                                HorizontalAlignment="Stretch"
+                                                Grid.Column="2"
                                                 Margin="4,0"
-                                                Click="DeclineButton_Click" 
-                                                Tag="{Binding RequestId}"/>
+                                                Click="DeclineUpgradeRequestButton_Click"
+                                                />
                                     </Grid>
                                 </Border>
                             </DataTemplate>

@@ -34,8 +34,8 @@ namespace App1
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
-
+                    string connectionString = "Server=192.168.0.87;Database=gitIss;User Id=SA;Password=reallyStrongPwd123;TrustServerCertificate=True;";
+                    
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>();
                     services.AddSingleton<IOffensiveWordsRepository>(provider =>

@@ -142,7 +142,7 @@ public class AdminReportData
         this.AdminUsers = adminUsers;
         this.ActiveUsersCount = activeUsersCount;
         this.BannedUsersCount = bannedUsersCount;
-        this.NewReviewsCount  = newReviewsCount;
+        this.NewReviewsCount = newReviewsCount;
         this.AverageRating = averageRating;
         this.RecentReviews = recentReviews;
 

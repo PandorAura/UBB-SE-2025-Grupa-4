@@ -5,8 +5,8 @@ namespace App1.Services
 {
     public interface IUpgradeRequestsService
     {
-        public List<UpgradeRequest> GetAllRequests();
-        public void HandleRequest(bool accepted, int requestId);
-        public string GetRoleNameBasedOnID(RoleType roleType);
+        List<UpgradeRequest> RetrieveAllUpgradeRequests();
+        void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier);
+        string GetRoleNameBasedOnIdentifier(RoleType roleType);
     }
 }

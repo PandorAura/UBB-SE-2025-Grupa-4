@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace App1.Repositories
 {
-    public class RolesRepository: IRolesRepository
+    public class RolesRepository : IRolesRepository
     {
         private readonly List<Role> _roles;
-        public RolesRepository() {
+        public RolesRepository()
+        {
             _roles = new List<Role>();
 
             _roles.Add(new Role(RoleType.Banned, "Banned"));

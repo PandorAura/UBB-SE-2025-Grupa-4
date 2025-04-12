@@ -1004,27 +1004,23 @@
 2025-04-11 16:07:11 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
 2025-04-11 16:35:28 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
 2025-04-11 16:43:17 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
-2025-04-11 17:08:40 - Starting model training process. Project root: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1
-2025-04-11 17:08:40 - Looking for training data at: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Ai_Check\review_data.csv
-2025-04-11 17:08:40 - ERROR: Missing training data file at D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Ai_Check\review_data.csv
-2025-04-11 17:11:12 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
-2025-04-11 17:11:38 - Starting model training process. Project root: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1
-2025-04-11 17:11:38 - Looking for training data at: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\AiCheck\review_data.csv
-2025-04-11 17:11:39 - Unexpected error during model training: Could not find label column 'IsOffensiveContent' (Parameter 'inputSchema')
-2025-04-11 17:23:11 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
-2025-04-12 11:32:54 - Starting model training process. Project root: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1
-2025-04-12 11:32:54 - Looking for training data at: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\AiCheck\review_data.csv
-2025-04-12 11:32:55 - Unexpected error during model training: Could not find label column 'IsOffensiveContent' (Parameter 'inputSchema')
-2025-04-12 12:24:10 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
-2025-04-12 15:41:42 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
-2025-04-12 15:49:08 - Starting model training process. Project root: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1
-2025-04-12 15:49:08 - Looking for training data at: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\UnitTests\bin\Debug\net8.0-windows10.0.19041.0\TestData\review_data.csv
-2025-04-12 15:49:09 - Unexpected error during model training: Could not find label column 'IsOffensiveContent' (Parameter 'inputSchema')
-2025-04-12 15:49:09 - Starting model training process. Project root: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1
-2025-04-12 15:49:09 - Looking for training data at: D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\UnitTests\bin\Debug\net8.0-windows10.0.19041.0\TestData\review_data.csv
-2025-04-12 15:49:09 - Unexpected error during model training: Could not find label column 'IsOffensiveContent' (Parameter 'inputSchema')
 2025-04-12 16:01:53 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
 2025-04-12 16:17:53 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
 2025-04-12 16:54:53 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
 2025-04-12 17:47:07 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
 2025-04-12 17:47:41 - D:\ISS\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-09 16:52:39 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-09 16:55:48 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-09 16:58:03 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-09 17:04:24 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-09 17:05:55 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-09 17:08:31 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-09 17:19:11 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-10 15:43:56 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-10 16:07:25 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-10 16:46:30 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-10 16:51:24 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-10 18:20:58 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-11 12:57:50 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-11 13:34:24 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-12 12:39:36 - C:\Users\eciobanu\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
