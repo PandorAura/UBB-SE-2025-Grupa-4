@@ -73,6 +73,32 @@ namespace App1.Services
             var reviews = _reviewsRepository.GetMostRecentReviews(count);
             return reviews ?? [];
         }
+
+        public List<Review> FilterReviewsByContent(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return GetFlaggedReviews();
+            }
+
+            content = content.ToLower();
+            return GetFlaggedReviews()
+                .Where(review => review.Content.ToLower().Contains(content))
+                .ToList();
+        }
+
+        //public List<Review> FilterReviewsByUser(string userFilter)
+        //{
+        //    if (string.IsNullOrEmpty(userFilter))
+        //    {
+        //        return GetFlaggedReviews();
+        //    }
+
+        //    userFilter = userFilter.ToLower();
+        //    return GetFlaggedReviews()
+        //        .Where(review => review.UserName.ToLower().Contains(userFilter))
+        //        .ToList();
+        //}
     }
 }
 

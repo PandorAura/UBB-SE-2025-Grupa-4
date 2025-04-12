@@ -78,5 +78,9 @@ namespace App1.Services
         /// </summary>
         /// <param name="userID">The ID of the user who created the review.</param>
         void ResetReviewFlags(int userID);
+
+        // Add new filter methods
+        public List<Review> FilterReviewsByContent(string content);
+        //public List<Review> FilterReviewsByUser(string userFilter);
     }
 }
