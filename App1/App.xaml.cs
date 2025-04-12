@@ -38,7 +38,11 @@ namespace App1
 
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>();
-                    services.AddSingleton<IAutoCheck, AutoCheck>(provider => new AutoCheck(connectionString));
+                    services.AddSingleton<IOffensiveWordsRepository>(provider =>
+                    {
+                        return new OffensiveWordsRepository(connectionString);
+                    });
+                    services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
                     services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
                     services.AddSingleton<IRolesRepository, RolesRepository>();
