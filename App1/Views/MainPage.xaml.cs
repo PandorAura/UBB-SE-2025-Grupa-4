@@ -12,6 +12,8 @@ using Microsoft.UI.Text;
 using System;
 using System.Runtime.CompilerServices;
 using App1.AutoChecker;
+using App1.ViewModels;
+using System.ComponentModel;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -24,336 +26,222 @@ namespace App1.Views
 
     public sealed partial class MainPage : Page
     {
-
-        private IReviewService reviewsService;
-        private IUserService userService;
-        private ICheckersService checkersService;
-        private IUpgradeRequestsService requestsService;
-        private IAutoCheck autoCheck;
+        public MainPageViewModel ViewModel { get; }
 
         public MainPage(IReviewService reviewsService,
-                   IUserService userService, IUpgradeRequestsService upgradeRequestsService, ICheckersService checkersService, IAutoCheck autoCheck
-                   )
+                   IUserService userService, IUpgradeRequestsService upgradeRequestsService, ICheckersService checkersService, IAutoCheck autoCheck)
         {
             this.InitializeComponent();
 
-            if ( reviewsService == null ) {
-                throw new ArgumentNullException(nameof(reviewsService));
-            }
-            if (userService == null)
+            // Initialize ViewModel with services
+            ViewModel = new MainPageViewModel(
+                reviewsService,
+                userService,
+                upgradeRequestsService,
+                checkersService,
+                autoCheck
+            );
+
+            // Subscribe to property changes to update UI
+            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+            // Set DataContext for binding
+            this.DataContext = ViewModel;
+            
+            // Handle unloaded event to clean up event subscriptions
+            this.Unloaded += MainPage_Unloaded;
+        }
+
+        private void MainPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Unsubscribe from events to prevent memory leaks
+            ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+        }
+
+        private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ViewModel.IsWordListVisible))
             {
-                throw new ArgumentNullException(nameof(userService));
+                WordListPopup.Visibility = ViewModel.IsWordListVisible ? Visibility.Visible : Visibility.Collapsed;
             }
-            this.reviewsService = reviewsService;
-            this.userService = userService;
-            this.requestsService = upgradeRequestsService;
-            this.checkersService = checkersService;
-            this.autoCheck = autoCheck;
-            // checkersService = new CheckersService(reviewsService);
-
-            LoadStatistics();
-            displayReviews();
-            displayAppeal();
-            displayRoleRequests();
-
         }
-
-        private void displayReviews()
-        {
-            ObservableCollection<Review> Reviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
-
-            ReviewsList.ItemsSource = Reviews;
-        }
-
-        private void displayAppeal()
-        {
-            ObservableCollection<User> UsersWhichAppealed = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals());
-
-            AppealsList.ItemsSource = UsersWhichAppealed;
-        }
-
 
         private void AppealsList_ItemClick(object sender, ItemClickEventArgs e)
         {
             if (e.ClickedItem is User selectedUser)
             {
-                Flyout flyout = new Flyout();
-                StackPanel panel = new StackPanel { Padding = new Thickness(10) };
-
-                selectedUser.AssignedRoles.Add(new Role(0, "Banned"));
-
-                TextBlock userInfo = new TextBlock
-                {
-                    Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.EmailAddress}\nStatus: Banned",
-                    FontSize = 18
-                };
-
-                List<Review> userReviews = reviewsService.GetReviewsByUser(selectedUser.UserId);
-
-                TextBlock reviewsHeader = new TextBlock
-                {
-                    Text = "User Reviews:",
-                    FontWeight = FontWeights.Bold,
-                    Margin = new Thickness(0, 10, 0, 5)
-                };
-
-                ListView reviewsList = new ListView
-                {
-                    ItemsSource = userReviews.Select(r => $"{r.Content}").ToList(),
-                    MaxHeight = 200
-                };
-
-                Button banButton = new Button
-                {
-                    Content = "Keep Ban",
-                    Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
-                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
-                    HorizontalAlignment = HorizontalAlignment.Stretch
-                };
-                banButton.Click += (s, args) =>
-                {
-                    selectedUser.AssignedRoles.Add(new Role(0, "Banned"));
-                    userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.EmailAddress}\nStatus: Banned";
-                    LoadStatistics();
-                };
-
-                Button appealButton = new Button
-                {
-                    Content = "Accept Appeal",
-                    Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green),
-                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
-                    HorizontalAlignment = HorizontalAlignment.Stretch
-                };
-                appealButton.Click += (s, args) =>
-                {
-                    selectedUser.AssignedRoles.Add(new Role(RoleType.Banned, "Banned"));
-                    userInfo.Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.EmailAddress}\nStatus: Active";
-                    LoadStatistics();
-                };
-
-                Button closeButton = new Button
-                {
-                    Content = "Close Appeal Case",
-                    HorizontalAlignment = HorizontalAlignment.Center
-                };
-                closeButton.Click += (s, args) =>
-                {
-                    selectedUser.HasSubmittedAppeal = false;
-                    AppealsList.ItemsSource = null;
-                    AppealsList.ItemsSource = userService.GetBannedUsersWhoHaveSubmittedAppeals();
-                    flyout.Hide();
-                    //LoadStatistics();
-                };
-
-                panel.Children.Add(userInfo);
-                panel.Children.Add(reviewsHeader);
-                panel.Children.Add(reviewsList);
-                panel.Children.Add(banButton);
-                panel.Children.Add(appealButton);
-                panel.Children.Add(closeButton);
-
-
-                flyout.Content = panel;
-                flyout.Placement = FlyoutPlacementMode.Left;
-                flyout.ShowAt((FrameworkElement)sender);
-
+                // Set the selected user in the ViewModel which triggers loading of details
+                ViewModel.SelectedAppealUser = selectedUser;
                 
+                // Create and show UI elements
+                ShowAppealDetailsUI(sender);
             }
         }
+        
+        private void ShowAppealDetailsUI(object anchor)
+        {
+            // This method still creates UI dynamically, which is not ideal MVVM
+            // In a better solution, we'd use a DataTemplate and Binding
+            Flyout flyout = new Flyout();
+            StackPanel panel = new StackPanel { Padding = new Thickness(10) };
+
+            // Display user status from ViewModel property
+            TextBlock userInfo = new TextBlock
+            {
+                Text = ViewModel.UserStatusDisplay,
+                FontSize = 18
+            };
+
+            TextBlock reviewsHeader = new TextBlock
+            {
+                Text = "User Reviews:",
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 10, 0, 5)
+            };
+
+            // Use the formatted reviews from ViewModel
+            ListView reviewsList = new ListView
+            {
+                ItemsSource = ViewModel.UserReviewsFormatted,
+                MaxHeight = 200
+            };
+
+            // Create buttons that use commands
+            Button banButton = new Button
+            {
+                Content = "Keep Ban",
+                Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
+                Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Command = ViewModel.KeepBanCommand
+            };
+
+            Button appealButton = new Button
+            {
+                Content = "Accept Appeal",
+                Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green),
+                Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Command = ViewModel.AcceptAppealCommand
+            };
+
+            Button closeButton = new Button
+            {
+                Content = "Close Appeal Case",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Command = ViewModel.CloseAppealCaseCommand
+            };
+            
+            // Add manual close event for the flyout
+            closeButton.Click += (s, args) => { flyout.Hide(); };
+
+            panel.Children.Add(userInfo);
+            panel.Children.Add(reviewsHeader);
+            panel.Children.Add(reviewsList);
+            panel.Children.Add(banButton);
+            panel.Children.Add(appealButton);
+            panel.Children.Add(closeButton);
+
+            flyout.Content = panel;
+            flyout.Placement = FlyoutPlacementMode.Left;
+            flyout.ShowAt((FrameworkElement)anchor);
+        }
+        
         private void RequestList_ItemClick(object sender, ItemClickEventArgs e)
         {
             if (e.ClickedItem is UpgradeRequest selectedRequest)
             {
-                Flyout flyout = new Flyout();
-                StackPanel panel = new StackPanel { Padding = new Thickness(10) };
-                int userID = selectedRequest.RequestingUserId;
-                User selectedUser = userService.GetUserById(userID);
-                RoleType currentRoleID = userService.GetHighestRoleTypeForUser(selectedUser.UserId);
-                string currentRoleName = requestsService.GetRoleNameBasedOnID(currentRoleID);
-                string requiredRoleName = requestsService.GetRoleNameBasedOnID(currentRoleID + 1);
-                TextBlock userInfo = new TextBlock
-                {
-                    Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.EmailAddress}\n{currentRoleName} -> {requiredRoleName}",
-                    FontSize = 18
-                };
-
-                List<Review> userReviews = reviewsService.GetReviewsByUser(selectedUser.UserId);
-
-                TextBlock reviewsHeader = new TextBlock
-                {
-                    Text = "User Reviews:",
-                    FontWeight = FontWeights.Bold,
-                    Margin = new Thickness(0, 10, 0, 5)
-                };
-
-                ListView reviewsList = new ListView
-                {
-                    ItemsSource = userReviews.Select(r => $"{r.Content}\nFlags: {r.NumberOfFlags}").ToList(),
-                    Height = 100
-                };
-
-                panel.Children.Add(userInfo);
-                panel.Children.Add(reviewsHeader);
-                panel.Children.Add(reviewsList);
-
-
-                flyout.Content = panel;
-                flyout.Placement = FlyoutPlacementMode.Left;
-                flyout.ShowAt((FrameworkElement)sender);
+                // Set the selected request in the ViewModel which triggers loading of details
+                ViewModel.SelectedUpgradeRequest = selectedRequest;
+                
+                // Create and show UI elements
+                ShowUpgradeRequestDetailsUI(sender);
             }
         }
-
-
-
-        private void displayRoleRequests()
+        
+        private void ShowUpgradeRequestDetailsUI(object anchor)
         {
-            List<UpgradeRequest> upgradeRequests = requestsService.GetAllRequests();
-            ObservableCollection<UpgradeRequest> UsersRoleRequests = new ObservableCollection<UpgradeRequest>(upgradeRequests);
+            Flyout flyout = new Flyout();
+            StackPanel panel = new StackPanel { Padding = new Thickness(10) };
+            
+            // Display user upgrade info from ViewModel property
+            TextBlock userInfo = new TextBlock
+            {
+                Text = ViewModel.UserUpgradeInfo,
+                FontSize = 18
+            };
 
-            RequestsList.ItemsSource = UsersRoleRequests;
+            TextBlock reviewsHeader = new TextBlock
+            {
+                Text = "User Reviews:",
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 10, 0, 5)
+            };
 
+            // Use the formatted reviews with flags from ViewModel
+            ListView reviewsList = new ListView
+            {
+                ItemsSource = ViewModel.UserReviewsWithFlags,
+                Height = 100
+            };
+
+            panel.Children.Add(userInfo);
+            panel.Children.Add(reviewsHeader);
+            panel.Children.Add(reviewsList);
+
+            flyout.Content = panel;
+            flyout.Placement = FlyoutPlacementMode.Left;
+            flyout.ShowAt((FrameworkElement)anchor);
         }
+        
         private void AcceptButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button)
+            if (sender is Button button && button.Tag is int requestId)
             {
-                if (button.Tag is int RequestId)
-                {
-                    this.requestsService.HandleRequest(true, RequestId);
-
-                }
+                ViewModel.HandleUpgradeRequest(true, requestId);
             }
-            this.displayRoleRequests();
-            LoadStatistics();
         }
+        
         private void DeclineButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button)
+            if (sender is Button button && button.Tag is int requestId)
             {
-                if (button.Tag is int RequestId)
-                {
-                    this.requestsService.HandleRequest(false, RequestId);
-                }
+                ViewModel.HandleUpgradeRequest(false, requestId);
             }
-            this.displayRoleRequests();
-            LoadStatistics();
-        }
-
-        private void LoadPieChart()
-        {
-            int bannedCount, usersCount, adminsCount, managerCount;
-            bannedCount = usersCount = adminsCount = managerCount = 0;
-
-            List<User> users = userService.GetAllUsers();
-            foreach (var user in users) { 
-                var count = user.AssignedRoles.Count;
-                switch (count) { 
-                    case 0: bannedCount++; break;
-                    case 1: usersCount++; break;
-                    case 2: adminsCount++; break;
-                    case 3: managerCount++; break;
-                }
-            }
-            
-            AllUsersPieChart.Series = new List<PieSeries<double>> 
-            {
-                new PieSeries<double> { Values = new double[] { bannedCount }, Name = "Banned" },
-                new PieSeries<double> { Values = new double[] { usersCount }, Name = "Users" },
-                new PieSeries<double> { Values = new double[] { adminsCount }, Name = "Admins" },
-                new PieSeries<double> { Values = new double[] { managerCount }, Name = "Managers" }
-            };
-        }
-
-        private void LoadStatistics()
-        {
-            LoadPieChart();
-            LoadBarChart();
-        }
-
-        private void LoadBarChart()
-        {
-            //flagged reviews = pending, hidden reviews = rejected
-            var rejectedCount = reviewsService.GetHiddenReviews().Count;
-            var pendingCount = reviewsService.GetFlaggedReviews().Count;
-            var totalCount = reviewsService.GetReviews().Count;
-            TotalDataBarChart.Series = new List<ISeries>
-            {
-                new ColumnSeries<double>
-                {
-                    Values = new double[] { rejectedCount, pendingCount, totalCount }, // Your data points
-                }
-            };
-
-            TotalDataBarChart.XAxes = new List<Axis>
-            {
-                new Axis { Labels = new List<string> { "rejected", "pending", "total" } }  // X-axis labels
-            };
-
-            TotalDataBarChart.YAxes = new List<Axis> { new Axis { Name = "Total", MinLimit = 0 } };
         }
 
         private void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ObservableCollection<Review> AllReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
-            string filter = ReviewSearchTextBox.Text.ToLower();
-            ReviewsList.ItemsSource = new ObservableCollection<Review>(
-                AllReviews.Where(review => review.Content.ToLower().Contains(filter))
-            );
+            ViewModel.FilterReviews(ReviewSearchTextBox.Text);
         }
 
         private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         { 
-            string filter = BannedUserSearchTextBox.Text.ToLower();
-            AppealsList.ItemsSource = new ObservableCollection<User>(
-                userService.GetBannedUsersWhoHaveSubmittedAppeals()
-            );
+            ViewModel.FilterAppeals(BannedUserSearchTextBox.Text);
         }
 
         private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                reviewsService.resetReviewFlags(review.ReviewID);
+                ViewModel.ResetReviewFlags(review.ReviewID);
             }
-            displayReviews();
-            LoadStatistics();
         }
 
         private void MenuFlyoutHideReview_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                reviewsService.HideReview(review.UserID);
-                reviewsService.resetReviewFlags(review.ReviewID); //Reviews are displayed if they have at least one flag
+                ViewModel.HideReview(review.UserID, review.ReviewID);
             }
-            displayReviews();
-            LoadStatistics();
         }
 
         private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                checkersService.RunAICheck(review);
+                ViewModel.RunAICheck(review);
             }
-            displayReviews();
-        }
-
-
-        private void Button_AutoCheck_Click(object sender, RoutedEventArgs e)
-        {
-            List<Review> reviews = reviewsService.GetFlaggedReviews();
-
-            List<string> messages = checkersService.RunAutoCheck(reviews); //put the messages in a logs file
-
-            displayReviews();
-            LoadStatistics();
-        }
-
-        private void Button_ModifyOffensiveWordsList_Click(object sender, RoutedEventArgs e)
-        {
-            WordsList.ItemsSource = checkersService.getOffensiveWordsList();
-            WordListPopup.Visibility = Visibility.Visible;
         }
 
         private async void AddWord_Click(object sender, RoutedEventArgs e)
@@ -372,28 +260,8 @@ namespace App1.Views
             if (await dialog.ShowAsync() == ContentDialogResult.Primary)
             {
                 var newWord = input.Text.Trim();
-                if (!string.IsNullOrWhiteSpace(newWord))
-                {
-                    checkersService.AddOffensiveWord(newWord);
-                    WordsList.ItemsSource = null;
-                    WordsList.ItemsSource = checkersService.getOffensiveWordsList();
-                }
+                ViewModel.AddOffensiveWord(newWord);
             }
-        }
-
-        private void DeleteWord_Click(object sender, RoutedEventArgs e)
-        {
-            if (WordsList.SelectedItem is string selectedWord)
-            {
-                checkersService.DeleteOffensiveWord(selectedWord);
-                WordsList.ItemsSource = null;
-                WordsList.ItemsSource = checkersService.getOffensiveWordsList();
-            }
-        }
-
-        private void CancelWordPopup_Click(object sender, RoutedEventArgs e)
-        {
-            WordListPopup.Visibility = Visibility.Collapsed;
         }
     }
 }

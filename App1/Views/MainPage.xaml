@@ -10,6 +10,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     xmlns:models="using:App1.Models" 
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:viewmodels="using:App1.ViewModels"
 >
 
     <Page.Resources>
@@ -71,7 +72,8 @@
                       Padding="0,4,0,0"
                       SelectionMode="Single"
                       Background="Transparent"
-                      BorderThickness="0">
+                      BorderThickness="0"
+                      ItemsSource="{x:Bind ViewModel.FlaggedReviews, Mode=OneWay}">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -140,7 +142,7 @@
                     FontWeight="SemiBold"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
-                    Click="Button_AutoCheck_Click">
+                    Command="{x:Bind ViewModel.RunAutoCheckCommand}">
                             <Button.Resources>
                                 <Style TargetType="Border">
                                     <Setter Property="CornerRadius" Value="8"/>
@@ -161,7 +163,7 @@
                     BorderBrush="{StaticResource SystemControlForegroundBaseMediumBrush}"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
-                    Click="Button_ModifyOffensiveWordsList_Click">
+                    Command="{x:Bind ViewModel.ShowWordListPopupCommand}">
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius" Value="8"/>
@@ -199,8 +201,12 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <lvc:PieChart x:Name="AllUsersPieChart" Grid.Column="0" Margin="0,12"/>
-                        <lvc:CartesianChart x:Name="TotalDataBarChart" Grid.Column="1" Margin="0,12"/>
+                        <lvc:PieChart x:Name="AllUsersPieChart" Grid.Column="0" Margin="0,12"
+                                      Series="{x:Bind ViewModel.PieChartSeries, Mode=OneWay}"/>
+                        <lvc:CartesianChart x:Name="TotalDataBarChart" Grid.Column="1" Margin="0,12"
+                                           Series="{x:Bind ViewModel.BarChartSeries, Mode=OneWay}"
+                                           XAxes="{x:Bind ViewModel.BarChartXAxes, Mode=OneWay}"
+                                           YAxes="{x:Bind ViewModel.BarChartYAxes, Mode=OneWay}"/>
                     </Grid>
                 </Grid>
             </Border>
@@ -227,7 +233,7 @@
                               BorderThickness="0"
                               IsItemClickEnabled="True" 
                               ItemClick="RequestList_ItemClick"
-                              >
+                              ItemsSource="{x:Bind ViewModel.UpgradeRequests, Mode=OneWay}">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -308,7 +314,8 @@
                       IsItemClickEnabled="True" 
                       ItemClick="AppealsList_ItemClick"
                       Background="Transparent"
-                      BorderThickness="0">
+                      BorderThickness="0"
+                      ItemsSource="{x:Bind ViewModel.AppealsUsers, Mode=OneWay}">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -334,24 +341,32 @@
         </Grid>
 
         <!-- Forbidden Words Popup -->
-        <Grid x:Name="WordListPopup" Visibility="Collapsed" Background="#80000000" Grid.RowSpan="2" Grid.ColumnSpan="3">
+        <Grid x:Name="WordListPopup" 
+              Visibility="Collapsed"
+              Background="#80000000" 
+              Grid.RowSpan="2" 
+              Grid.ColumnSpan="3">
             <Border Background="{ThemeResource CardBackgroundFillColorDefault}"
-            CornerRadius="{StaticResource ControlCornerRadius}"
-            Padding="20" Width="400" Height="400"
-            HorizontalAlignment="Center" VerticalAlignment="Center"
-            BorderBrush="{ThemeResource CardStrokeColorDefault}"
-            BorderThickness="{StaticResource CardBorderThickness}">
+                    CornerRadius="{StaticResource ControlCornerRadius}"
+                    Padding="20" Width="400" Height="400"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    BorderBrush="{ThemeResource CardStrokeColorDefault}"
+                    BorderThickness="{StaticResource CardBorderThickness}">
                 <StackPanel>
                     <TextBlock Text="Forbidden Words" FontSize="18" FontWeight="Bold" Margin="0,0,0,12"/>
 
                     <ListView x:Name="WordsList" Height="200"
                       SelectionMode="Single"
-                      BorderThickness="1" Margin="0,0,0,12"/>
+                      BorderThickness="1" Margin="0,0,0,12"
+                      ItemsSource="{x:Bind ViewModel.OffensiveWords, Mode=OneWay}"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Add" Width="100" Margin="0,0,8,0" Click="AddWord_Click"/>
-                        <Button Content="Delete" Width="100" Click="DeleteWord_Click"/>
-                        <Button Content="Cancel" Width="100" Click="CancelWordPopup_Click"/>
+                        <Button Content="Delete" Width="100" 
+                                Command="{x:Bind ViewModel.DeleteOffensiveWordCommand}" 
+                                CommandParameter="{x:Bind WordsList.SelectedItem, Mode=OneWay}"/>
+                        <Button Content="Cancel" Width="100" 
+                                Command="{x:Bind ViewModel.HideWordListPopupCommand}"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

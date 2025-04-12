@@ -18,5 +18,9 @@ namespace App1.Services
         int GetReviewCountSince(DateTime date);
         List<Review> GetReviewsByUser(int userId);
         void resetReviewFlags(int userID);
+
+        // Add new filter methods
+        public List<Review> FilterReviewsByContent(string content);
+        public List<Review> FilterReviewsByUser(string userFilter);
     }
 }
