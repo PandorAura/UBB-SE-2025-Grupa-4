@@ -22,16 +22,16 @@ namespace App1.Services
             this.RemoveUpgradeRequestsFromBannedUsers();
         }
 
-        protected void RemoveUpgradeRequestsFromBannedUsers()
+        public void RemoveUpgradeRequestsFromBannedUsers()
         {
             List<UpgradeRequest> pendingUpgradeRequests = this.RetrieveAllUpgradeRequests();
-            for (int requestIndex = 0; requestIndex < pendingUpgradeRequests.Count; requestIndex++)
+            // Use a reversed loop or a copy of the list to safely remove items
+            for (int i = pendingUpgradeRequests.Count - 1; i >= 0; i--)
             {
-                int requestingUserIdentifier = pendingUpgradeRequests[requestIndex].RequestingUserIdentifier;
+                int requestingUserIdentifier = pendingUpgradeRequests[i].RequestingUserIdentifier;
                 if (this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier) == RoleType.Banned)
                 {
-                    this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[requestIndex].UpgradeRequestId);
-                    requestIndex--;
+                    this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[i].UpgradeRequestId);
                 }
             }
         }

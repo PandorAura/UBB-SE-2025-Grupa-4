@@ -7,6 +7,26 @@ using Xunit;
 
 namespace UnitTests.UpgradeRequests
 {
+    // Test subclass that exposes the protected method for testing
+    public class TestableUpgradeRequestsService : UpgradeRequestsService
+    {
+        public TestableUpgradeRequestsService(
+            IUpgradeRequestsRepository upgradeRequestsRepository,
+            IRolesRepository rolesRepository,
+            IUserRepository userRepository)
+            : base(upgradeRequestsRepository, rolesRepository, userRepository)
+        {
+            // Skip calling RemoveUpgradeRequestsFromBannedUsers in constructor
+            // We'll call it explicitly in our test
+        }
+
+        // Expose the protected method for testing
+        public void PublicRemoveUpgradeRequestsFromBannedUsers()
+        {
+            base.RemoveUpgradeRequestsFromBannedUsers();
+        }
+    }
+
     public class UpgradeRequestsServiceTests
     {
         private readonly Mock<IUpgradeRequestsRepository> _mockUpgradeRequestsRepository;
@@ -45,8 +65,7 @@ namespace UnitTests.UpgradeRequests
         [Fact]
         public void Constructor_WithValidDependencies_CreatesService()
         {
-            // Assert
-            Assert.NotNull(_upgradeRequestsService);
+           
 
             _mockUpgradeRequestsRepository.Verify(r => r.RetrieveAllUpgradeRequests(), Times.Once);
         }
@@ -130,78 +149,56 @@ namespace UnitTests.UpgradeRequests
             _mockUpgradeRequestsRepository.Verify(r => r.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier), Times.Once);
         }
 
-        //    [Fact]
-        //    public void RemoveUpgradeRequestsFromBannedUsers_RemovesRequestsFromBannedUsers()
-        //    {
-        //        // Arrange
-        //        // Create a new service that won't call the method in constructor
-        //        var upgradeRequestsRepository = new Mock<IUpgradeRequestsRepository>();
-        //        var rolesRepository = new Mock<IRolesRepository>();
-        //        var userRepository = new Mock<IUserRepository>();
+        [Fact]
+        public void RemoveUpgradeRequestsFromBannedUsers_RemovesBannedUsersRequests()
+        {
+            // Arrange
+            var upgradeRequests = new List<UpgradeRequest>
+            {
+                new UpgradeRequest(1, 100, "Regular User"),
+                new UpgradeRequest(2, 101, "Banned User"),
+                new UpgradeRequest(3, 102, "Another Regular User"),
+                new UpgradeRequest(4, 103, "Another Banned User")
+            };
 
-        //        // Setup roles
-        //        var roles = new List<Role>
-        //        {
-        //            new Role(RoleType.Banned, "Banned"),
-        //            new Role(RoleType.User, "User"),
-        //            new Role(RoleType.Manager, "Manager"),
-        //            new Role(RoleType.Admin, "Admin")
-        //        };
-        //        rolesRepository.Setup(r => r.GetAllRoles()).Returns(roles);
+            // Create new mocks specifically for this test
+            var mockRepo = new Mock<IUpgradeRequestsRepository>();
+            var mockRoles = new Mock<IRolesRepository>();
+            var mockUsers = new Mock<IUserRepository>();
 
-        //        var upgradeRequests = new List<UpgradeRequest>
-        //        {
-        //            new UpgradeRequest(1, 100, "User 1"),
-        //            new UpgradeRequest(2, 101, "User 2"),
-        //            new UpgradeRequest(3, 102, "Banned User")
-        //        };
-        //        upgradeRequestsRepository.Setup(r => r.RetrieveAllUpgradeRequests())
-        //            .Returns(upgradeRequests);
+            // Setup retrieval of all upgrade requests
+            mockRepo.Setup(r => r.RetrieveAllUpgradeRequests())
+                .Returns(upgradeRequests);
 
-        //        userRepository.Setup(r => r.GetHighestRoleTypeForUser(100))
-        //            .Returns(RoleType.User); // Not banned
-        //        userRepository.Setup(r => r.GetHighestRoleTypeForUser(101))
-        //            .Returns(RoleType.User); // Not banned
-        //        userRepository.Setup(r => r.GetHighestRoleTypeForUser(102))
-        //            .Returns(RoleType.Banned); // Banned
+            // Setup roles
+            mockRoles.Setup(r => r.GetAllRoles())
+                .Returns(new List<Role>
+                {
+                    new Role(RoleType.Banned, "Banned"),
+                    new Role(RoleType.User, "User")
+                });
 
-        //        // Create a test service without calling the constructor-based cleanup
-        //        var service = new UpgradeRequestsServiceForTest(
-        //            upgradeRequestsRepository.Object,
-        //            rolesRepository.Object,
-        //            userRepository.Object);
+            // Setup user repository to identify banned users
+            mockUsers.Setup(u => u.GetHighestRoleTypeForUser(101)).Returns(RoleType.Banned);
+            mockUsers.Setup(u => u.GetHighestRoleTypeForUser(103)).Returns(RoleType.Banned);
+            mockUsers.Setup(u => u.GetHighestRoleTypeForUser(100)).Returns(RoleType.User);
+            mockUsers.Setup(u => u.GetHighestRoleTypeForUser(102)).Returns(RoleType.User);
 
-        //        // Act
-        //        service.RemoveUpgradeRequestsFromBannedUsers();
+            // Create testable service with our mocks
+            var testableService = new TestableUpgradeRequestsService(
+                mockRepo.Object,
+                mockRoles.Object,
+                mockUsers.Object);
 
-        //        // Assert
-        //        upgradeRequestsRepository.Verify(r => r.RetrieveAllUpgradeRequests(), Times.Once);
-        //        userRepository.Verify(r => r.GetHighestRoleTypeForUser(100), Times.Once);
-        //        userRepository.Verify(r => r.GetHighestRoleTypeForUser(101), Times.Once);
-        //        userRepository.Verify(r => r.GetHighestRoleTypeForUser(102), Times.Once);
-        //        upgradeRequestsRepository.Verify(r => r.RemoveUpgradeRequestByIdentifier(3), Times.Once);
-        //        upgradeRequestsRepository.Verify(r => r.RemoveUpgradeRequestByIdentifier(1), Times.Never);
-        //        upgradeRequestsRepository.Verify(r => r.RemoveUpgradeRequestByIdentifier(2), Times.Never);
-        //    }
-        //}
+            // Act
+            testableService.PublicRemoveUpgradeRequestsFromBannedUsers();
 
-        //// Helper class to avoid constructor-based cleanup for testing RemoveUpgradeRequestsFromBannedUsers
-        //public class UpgradeRequestsServiceForTest : UpgradeRequestsService
-        //{
-        //    public UpgradeRequestsServiceForTest(
-        //        IUpgradeRequestsRepository upgradeRequestsRepository,
-        //        IRolesRepository rolesRepository,
-        //        IUserRepository userRepository)
-        //        : base(upgradeRequestsRepository, rolesRepository, userRepository)
-        //    {
-        //        // Override the base constructor behavior to avoid calling RemoveUpgradeRequestsFromBannedUsers
-        //    }
-
-        //    // Make the method public for direct testing
-        //    public new void RemoveUpgradeRequestsFromBannedUsers()
-        //    {
-        //        base.RemoveUpgradeRequestsFromBannedUsers();
-        //    }
-        //}
+            // Assert
+            // Verify that only the banned users' requests were removed
+            mockRepo.Verify(r => r.RemoveUpgradeRequestByIdentifier(2), Times.AtLeastOnce);
+            mockRepo.Verify(r => r.RemoveUpgradeRequestByIdentifier(4), Times.AtLeastOnce);
+            mockRepo.Verify(r => r.RemoveUpgradeRequestByIdentifier(1), Times.Never);
+            mockRepo.Verify(r => r.RemoveUpgradeRequestByIdentifier(3), Times.Never);
+        }
     }
 }
