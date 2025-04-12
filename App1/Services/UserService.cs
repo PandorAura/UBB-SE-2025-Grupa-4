@@ -5,28 +5,27 @@ using App1.Repositories;
 
 namespace App1.Services
 {
-    public class UserService: IUserService
+    public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepo;
-        private const int BANNED_PERMISSION_ID = 0;
+        private readonly IUserRepository _userRepository;
 
         public UserService(IUserRepository userRepository)
         {
-            _userRepo = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
         public List<User> GetAllUsers()
         {
-            return _userRepo.GetUsers();
+            return _userRepository.GetAllUsers();
         }
 
-        public List<User> GetActiveUsers(int permissionId)
+        public List<User> GetActiveUsersByRoleType(RoleType roleType)
         {
             try
             {
-                return permissionId switch
+                return roleType switch
                 {
-                    > 0 => _userRepo.GetUsersByRole(permissionId),
+                    > 0 => _userRepository.GetUsersByRoleType(roleType),
                     _ => throw new ArgumentException("Permission ID must be positive")
                 };
             }
@@ -40,7 +39,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepo.GetUsersByRole(BANNED_PERMISSION_ID);
+                return _userRepository.GetUsersByRoleType(RoleType.Banned);
             }
             catch (Exception ex)
             {
@@ -48,28 +47,44 @@ namespace App1.Services
             }
         }
 
-        public List<User> GetUsersByPermission(int permissionId)
+        public List<User> GetUsersByRoleType(RoleType roleType)
         {
-            return  _userRepo.GetUsersByRole(permissionId); 
-        }
-    
-        public string GetUserName(int ID) { 
-            return _userRepo.getUserByID(ID).Name;
+            return _userRepository.GetUsersByRoleType(roleType);
         }
 
-        public List<User> GetAppealingUsers()
+        public string GetUserFullNameById(int userId)
         {
-            return _userRepo.GetAppealingUsers();
+            return _userRepository.GetUserByID(userId).FullName;
         }
 
-        public User GetUserBasedOnID(int ID)
+        public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
         {
-            return _userRepo.getUserByID(ID);
+            return _userRepository.GetBannedUsersWhoHaveSubmittedAppeals();
         }
 
-        public int GetHighestRoleBasedOnUserID(int ID)
+        public User GetUserById(int userId)
         {
-            return this._userRepo.getHighestRoleIdBasedOnUserId(ID);
+            return _userRepository.GetUserByID(userId);
+        }
+
+        public RoleType GetHighestRoleTypeForUser(int userId)
+        {
+            return this._userRepository.GetHighestRoleTypeForUser(userId);
+        }
+
+        public List<User> GetAdminUsers()
+        {
+            return _userRepository.GetUsersByRoleType(RoleType.Admin);
+        }
+
+        public List<User> GetRegularUsers()
+        {
+            return _userRepository.GetUsersByRoleType(RoleType.User);
+        }
+
+        public List<User> GetManagers()
+        {
+            return _userRepository.GetUsersByRoleType(RoleType.Manager);
         }
     }
 

@@ -1,15 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using App1.Models;
+using System.Collections.Generic;
 
 namespace App1.Services
 {
     public interface IUserService
     {
-        public List<User> GetActiveUsers(int permissionId);
+        public List<User> GetActiveUsersByRoleType(RoleType roleType);
         public List<User> GetAllUsers();
-        public List<User> GetAppealingUsers();
+        public List<User> GetBannedUsersWhoHaveSubmittedAppeals();
         public List<User> GetBannedUsers();
-        List<User> GetUsersByPermission(int permissionId);
-        public User GetUserBasedOnID(int ID);
-        public int GetHighestRoleBasedOnUserID(int ID);
+        public List<User> GetAdminUsers();
+        public List<User> GetRegularUsers();
+        public List<User> GetManagers();
+        List<User> GetUsersByRoleType(RoleType roleType);
+        public User GetUserById(int ID);
+        public RoleType GetHighestRoleTypeForUser(int ID);
     }
 }

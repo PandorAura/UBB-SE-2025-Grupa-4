@@ -9,8 +9,7 @@ namespace App1.Repositories
 {
     public interface IRolesRepository
     {
-        public Role getUpgradedRoleBasedOnCurrentId(int currentRoleId);
-        public List<Role> getRoles();
-
+        public Role GetNextRole(RoleType currentRoleType);
+        public List<Role> GetAllRoles();
     }
 }

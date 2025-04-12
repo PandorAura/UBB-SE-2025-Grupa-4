@@ -1,93 +1,132 @@
-﻿using App1.Models;
+﻿using App1.Infrastructure;
+using App1.Models;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
-//using System.Data.SqlClient;
-using Microsoft.Data.SqlClient;
+using System.Data;
+
 namespace App1.Repositories
 {
-    public class UpgradeRequestsRepository: IUpgradeRequestsRepository
+    public class UpgradeRequestsRepository : IUpgradeRequestsRepository
     {
-        private SqlDataAdapter da;
-        private SqlConnection cs;
-        public UpgradeRequestsRepository(string connectionString) {
-            cs = new SqlConnection(connectionString);
-            da = new SqlDataAdapter();
+        private readonly ISqlConnectionFactory _connectionFactory;
+        private readonly ISqlDataAdapter _dataAdapter;
+
+        private const string SELECT_ALL_UPGRADE_REQUESTS_QUERY = "SELECT RequestId, RequestingUserId, RequestingUserName FROM UpgradeRequests";
+        private const string SELECT_UPGRADE_REQUEST_BY_IDENTIFIER_QUERY = "SELECT RequestId, RequestingUserId, RequestingUserName FROM UpgradeRequests WHERE RequestId = @upgradeRequestIdentifier";
+        private const string DELETE_UPGRADE_REQUEST_QUERY = "DELETE FROM UpgradeRequests WHERE RequestId=@upgradeRequestIdentifier";
+
+        public UpgradeRequestsRepository(ISqlConnectionFactory connectionFactory, ISqlDataAdapter dataAdapter)
+        {
+            _connectionFactory = connectionFactory;
+            _dataAdapter = dataAdapter;
         }
 
-        public List<UpgradeRequest> getAllRequests()
+        // Legacy constructor for backward compatibility
+        public UpgradeRequestsRepository(string databaseConnectionString)
+            : this(new SqlConnectionFactory(databaseConnectionString), new SqlDataAdapterWrapper(new SqlDataAdapter()))
         {
-            List<UpgradeRequest> requests = new List<UpgradeRequest>();
-            string query = "SELECT RequestId, RequestingUserId, RequestingUserName FROM UpgradeRequests";
-            try
+        }
+
+        public List<UpgradeRequest> RetrieveAllUpgradeRequests()
+        {
+            List<UpgradeRequest> upgradeRequestsList = new List<UpgradeRequest>();
+
+            using (var connection = _connectionFactory.CreateConnection())
             {
-                cs.Open();
-                SqlCommand selectCommand = new SqlCommand(query, cs);
-                SqlDataReader reader = selectCommand.ExecuteReader();
-                while (reader.Read())
+                try
                 {
-                    UpgradeRequest request = new UpgradeRequest(
-                        reader.GetInt32(0),
-                        reader.GetInt32(1),
-                        reader.GetString(2));
-                    
-                    requests.Add(request);
+                    connection.Open();
+                    var selectUpgradeRequestsCommand = connection.CreateCommand();
+                    selectUpgradeRequestsCommand.CommandText = SELECT_ALL_UPGRADE_REQUESTS_QUERY;
+
+                    using (var upgradeRequestsDataReader = selectUpgradeRequestsCommand.ExecuteReader())
+                    {
+                        while (upgradeRequestsDataReader.Read())
+                        {
+                            UpgradeRequest upgradeRequest = new UpgradeRequest(
+                                upgradeRequestsDataReader.GetInt32(0),
+                                upgradeRequestsDataReader.GetInt32(1),
+                                upgradeRequestsDataReader.GetString(2));
+
+                            upgradeRequestsList.Add(upgradeRequest);
+                        }
+                        upgradeRequestsDataReader.Close();
+                    }
                 }
-                reader.Close();
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
-            }
-            finally
-            {
-                cs.Close();
-            }
-            return requests;
-        }
-
-        public void deleteRequestBasedOnRequestId(int requestId)
-        {
-            da.DeleteCommand = new SqlCommand("DELETE FROM UpgradeRequests WHERE RequestId=@requestId",cs);
-            da.DeleteCommand.Parameters.Add("@requestId", System.Data.SqlDbType.Int).Value = requestId;
-            cs.Open();
-            da.DeleteCommand.ExecuteNonQuery();
-            cs.Close();
-        }
-        public UpgradeRequest getUpgradeRequest(int requestId)
-        {
-            UpgradeRequest request = null;
-            string query = "SELECT RequestId, RequestingUserId, RequestingUserName FROM UpgradeRequests WHERE RequestId = @id";
-
-            try
-            {
-                cs.Open();
-                SqlCommand cmd = new SqlCommand(query, cs);
-                cmd.Parameters.AddWithValue("@id", requestId);
-
-                SqlDataReader reader = cmd.ExecuteReader();
-
-                if (reader.Read()) 
+                catch (Exception databaseException)
                 {
-                    request = new UpgradeRequest(
-                        reader.GetInt32(0),      
-                        reader.GetInt32(1),       
-                        reader.GetString(2)       
-                    );
+                    Console.WriteLine("Database Error: " + databaseException.Message);
                 }
-
-                reader.Close();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
-            }
-            finally
-            {
-                cs.Close();
+                finally
+                {
+                    connection.Close();
+                }
             }
 
-            return request;
+            return upgradeRequestsList;
         }
-    
+
+        public void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
+        {
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                try
+                {
+                    connection.Open();
+                    var deleteCommand = connection.CreateCommand();
+                    deleteCommand.CommandText = DELETE_UPGRADE_REQUEST_QUERY;
+                    deleteCommand.Parameters.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier);
+                    deleteCommand.ExecuteNonQuery();
+                }
+                catch (Exception databaseException)
+                {
+                    Console.WriteLine("Database Error: " + databaseException.Message);
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+        }
+
+        public UpgradeRequest RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
+        {
+            UpgradeRequest retrievedUpgradeRequest = null;
+
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                try
+                {
+                    connection.Open();
+                    var selectUpgradeRequestCommand = connection.CreateCommand();
+                    selectUpgradeRequestCommand.CommandText = SELECT_UPGRADE_REQUEST_BY_IDENTIFIER_QUERY;
+                    selectUpgradeRequestCommand.Parameters.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier);
+
+                    using (var upgradeRequestDataReader = selectUpgradeRequestCommand.ExecuteReader())
+                    {
+                        if (upgradeRequestDataReader.Read())
+                        {
+                            retrievedUpgradeRequest = new UpgradeRequest(
+                                upgradeRequestDataReader.GetInt32(0),
+                                upgradeRequestDataReader.GetInt32(1),
+                                upgradeRequestDataReader.GetString(2)
+                            );
+                        }
+                        upgradeRequestDataReader.Close();
+                    }
+                }
+                catch (Exception databaseException)
+                {
+                    Console.WriteLine("Database Error: " + databaseException.Message);
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
+            return retrievedUpgradeRequest;
+        }
     }
 }

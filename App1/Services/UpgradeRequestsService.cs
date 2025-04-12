@@ -5,60 +5,60 @@ using System.Linq;
 
 namespace App1.Services
 {
-    public class UpgradeRequestsService: IUpgradeRequestsService
+    public class UpgradeRequestsService : IUpgradeRequestsService
     {
-        private IUpgradeRequestsRepository upgradeRequestsRepository;
-        private IRolesRepository rolesRepository;
-        private IUserRepository userRepo;
+        private readonly IUpgradeRequestsRepository upgradeRequestsRepository;
+        private readonly IRolesRepository rolesRepository;
+        private readonly IUserRepository userRepository;
 
-        public UpgradeRequestsService(IUpgradeRequestsRepository upgradeRequestsRepository, IRolesRepository rolesRepository, IUserRepository newUserRepo)
+        public UpgradeRequestsService(
+            IUpgradeRequestsRepository upgradeRequestsRepository,
+            IRolesRepository rolesRepository,
+            IUserRepository userRepository)
         {
             this.upgradeRequestsRepository = upgradeRequestsRepository;
             this.rolesRepository = rolesRepository;
-            this.userRepo = newUserRepo;
-            this.CheckForBannedUserRequests();
+            this.userRepository = userRepository;
+            this.RemoveUpgradeRequestsFromBannedUsers();
         }
 
-        public void CheckForBannedUserRequests()
+        public void RemoveUpgradeRequestsFromBannedUsers()
         {
-            List<UpgradeRequest> requests = this.GetAllRequests();
-            for(int i=0; i<requests.Count; i++) 
+            List<UpgradeRequest> pendingUpgradeRequests = this.RetrieveAllUpgradeRequests();
+            // Use a reversed loop or a copy of the list to safely remove items
+            for (int i = pendingUpgradeRequests.Count - 1; i >= 0; i--)
             {
-                int userId = requests[i].RequestingUserId;
-                if (this.userRepo.getHighestRoleIdBasedOnUserId(userId) == 0)
+                int requestingUserIdentifier = pendingUpgradeRequests[i].RequestingUserIdentifier;
+                if (this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier) == RoleType.Banned)
                 {
-                    this.upgradeRequestsRepository.deleteRequestBasedOnRequestId(requests[i].RequestId);
-                    i--;
+                    this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[i].UpgradeRequestId);
                 }
             }
         }
-        public string GetRoleNameBasedOnID(int roleId)
+
+        public string GetRoleNameBasedOnIdentifier(RoleType roleType)
         {
-            List<Role> roles = this.rolesRepository.getRoles();
-            Role role = roles.First(role => role.RoleId == roleId);
-            return role.RoleName;
+            List<Role> availableRoles = this.rolesRepository.GetAllRoles();
+            Role matchingRole = availableRoles.First(role => role.RoleType == roleType);
+            return matchingRole.RoleName;
         }
 
-        public List<UpgradeRequest> GetAllRequests()
+        public List<UpgradeRequest> RetrieveAllUpgradeRequests()
         {
-            return this.upgradeRequestsRepository.getAllRequests();
+            return this.upgradeRequestsRepository.RetrieveAllUpgradeRequests();
         }
 
-        public void HandleRequest(bool accepted, int requestId)
+        public void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier)
         {
-            if (accepted)
+            if (isRequestAccepted)
             {
-                UpgradeRequest currentRequest =  this.upgradeRequestsRepository.getUpgradeRequest(requestId);
-
-                int requestingUserId = currentRequest.RequestingUserId;
-
-                int highestRoleId = this.userRepo.getHighestRoleIdBasedOnUserId(requestingUserId);
-
-                Role upgradedRole = rolesRepository.getUpgradedRoleBasedOnCurrentId(highestRoleId);
-
-                this.userRepo.addRoleToUser(requestingUserId, upgradedRole);
+                UpgradeRequest currentUpgradeRequest = this.upgradeRequestsRepository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+                int requestingUserIdentifier = currentUpgradeRequest.RequestingUserIdentifier;
+                RoleType currentHighestRoleType = this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier);
+                Role nextRoleLevel = rolesRepository.GetNextRole(currentHighestRoleType);
+                this.userRepository.AddRoleToUser(requestingUserIdentifier, nextRoleLevel);
             }
-            this.upgradeRequestsRepository.deleteRequestBasedOnRequestId(requestId);
+            this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
         }
     }
 }

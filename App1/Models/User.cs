@@ -4,30 +4,28 @@ using System.Collections.Generic;
 public class User
 {
     public int UserId { get; set; }
-    public string Email { get; set; }
-    public string Name { get; set; }
+    public string EmailAddress { get; set; }
+    public string FullName { get; set; }
     public int NumberOfDeletedReviews { get; set; }
-    //public int PermissionID { get; set; }
-    public bool HasAppealed { get; set; }
-    public List<Role> Roles { get; set; }
+    public bool HasSubmittedAppeal { get; set; }
+    public List<Role> AssignedRoles { get; set; }
 
     public User() { }
 
-    public User(int userId, string email, string name, int numberOfDeletedReviews, int permissionID, bool hasAppealed, List<Role> roles)
-    
-        {
+    public User(int userId, string emailAddress, string fullName, int numberOfDeletedReviews, bool HasSubmittedAppeal, List<Role> assignedRoles)
+
+    {
         UserId = userId;
-        Email = email;
-        Name = name;
+        EmailAddress = emailAddress;
+        FullName = fullName;
         NumberOfDeletedReviews = numberOfDeletedReviews;
-        //PermissionID = permissionID;
-        HasAppealed = hasAppealed;
-        Roles = roles;
+        this.HasSubmittedAppeal = HasSubmittedAppeal;
+        AssignedRoles = assignedRoles;
 
     }
 
     public override string ToString()
     {
-        return "Id: " + UserId.ToString() + ", email: " + Email;
+        return "Id: " + UserId.ToString() + ", email: " + EmailAddress;
     }
 }

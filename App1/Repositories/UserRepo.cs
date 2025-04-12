@@ -1,143 +1,166 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using App1.Models;
+using Windows.System;
 
 namespace App1.Repositories
 {
     public class UserRepo : IUserRepository
     {
-        private readonly List<User> _users;
+        private readonly List<User> _usersList;
 
         public UserRepo()
         {
-            List<Role> roles1 = new List<Role>
+            List<Role> basicUserRoles = new List<Role>
             {
-                new Role(1, "user")
+                new Role(RoleType.User, "user")
             };
-            List<Role> roles2 = new List<Role>
+            List<Role> adminRoles = new List<Role>
             {
-                new Role(1, "user"),
-                new Role(2, "admin")
+                new Role(RoleType.User, "user"),
+                new Role(RoleType.Admin, "admin")
             };
-            List<Role> roles3 = new List<Role>
+            List<Role> managerRoles = new List<Role>
             {
-                new Role(1, "user"),
-                new Role(2, "admin"),
-                new Role(3, "manager")
+                new Role(RoleType.User, "user"),
+                new Role(RoleType.Admin, "admin"),
+                new Role(RoleType.Manager, "manager")
             };
-            List<Role> roles4 = new List<Role>
+            List<Role> bannedUserRoles = new List<Role>
             {
-                new Role(0, "banned")
+                new Role(RoleType.Banned, "banned")
             };
-            _users = new List<User>
+            _usersList = new List<User>
             {
                 new User(
                     userId: 1,
-                    email: "mkhenike@gmail.com",
-                    name: "Admin One",
-                    numberOfDeletedReviews: 3,
-                    permissionID: 1,
-                    hasAppealed: false,
-                    roles: roles4
-                ),
-                 new User(
+                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
+                    fullName: "Bianca Georgiana Cirnu",
+                    numberOfDeletedReviews: 2,
+                    HasSubmittedAppeal: true,
+                    assignedRoles: basicUserRoles
+                    ),
+                new User(
                     userId: 2,
-                    email: "aurapandor@gmail.com",
-                    name: "Admin Two",
-                    numberOfDeletedReviews: 3,
-                    permissionID: 2,
-                    hasAppealed: true,
-                    roles: roles3
-
+                    emailAddress: "alexiabortos@gmail.com",
+                    fullName: "Alexia Bortos",
+                    numberOfDeletedReviews: 2,
+                    HasSubmittedAppeal: true,
+                    assignedRoles: adminRoles
                 ),
-                  new User(
-                    userId: 3,
-                    email: "oanarares2004@gmail.com",
-                    name: "Admin Two",
-                    numberOfDeletedReviews: 3,
-                    permissionID: 1,
-                    hasAppealed: true,
-                    roles: roles2
-
-                ),
-                   new User(
-                    userId: 4,
-                    email: "nimigeanvalentinoficial@gmail.com",
-                    name: "Admin Two",
-                    numberOfDeletedReviews: 3,
-                    permissionID: 1,
-                    hasAppealed: true,
-                    roles: roles2
-
-                ),
-                    new User(
-                    userId: 5,
-                    email: "alinamoca25@gmail.com",
-                    name: "Admin Two",
-                    numberOfDeletedReviews: 3,
-                    permissionID: 1,
-                    hasAppealed: true,
-                    roles: roles2
-
-                ),
-                    new User(
-                    userId: 6,
-                    email: "mkhenike@gmail.com",
-                    name: "Banned User",
-                    numberOfDeletedReviews: 3,
-                    permissionID: 0,
-                    hasAppealed: true,
-                    roles: roles4
-                )
             };
         }
 
-        public List<User> GetAppealedUsers()
+        public List<User> GetUsersWhoHaveSubmittedAppeals()
         {
-            return _users.Where(u => u.HasAppealed).ToList();
-        }
-
-        public List<User> GetUsersByRole(int roleID)
-        {
-            return _users.Where(u => u.Roles.Any(r => r.RoleId == roleID)).ToList();
-        }
-
-        public int getHighestRoleIdBasedOnUserId(int userId)
-        {
-            User? user = _users.FirstOrDefault(user => user.UserId == userId);
-
-            if (user == null)
+            try
             {
-                return 0;
+                return _usersList.Where(user => user.HasSubmittedAppeal).ToList();
             }
-
-            List<Role> roles = user.Roles;
-
-            Role maxRole = roles.MaxBy(role => role.RoleId);
-
-            int maxId = maxRole.RoleId;
-
-            return maxId;
+            catch (Exception ex)
+            {
+                throw new RepositoryException("Failed to retrieve users who have submitted appeals.", ex);
+            }
         }
 
-        public User getUserByID(int ID) { 
-            return _users.First(user => user.UserId == ID);
-        }
-
-        public List<User> GetAppealingUsers()
+        public List<User> GetUsersByRoleType(RoleType roleType)
         {
-            return _users.Where(u => u.HasAppealed == true && u.Roles.Any(r => r.RoleId == 0)).ToList();
-        }
-        public void addRoleToUser(int userID, Role roleToAdd)
-        {
-            User user = _users.First(user => user.UserId == userID);
-            user.Roles.Add(roleToAdd);
-        }
-        public List<User> GetUsers()
-        {
-            return _users;
+            try
+            {
+                return _usersList.Where(user => user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to retrieve users with role type '{roleType}'.", ex);
+            }
         }
 
+        public RoleType GetHighestRoleTypeForUser(int userId)
+        {
+            try
+            {
+                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+
+                if (user == null)
+                {
+                    throw new ArgumentException($"No user found with ID {userId}");
+                }
+
+                if (user.AssignedRoles.Count == 0)
+                {
+                    return RoleType.Banned;
+                }
+
+                return user.AssignedRoles.Max(role => role.RoleType);
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to retrieve the highest role type for user with ID {userId}.", ex);
+            }
+        }
+
+        public User GetUserByID(int userId)
+        {
+            try
+            {
+                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                if (user == null)
+                {
+                    throw new ArgumentException($"No user found with ID {userId}");
+                }
+                return user;
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to retrieve user with ID {userId}.", ex);
+            }
+        }
+
+        public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
+        {
+            try
+            {
+                return _usersList.Where(user => user.HasSubmittedAppeal && user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException("Failed to retrieve banned users who have submitted appeals.", ex);
+            }
+        }
+        public void AddRoleToUser(int userId, Role roleToAdd)
+        {
+            try
+            {
+                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                if (user == null)
+                {
+                    throw new ArgumentException($"No user found with ID {userId}");
+                }
+                user.AssignedRoles.Add(roleToAdd);
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to add role to user with ID {userId}.", ex);
+            }
+        }
+        public List<User> GetAllUsers()
+        {
+            try
+            {
+                return _usersList;
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException("Failed to retrieve all users.", ex);
+            }
+        }
+
+        public class RepositoryException : Exception
+        {
+            public RepositoryException(string message, Exception innerException)
+                : base(message, innerException) { }
+        }
     }
 }

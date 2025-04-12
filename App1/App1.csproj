@@ -13,7 +13,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Templates\PlainTextContentTemplate.txt" />
+    <None Remove="Templates\RecentReviewFor&#xD;&#xA;		  Template.html" />
     <None Remove="Views\MainPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Templates\EmailContentTemplate.html" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +29,12 @@
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="Templates\PlainTextContentTemplate.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\RecentReviewForReportTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -50,6 +61,7 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
     <PackageReference Include="Quartz" Version="3.14.0" />
+    <PackageReference Include="Quartz.AspNetCore" Version="3.14.0" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.14.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250310001" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
