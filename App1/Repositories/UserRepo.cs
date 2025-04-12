@@ -41,7 +41,15 @@ namespace App1.Repositories
                     numberOfDeletedReviews: 2,
                     HasSubmittedAppeal: true,
                     assignedRoles: basicUserRoles
-                    )
+                    ),
+                new User(
+                    userId: 2,
+                    emailAddress: "alexiabortos@gmail.com",
+                    fullName: "Alexia Bortos",
+                    numberOfDeletedReviews: 2,
+                    HasSubmittedAppeal: true,
+                    assignedRoles: adminRoles
+                ),
             };
         }
 
@@ -82,7 +90,7 @@ namespace App1.Repositories
 
                 if (user.AssignedRoles.Count == 0)
                 {
-                    return RoleType.Banned; 
+                    return RoleType.Banned;
                 }
 
                 return user.AssignedRoles.Max(role => role.RoleType);
@@ -93,7 +101,8 @@ namespace App1.Repositories
             }
         }
 
-        public User GetUserByID(int userId) {
+        public User GetUserByID(int userId)
+        {
             try
             {
                 User user = _usersList.FirstOrDefault(user => user.UserId == userId);

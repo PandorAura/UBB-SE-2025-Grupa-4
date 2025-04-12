@@ -28,7 +28,7 @@ namespace App1.Views
         private IReviewService reviewsService;
         private IUserService userService;
         private ICheckersService checkersService;
-        private IUpgradeRequestsService requestsService;
+        private IUpgradeRequestsService upgradeRequestsService;
         private IAutoCheck autoCheck;
 
         public MainPage(IReviewService reviewsService,
@@ -37,7 +37,8 @@ namespace App1.Views
         {
             this.InitializeComponent();
 
-            if ( reviewsService == null ) {
+            if (reviewsService == null)
+            {
                 throw new ArgumentNullException(nameof(reviewsService));
             }
             if (userService == null)
@@ -46,7 +47,7 @@ namespace App1.Views
             }
             this.reviewsService = reviewsService;
             this.userService = userService;
-            this.requestsService = upgradeRequestsService;
+            this.upgradeRequestsService = upgradeRequestsService;
             this.checkersService = checkersService;
             this.autoCheck = autoCheck;
             // checkersService = new CheckersService(reviewsService);
@@ -54,7 +55,7 @@ namespace App1.Views
             LoadStatistics();
             displayReviews();
             displayAppeal();
-            displayRoleRequests();
+            displayUpgradeRequests();
 
         }
 
@@ -71,6 +72,7 @@ namespace App1.Views
 
             AppealsList.ItemsSource = UsersWhichAppealed;
         }
+
 
 
         private void AppealsList_ItemClick(object sender, ItemClickEventArgs e)
@@ -157,87 +159,86 @@ namespace App1.Views
                 flyout.Placement = FlyoutPlacementMode.Left;
                 flyout.ShowAt((FrameworkElement)sender);
 
-                
+
             }
         }
-        private void RequestList_ItemClick(object sender, ItemClickEventArgs e)
+        private void UpgradeRequestList_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is UpgradeRequest selectedRequest)
+            if (e.ClickedItem is UpgradeRequest selectedUpgradeRequest)
             {
-                Flyout flyout = new Flyout();
-                StackPanel panel = new StackPanel { Padding = new Thickness(10) };
-                int userID = selectedRequest.RequestingUserId;
-                User selectedUser = userService.GetUserById(userID);
-                RoleType currentRoleID = userService.GetHighestRoleTypeForUser(selectedUser.UserId);
-                string currentRoleName = requestsService.GetRoleNameBasedOnID(currentRoleID);
-                string requiredRoleName = requestsService.GetRoleNameBasedOnID(currentRoleID + 1);
-                TextBlock userInfo = new TextBlock
+                Flyout upgradeRequestDetailsFlyout = new Flyout();
+                StackPanel upgradeRequestDetailsPanel = new StackPanel { Padding = new Thickness(10) };
+                int requestingUserIdentifier = selectedUpgradeRequest.RequestingUserIdentifier;
+                User requestingUser = userService.GetUserById(requestingUserIdentifier);
+                RoleType currentRoleIdentifier = userService.GetHighestRoleTypeForUser(requestingUser.UserId);
+                string currentRoleDisplayName = upgradeRequestsService.GetRoleNameBasedOnIdentifier(currentRoleIdentifier);
+                string nextRoleDisplayName = upgradeRequestsService.GetRoleNameBasedOnIdentifier(currentRoleIdentifier + 1);
+                TextBlock userInformationTextBlock = new TextBlock
                 {
-                    Text = $"User ID: {selectedUser.UserId}\nEmail: {selectedUser.EmailAddress}\n{currentRoleName} -> {requiredRoleName}",
+                    Text = $"User ID: {requestingUser.UserId}\nEmail: {requestingUser.EmailAddress}\n{currentRoleDisplayName} -> {nextRoleDisplayName}",
                     FontSize = 18
                 };
 
-                List<Review> userReviews = reviewsService.GetReviewsByUser(selectedUser.UserId);
+                List<Review> userReviewsList = reviewsService.GetReviewsByUser(requestingUser.UserId);
 
-                TextBlock reviewsHeader = new TextBlock
+                TextBlock userReviewsHeaderTextBlock = new TextBlock
                 {
                     Text = "User Reviews:",
                     FontWeight = FontWeights.Bold,
                     Margin = new Thickness(0, 10, 0, 5)
                 };
 
-                ListView reviewsList = new ListView
+                ListView userReviewsListView = new ListView
                 {
-                    ItemsSource = userReviews.Select(r => $"{r.Content}\nFlags: {r.NumberOfFlags}").ToList(),
+                    ItemsSource = userReviewsList.Select(review => $"{review.Content}\nFlags: {review.NumberOfFlags}").ToList(),
                     Height = 100
                 };
 
-                panel.Children.Add(userInfo);
-                panel.Children.Add(reviewsHeader);
-                panel.Children.Add(reviewsList);
+                upgradeRequestDetailsPanel.Children.Add(userInformationTextBlock);
+                upgradeRequestDetailsPanel.Children.Add(userReviewsHeaderTextBlock);
+                upgradeRequestDetailsPanel.Children.Add(userReviewsListView);
 
 
-                flyout.Content = panel;
-                flyout.Placement = FlyoutPlacementMode.Left;
-                flyout.ShowAt((FrameworkElement)sender);
+                upgradeRequestDetailsFlyout.Content = upgradeRequestDetailsPanel;
+                upgradeRequestDetailsFlyout.Placement = FlyoutPlacementMode.Left;
+                upgradeRequestDetailsFlyout.ShowAt((FrameworkElement)sender);
             }
         }
 
 
 
-        private void displayRoleRequests()
+        private void displayUpgradeRequests()
         {
-            List<UpgradeRequest> upgradeRequests = requestsService.GetAllRequests();
-            ObservableCollection<UpgradeRequest> UsersRoleRequests = new ObservableCollection<UpgradeRequest>(upgradeRequests);
+            List<UpgradeRequest> upgradeRequestsList = upgradeRequestsService.RetrieveAllUpgradeRequests();
+            ObservableCollection<UpgradeRequest> upgradeRequestsCollection = new ObservableCollection<UpgradeRequest>(upgradeRequestsList);
 
-            RequestsList.ItemsSource = UsersRoleRequests;
-
+            UpgradeRequestsList.ItemsSource = upgradeRequestsCollection;
         }
-        private void AcceptButton_Click(object sender, RoutedEventArgs e)
+        private void AcceptUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button)
+            if (sender is Button upgradeRequestButton)
             {
-                if (button.Tag is int RequestId)
+                if (upgradeRequestButton.Tag is int upgradeRequestIdentifier)
                 {
-                    this.requestsService.HandleRequest(true, RequestId);
-
+                    this.upgradeRequestsService.ProcessUpgradeRequest(true, upgradeRequestIdentifier);
                 }
             }
-            this.displayRoleRequests();
+            this.displayUpgradeRequests();
             LoadStatistics();
         }
-        private void DeclineButton_Click(object sender, RoutedEventArgs e)
+        private void DeclineUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button)
+            if (sender is Button upgradeRequestButton)
             {
-                if (button.Tag is int RequestId)
+                if (upgradeRequestButton.Tag is int upgradeRequestIdentifier)
                 {
-                    this.requestsService.HandleRequest(false, RequestId);
+                    this.upgradeRequestsService.ProcessUpgradeRequest(false, upgradeRequestIdentifier);
                 }
             }
-            this.displayRoleRequests();
+            this.displayUpgradeRequests();
             LoadStatistics();
         }
+
 
         private void LoadPieChart()
         {
@@ -245,17 +246,19 @@ namespace App1.Views
             bannedCount = usersCount = adminsCount = managerCount = 0;
 
             List<User> users = userService.GetAllUsers();
-            foreach (var user in users) { 
+            foreach (var user in users)
+            {
                 var count = user.AssignedRoles.Count;
-                switch (count) { 
+                switch (count)
+                {
                     case 0: bannedCount++; break;
                     case 1: usersCount++; break;
                     case 2: adminsCount++; break;
                     case 3: managerCount++; break;
                 }
             }
-            
-            AllUsersPieChart.Series = new List<PieSeries<double>> 
+
+            AllUsersPieChart.Series = new List<PieSeries<double>>
             {
                 new PieSeries<double> { Values = new double[] { bannedCount }, Name = "Banned" },
                 new PieSeries<double> { Values = new double[] { usersCount }, Name = "Users" },
@@ -263,6 +266,7 @@ namespace App1.Views
                 new PieSeries<double> { Values = new double[] { managerCount }, Name = "Managers" }
             };
         }
+
 
         private void LoadStatistics()
         {
@@ -302,12 +306,13 @@ namespace App1.Views
         }
 
         private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        { 
+        {
             string filter = BannedUserSearchTextBox.Text.ToLower();
             AppealsList.ItemsSource = new ObservableCollection<User>(
                 userService.GetBannedUsersWhoHaveSubmittedAppeals()
             );
         }
+
 
         private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
         {
