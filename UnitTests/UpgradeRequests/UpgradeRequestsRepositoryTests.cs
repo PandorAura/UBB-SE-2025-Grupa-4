@@ -59,24 +59,83 @@ namespace UnitTests.UpgradeRequests
         }
 
         [Fact]
-        public void RetrieveAllUpgradeRequests_ReturnsListOfUpgradeRequests()
+        public void Constructor_WithValidDependencies_CreatesRepository()
         {
+            // Arrange & Act
+            var repository = new UpgradeRequestsRepository(_mockConnectionFactory.Object, _mockDataAdapter.Object);
+
+            // Assert
+            Assert.NotNull(repository);
+        }
+
+        [Fact]
+        public void Constructor_WithConnectionString_CreatesRepository()
+        {
+            // Arrange
+            string connectionString = "TestConnectionString";
+
+            // Act
+            var repository = new UpgradeRequestsRepository(connectionString);
+
+            // Assert
+            Assert.NotNull(repository);
+        }
+
+        [Fact]
+        public void RetrieveAllUpgradeRequests_ReturnsUpgradeRequests()
+        {
+            // Arrange
+            var upgradeRequestReader = new Mock<ISqlDataReader>();
+            upgradeRequestReader.SetupSequence(r => r.Read())
+                .Returns(true)
+                .Returns(true)
+                .Returns(false);
+
+            upgradeRequestReader.SetupSequence(r => r.GetInt32(0))
+                .Returns(1)
+                .Returns(2);
+
+            upgradeRequestReader.SetupSequence(r => r.GetInt32(1))
+                .Returns(100)
+                .Returns(200);
+
+            upgradeRequestReader.SetupSequence(r => r.GetString(2))
+                .Returns("User 1")
+                .Returns("User 2");
+
+            _mockCommand.Setup(c => c.ExecuteReader()).Returns(upgradeRequestReader.Object);
+
             // Act
             var result = _repository.RetrieveAllUpgradeRequests();
 
             // Assert
             Assert.NotNull(result);
-            Assert.IsType<List<UpgradeRequest>>(result);
-            Assert.Single(result);
-
-            var request = result[0];
-            Assert.Equal(1, request.UpgradeRequestId);
-            Assert.Equal(100, request.RequestingUserIdentifier);
-            Assert.Equal("Test User", request.RequestingUserDisplayName);
+            Assert.Equal(2, result.Count);
+            Assert.Equal(1, result[0].UpgradeRequestId);
+            Assert.Equal(100, result[0].RequestingUserIdentifier);
+            Assert.Equal("User 1", result[0].RequestingUserDisplayName);
+            Assert.Equal(2, result[1].UpgradeRequestId);
+            Assert.Equal(200, result[1].RequestingUserIdentifier);
+            Assert.Equal("User 2", result[1].RequestingUserDisplayName);
 
             _mockConnection.Verify(c => c.Open(), Times.Once);
             _mockConnection.Verify(c => c.Close(), Times.Once);
-            _mockCommand.Verify(c => c.ExecuteReader(), Times.Once);
+        }
+
+        [Fact]
+        public void RetrieveAllUpgradeRequests_WhenExceptionOccurs_ReturnsEmptyList()
+        {
+            // Arrange
+            _mockConnection.Setup(c => c.Open()).Throws(new Exception("Test exception"));
+
+            // Act
+            var result = _repository.RetrieveAllUpgradeRequests();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+            _mockConnection.Verify(c => c.Open(), Times.Once);
+            _mockConnection.Verify(c => c.Close(), Times.Once);
         }
 
         [Fact]
@@ -93,6 +152,21 @@ namespace UnitTests.UpgradeRequests
             _mockConnection.Verify(c => c.Close(), Times.Once);
             _mockCommand.Verify(c => c.ExecuteNonQuery(), Times.Once);
             _mockParameters.Verify(p => p.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier), Times.Once);
+        }
+
+        [Fact]
+        public void RemoveUpgradeRequestByIdentifier_WhenExceptionOccurs_HandlesException()
+        {
+            // Arrange
+            int upgradeRequestIdentifier = 1;
+            _mockConnection.Setup(c => c.Open()).Throws(new Exception("Test exception"));
+
+            // Act & Assert (no exception should be thrown)
+            _repository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+
+            // Verify connection handling
+            _mockConnection.Verify(c => c.Open(), Times.Once);
+            _mockConnection.Verify(c => c.Close(), Times.Once);
         }
 
         [Fact]
@@ -121,8 +195,6 @@ namespace UnitTests.UpgradeRequests
         {
             // Arrange
             int upgradeRequestIdentifier = 999; // Non-existent ID
-
-            // Setup reader to return no results for this specific test
             _mockDataReader.Setup(r => r.Read()).Returns(false);
 
             // Act
@@ -133,6 +205,22 @@ namespace UnitTests.UpgradeRequests
             _mockConnection.Verify(c => c.Open(), Times.Once);
             _mockConnection.Verify(c => c.Close(), Times.Once);
             _mockParameters.Verify(p => p.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier), Times.Once);
+        }
+
+        [Fact]
+        public void RetrieveUpgradeRequestByIdentifier_WhenExceptionOccurs_ReturnsNull()
+        {
+            // Arrange
+            int upgradeRequestIdentifier = 1;
+            _mockConnection.Setup(c => c.Open()).Throws(new Exception("Test exception"));
+
+            // Act
+            var result = _repository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+
+            // Assert
+            Assert.Null(result);
+            _mockConnection.Verify(c => c.Open(), Times.Once);
+            _mockConnection.Verify(c => c.Close(), Times.Once);
         }
     }
 }
