@@ -10,7 +10,7 @@ namespace App1.Services
     public interface ICheckersService
     {
         public List<string> RunAutoCheck(List<Review> reviews);
-        public HashSet<string> getOffensiveWordsList();
+        public HashSet<string> GetOffensiveWordsList();
         public void AddOffensiveWord(string newWord);
         public void DeleteOffensiveWord(string word);
         public void RunAICheck(Review review);

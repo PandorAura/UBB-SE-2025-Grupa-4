@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System;
 using App1.Views;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Windowing;
+using Microsoft.UI;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -21,6 +23,15 @@ namespace App1
             InitializeScheduler().ConfigureAwait(false);
             ScheduleDelayedEmailAutomatically().ConfigureAwait(false);
             this.Activated += OnWindowActivated;
+
+            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            WindowId windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+            AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
+
+            if (appWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.Maximize();
+            }
         }
 
         private void OnWindowActivated(object sender, WindowActivatedEventArgs args)
@@ -59,7 +70,7 @@ namespace App1
                 ITrigger trigger = TriggerBuilder.Create()
                     .WithIdentity("autoTrigger", "emailGroup")
                     .StartNow()
-                    .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Wednesday, 16, 15))
+                    .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Wednesday, 17, 06))
                     .Build();
 
                 await _scheduler.ScheduleJob(job, trigger);
