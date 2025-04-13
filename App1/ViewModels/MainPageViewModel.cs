@@ -372,7 +372,7 @@ namespace App1.ViewModels
 
         public void RunAICheck(Review review)
         {
-            _checkersService.RunAICheck(review);
+            _checkersService.RunAICheckForOneReview(review);
             LoadFlaggedReviews();
         }
 
@@ -438,9 +438,10 @@ namespace App1.ViewModels
             int bannedCount = 0, usersCount = 0, adminsCount = 0, managerCount = 0;
 
             List<User> users = _userService.GetAllUsers();
-            foreach (var user in users)
+            foreach (User user in users)
             {
-                var count = user.AssignedRoles.Count;
+                
+                int count = user.AssignedRoles.Count;
                 switch (count)
                 {
                     case 0: bannedCount++; break;
@@ -461,9 +462,9 @@ namespace App1.ViewModels
 
         private void LoadBarChart()
         {
-            var rejectedCount = _reviewsService.GetHiddenReviews().Count;
-            var pendingCount = _reviewsService.GetFlaggedReviews().Count;
-            var totalCount = _reviewsService.GetAllReviews().Count;
+            int rejectedCount = _reviewsService.GetHiddenReviews().Count;
+            int pendingCount = _reviewsService.GetFlaggedReviews().Count;
+            int totalCount = _reviewsService.GetAllReviews().Count;
 
             BarChartSeries = new ISeries[]
             {
@@ -490,7 +491,7 @@ namespace App1.ViewModels
             IsAppealUserBanned = true;
             UserStatusDisplay = GetUserStatusDisplay(user, true);
             
-            var reviews = GetUserReviews(user.UserId);
+            List<Review> reviews = GetUserReviews(user.UserId);
             UserReviewsFormatted = new ObservableCollection<string>(
                 reviews.Select(r => FormatReviewContent(r)).ToList()
             );
@@ -531,7 +532,7 @@ namespace App1.ViewModels
             
             UserUpgradeInfo = FormatUserUpgradeInfo(selectedUser, currentRoleName, requiredRoleName);
             
-            var reviews = GetUserReviews(selectedUser.UserId);
+            List<Review> reviews = GetUserReviews(selectedUser.UserId);
             UserReviewsWithFlags = new ObservableCollection<string>(
                 reviews.Select(r => FormatReviewWithFlags(r)).ToList()
             );

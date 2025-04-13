@@ -31,7 +31,7 @@ namespace App1.AutoChecker
             if (string.IsNullOrWhiteSpace(reviewText))
                 return false;
 
-            var words = reviewText.Split(WordDelimiters, StringSplitOptions.RemoveEmptyEntries);
+            string[] words = reviewText.Split(WordDelimiters, StringSplitOptions.RemoveEmptyEntries);
             return words.Any(word => _offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase));
         }
 

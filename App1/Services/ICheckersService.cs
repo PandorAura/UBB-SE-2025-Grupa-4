@@ -13,7 +13,7 @@ namespace App1.Services
         public HashSet<string> GetOffensiveWordsList();
         public void AddOffensiveWord(string newWord);
         public void DeleteOffensiveWord(string word);
-        public void RunAICheck(Review review);
+        public void RunAICheckForOneReview(Review review);
 
     }
 }

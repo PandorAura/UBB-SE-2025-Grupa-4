@@ -250,7 +250,7 @@ namespace App1.Views
 
             if (await dialog.ShowAsync() == ContentDialogResult.Primary)
             {
-                var newWord = input.Text.Trim();
+                string newWord = input.Text.Trim();
                 ViewModel.AddOffensiveWord(newWord);
             }
         }
