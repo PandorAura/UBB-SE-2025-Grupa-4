@@ -8,6 +8,9 @@ using Quartz.Impl;
 using Microsoft.Extensions.Hosting;
 using App1.Views;
 using App1.AutoChecker;
+using App1.Models;
+using System.Collections.Generic;
+using System;
 
 namespace App1
 {
@@ -34,7 +37,7 @@ namespace App1
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    string connectionString = "Server=KYLIAN-MBAPPÉ-P;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+                    string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
 
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>();
@@ -83,6 +86,69 @@ namespace App1
             {
                 MainWindow?.Activate();
             };
+        }
+
+        public static class ReviewsSampleData
+        {
+            public static IEnumerable<Review> GetSampleReviews()
+            {
+                return new List<Review>
+                {
+                    new Review(
+                        reviewId: 0,
+                        userId: 1,
+                        rating: 5,
+                        content: "Terrible mix, a complete mess dick ass taste",
+                        createdDate: DateTime.Now.AddHours(-1),
+                        numberOfFlags: 1,
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 3,
+                        rating: 4,
+                        content: "Good experience",
+                        createdDate: DateTime.Now.AddHours(-5),
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 1,
+                        rating: 2,
+                        content: "Such a bitter aftertaste",
+                        createdDate: DateTime.Now.AddDays(-1),
+                        numberOfFlags: 3,
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 2,
+                        rating: 5,
+                        content: "Excellent!",
+                        createdDate: DateTime.Now.AddDays(-2),
+                        numberOfFlags: 1,
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 3,
+                        rating: 5,
+                        content: "dunce",
+                        createdDate: DateTime.Now.AddDays(-2),
+                        numberOfFlags: 1,
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 2,
+                        rating: 5,
+                        content: "Amazing",
+                        createdDate: DateTime.Now.AddDays(-2),
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 2,
+                        rating: 5,
+                        content: "My favorite!",
+                        createdDate: DateTime.Now.AddDays(-2),
+                        isHidden: false),
+                };
+            }
         }
     }
 }

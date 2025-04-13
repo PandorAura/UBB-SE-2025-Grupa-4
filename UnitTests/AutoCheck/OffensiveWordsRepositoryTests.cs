@@ -9,7 +9,7 @@ namespace UnitTests.Autocheck
     // integration tests
     public class OffensiveWordsRepositoryTests : IDisposable
     {
-        private readonly string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=TestDb;Trusted_Connection=True;";
+        private readonly string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=TestDb;Integrated Security=True;TrustServerCertificate=True;";
         private readonly OffensiveWordsRepository repository;
 
         public OffensiveWordsRepositoryTests()

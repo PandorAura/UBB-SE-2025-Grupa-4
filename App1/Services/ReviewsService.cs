@@ -17,60 +17,60 @@ namespace App1.Services
 
         public void ResetReviewFlags(int reviewId)
         {
-            _reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
+            this._reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
         }
 
         public void HideReview(int reviewId)
         {
-            _reviewsRepository.UpdateReviewVisibility(reviewId, true);
+            this._reviewsRepository.UpdateReviewVisibility(reviewId, true);
         }
 
         public List<Review> GetFlaggedReviews()
         {
-            return _reviewsRepository.GetAllReviews().Where(review => review.NumberOfFlags > 0).ToList();
+            return this._reviewsRepository.GetAllReviews().Where(review => review.NumberOfFlags > 0).ToList();
         }
 
         public List<Review> GetHiddenReviews()
         {
-            return _reviewsRepository.GetAllReviews().Where(review => review.IsHidden == true).ToList();
+            return this._reviewsRepository.GetAllReviews().Where(review => review.IsHidden == true).ToList();
         }
 
         public List<Review> GetAllReviews()
         {
-            return _reviewsRepository.GetAllReviews();
+            return this._reviewsRepository.GetAllReviews();
         }
 
         public List<Review> GetReviewsSince(DateTime date)
         {
-            return _reviewsRepository.GetReviewsSince(date);
+            return this._reviewsRepository.GetReviewsSince(date);
         }
 
         public double GetAverageRatingForVisibleReviews()
         {
-            return _reviewsRepository.GetAverageRatingForVisibleReviews();
+            return this._reviewsRepository.GetAverageRatingForVisibleReviews();
         }
 
         public List<Review> GetMostRecentReviews(int count)
         {
-            return _reviewsRepository.GetMostRecentReviews(count);
+            return this._reviewsRepository.GetMostRecentReviews(count);
         }
 
         public int GetReviewCountAfterDate(DateTime date)
         {
-            return _reviewsRepository.GetReviewCountAfterDate(date);
+            return this._reviewsRepository.GetReviewCountAfterDate(date);
         }
 
         public List<Review> GetReviewsByUser(int userId)
         {
-            return _reviewsRepository.GetReviewsByUser(userId);
+            return this._reviewsRepository.GetReviewsByUser(userId);
         }
 
         public List<Review> GetReviewsForReport()
         {
             DateTime date = DateTime.Now.AddDays(-1);
-            int count = _reviewsRepository.GetReviewCountAfterDate(date);
+            int count = this._reviewsRepository.GetReviewCountAfterDate(date);
 
-            List<Review> reviews = _reviewsRepository.GetMostRecentReviews(count);
+            List<Review> reviews = this._reviewsRepository.GetMostRecentReviews(count);
             return reviews ?? [];
         }
 
@@ -101,4 +101,3 @@ namespace App1.Services
         //}
     }
 }
-
