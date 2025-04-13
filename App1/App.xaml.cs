@@ -37,8 +37,12 @@ namespace App1
                     string connectionString = "Server=DESKTOP-KEB351O\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
 
                     services.AddSingleton<IUserRepository, UserRepo>();
-                    services.AddSingleton<IReviewRepository, ReviewRepo>();
-                    services.AddSingleton<IAutoCheck, AutoCheck>(provider => new AutoCheck(connectionString));
+                    services.AddSingleton<IReviewsRepository, ReviewsRepository>();
+                    services.AddSingleton<IOffensiveWordsRepository>(provider =>
+                    {
+                        return new OffensiveWordsRepository(connectionString);
+                    });
+                    services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
                     services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
                     services.AddSingleton<IRolesRepository, RolesRepository>();

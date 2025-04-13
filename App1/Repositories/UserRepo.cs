@@ -42,39 +42,14 @@ namespace App1.Repositories
                     HasSubmittedAppeal: true,
                     assignedRoles: basicUserRoles
                     ),
-            new User(
+                new User(
                     userId: 2,
-                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
-                    fullName: "Bianca Georgiana Cirnu",
+                    emailAddress: "alexiabortos@gmail.com",
+                    fullName: "Alexia Bortos",
                     numberOfDeletedReviews: 2,
                     HasSubmittedAppeal: true,
-                    assignedRoles: basicUserRoles
-                    ),
-            new User(
-                    userId: 3,
-                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
-                    fullName: "Bianca Georgiana Cirnu",
-                    numberOfDeletedReviews: 2,
-                    HasSubmittedAppeal: true,
-                    assignedRoles: basicUserRoles
-                    ),
-            new User(
-                    userId: 4,
-                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
-                    fullName: "Bianca Georgiana Cirnu",
-                    numberOfDeletedReviews: 2,
-                    HasSubmittedAppeal: true,
-                    assignedRoles: basicUserRoles
-                    ),
-            new User(
-                    userId: 5,
-                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
-                    fullName: "Bianca Georgiana Cirnu",
-                    numberOfDeletedReviews: 2,
-                    HasSubmittedAppeal: true,
-                    assignedRoles: basicUserRoles
-                    )
-
+                    assignedRoles: adminRoles
+                ),
             };
         }
 
@@ -115,7 +90,7 @@ namespace App1.Repositories
 
                 if (user.AssignedRoles.Count == 0)
                 {
-                    return RoleType.Banned; 
+                    return RoleType.Banned;
                 }
 
                 return user.AssignedRoles.Max(role => role.RoleType);
@@ -126,7 +101,8 @@ namespace App1.Repositories
             }
         }
 
-        public User GetUserByID(int userId) {
+        public User GetUserByID(int userId)
+        {
             try
             {
                 User user = _usersList.FirstOrDefault(user => user.UserId == userId);

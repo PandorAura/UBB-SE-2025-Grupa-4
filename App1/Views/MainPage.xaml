@@ -10,6 +10,8 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     xmlns:models="using:App1.Models" 
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:converters="using:App1.Converters"
+    xmlns:viewmodels="using:App1.ViewModels"
 >
 
     <Page.Resources>
@@ -23,6 +25,8 @@
         <SolidColorBrush x:Key="HeaderBackgroundColor" Color="#1f3d7a" />
         <SolidColorBrush x:Key="AcceptButtonColor" Color="#107C10" />
         <SolidColorBrush x:Key="DeclineButtonColor" Color="#D13438" />
+        
+        <converters:UserIdToNameConverter x:Key="UserIdToNameConverter"/>
     </Page.Resources>
 
     <!--main grid-->
@@ -71,7 +75,8 @@
                       Padding="0,4,0,0"
                       SelectionMode="Single"
                       Background="Transparent"
-                      BorderThickness="0">
+                      BorderThickness="0"
+                      ItemsSource="{x:Bind ViewModel.FlaggedReviews, Mode=OneWay}">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -110,7 +115,7 @@
                                 </Border.ContextFlyout>
                                 <StackPanel>
                                     <TextBlock FontWeight="SemiBold" Margin="0,0,0,4">
-                                        <Run Text="{x:Bind UserID}"/>
+                                        <Run Text="{x:Bind UserId, Converter={StaticResource UserIdToNameConverter}}"/>
                                     </TextBlock>
                                     <TextBlock TextWrapping="Wrap" Text="{x:Bind Content}"/>
                                 </StackPanel>
@@ -130,43 +135,47 @@
                 </Grid.ColumnDefinitions>
                         
                 <Button 
-                    Content="Automatically check reviews" 
                     CornerRadius="8"
                     Background="{StaticResource AccentColor}"
                     Foreground="White"
-                    Padding="24,12"
-                    MinWidth="150"
-                    FontSize="14"
+                    Padding="12,8"
+                    MinWidth="120"
+                    FontSize="13"
                     FontWeight="SemiBold"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
-                    Click="Button_AutoCheck_Click">
+                    Command="{x:Bind ViewModel.RunAutoCheckCommand}">
                             <Button.Resources>
                                 <Style TargetType="Border">
                                     <Setter Property="CornerRadius" Value="8"/>
                                 </Style>
-                            </Button.Resources> 
+                            </Button.Resources>
+                            <Button.Content>
+                                <TextBlock Text="Automatically check reviews" TextWrapping="Wrap" TextAlignment="Center"/>
+                            </Button.Content>
                 </Button>
 
                 <Button Grid.Column="1"
-                    Content="Modify offensive words list"
                     CornerRadius="8"
                     Background="{StaticResource SystemControlBackgroundBaseLowBrush}"
                     Foreground="{StaticResource SystemControlForegroundBaseHighBrush}"
-                    Padding="24,12"
-                    MinWidth="150"
-                    FontSize="14"
+                    Padding="12,8"
+                    MinWidth="120"
+                    FontSize="13"
                     FontWeight="SemiBold"
                     BorderThickness="1"
                     BorderBrush="{StaticResource SystemControlForegroundBaseMediumBrush}"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
-                    Click="Button_ModifyOffensiveWordsList_Click">
+                    Command="{x:Bind ViewModel.ShowWordListPopupCommand}">
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius" Value="8"/>
                         </Style>
                     </Button.Resources>
+                    <Button.Content>
+                        <TextBlock Text="Modify offensive words list" TextWrapping="Wrap" TextAlignment="Center"/>
+                    </Button.Content>
                 </Button>
             </Grid>
         </Grid>
@@ -199,13 +208,17 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <lvc:PieChart x:Name="AllUsersPieChart" Grid.Column="0" Margin="0,12"/>
-                        <lvc:CartesianChart x:Name="TotalDataBarChart" Grid.Column="1" Margin="0,12"/>
+                        <lvc:PieChart x:Name="AllUsersPieChart" Grid.Column="0" Margin="0,12"
+                                      Series="{x:Bind ViewModel.PieChartSeries, Mode=OneWay}"/>
+                        <lvc:CartesianChart x:Name="TotalDataBarChart" Grid.Column="1" Margin="0,12"
+                                           Series="{x:Bind ViewModel.BarChartSeries, Mode=OneWay}"
+                                           XAxes="{x:Bind ViewModel.BarChartXAxes, Mode=OneWay}"
+                                           YAxes="{x:Bind ViewModel.BarChartYAxes, Mode=OneWay}"/>
                     </Grid>
                 </Grid>
             </Border>
 
-            <!-- Role Requests Grid -->
+            <!-- Role Upgrade Requests Grid -->
             <Border Grid.Row="1"
                     Background="{ThemeResource CardBackgroundFillColorDefault}"
                     BorderBrush="{ThemeResource CardStrokeColorDefault}"
@@ -220,14 +233,14 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="Role requests" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                    <ListView x:Name="RequestsList" Grid.Row="1" 
+                    <TextBlock Text="Role Upgrade Requests" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                    <ListView x:Name="UpgradeRequestsList" Grid.Row="1" 
                               Height="150"
                               Background="Transparent"
                               BorderThickness="0"
                               IsItemClickEnabled="True" 
                               ItemClick="RequestList_ItemClick"
-                              >
+                              ItemsSource="{x:Bind ViewModel.UpgradeRequests, Mode=OneWay}">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -257,25 +270,27 @@
                                                    TextWrapping="Wrap"
                                                    Margin="0,0,8,0"/>
 
-                                        <Button Content="Accept" 
-                                                Background="{StaticResource AcceptButtonColor}" 
-                                                Foreground="White" 
-                                                CornerRadius="{StaticResource ControlCornerRadius}"
-                                                Padding="8,4"
-                                                Grid.Column="1" 
+                                        <Button x:Name="AcceptUpgradeRequestButton"
+                                                Content="Accept"
+                                                Tag="{Binding UpgradeRequestId}"
+                                                Background="{StaticResource AcceptButtonColor}"
+                                                Foreground="White"
+                                                HorizontalAlignment="Stretch"
+                                                Grid.Column="1"
                                                 Margin="4,0"
-                                                Click="AcceptButton_Click" 
-                                                Tag="{Binding RequestId}"/>
+                                                Click="AcceptUpgradeRequestButton_Click"
+                                                />
 
-                                        <Button Content="Decline" 
-                                                Background="{StaticResource DeclineButtonColor}" 
-                                                Foreground="White" 
-                                                CornerRadius="{StaticResource ControlCornerRadius}"
-                                                Padding="8,4"
-                                                Grid.Column="2" 
+                                        <Button x:Name="DeclineUpgradeRequestButton"
+                                                Content="Decline"
+                                                Tag="{Binding UpgradeRequestId}"
+                                                Background="{StaticResource DeclineButtonColor}"
+                                                Foreground="White"
+                                                HorizontalAlignment="Stretch"
+                                                Grid.Column="2"
                                                 Margin="4,0"
-                                                Click="DeclineButton_Click" 
-                                                Tag="{Binding RequestId}"/>
+                                                Click="DeclineUpgradeRequestButton_Click"
+                                                />
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -308,7 +323,8 @@
                       IsItemClickEnabled="True" 
                       ItemClick="AppealsList_ItemClick"
                       Background="Transparent"
-                      BorderThickness="0">
+                      BorderThickness="0"
+                      ItemsSource="{x:Bind ViewModel.AppealsUsers, Mode=OneWay}">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -334,24 +350,32 @@
         </Grid>
 
         <!-- Forbidden Words Popup -->
-        <Grid x:Name="WordListPopup" Visibility="Collapsed" Background="#80000000" Grid.RowSpan="2" Grid.ColumnSpan="3">
+        <Grid x:Name="WordListPopup" 
+              Visibility="Collapsed"
+              Background="#80000000" 
+              Grid.RowSpan="2" 
+              Grid.ColumnSpan="3">
             <Border Background="{ThemeResource CardBackgroundFillColorDefault}"
-            CornerRadius="{StaticResource ControlCornerRadius}"
-            Padding="20" Width="400" Height="400"
-            HorizontalAlignment="Center" VerticalAlignment="Center"
-            BorderBrush="{ThemeResource CardStrokeColorDefault}"
-            BorderThickness="{StaticResource CardBorderThickness}">
+                    CornerRadius="{StaticResource ControlCornerRadius}"
+                    Padding="20" Width="400" Height="400"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    BorderBrush="{ThemeResource CardStrokeColorDefault}"
+                    BorderThickness="{StaticResource CardBorderThickness}">
                 <StackPanel>
                     <TextBlock Text="Forbidden Words" FontSize="18" FontWeight="Bold" Margin="0,0,0,12"/>
 
                     <ListView x:Name="WordsList" Height="200"
                       SelectionMode="Single"
-                      BorderThickness="1" Margin="0,0,0,12"/>
+                      BorderThickness="1" Margin="0,0,0,12"
+                      ItemsSource="{x:Bind ViewModel.OffensiveWords, Mode=OneWay}"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Add" Width="100" Margin="0,0,8,0" Click="AddWord_Click"/>
-                        <Button Content="Delete" Width="100" Click="DeleteWord_Click"/>
-                        <Button Content="Cancel" Width="100" Click="CancelWordPopup_Click"/>
+                        <Button Content="Delete" Width="100" 
+                                Command="{x:Bind ViewModel.DeleteOffensiveWordCommand}" 
+                                CommandParameter="{x:Bind WordsList.SelectedItem, Mode=OneWay}"/>
+                        <Button Content="Cancel" Width="100" 
+                                Command="{x:Bind ViewModel.HideWordListPopupCommand}"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using App1.Models;
 using App1.Repositories;
 
 namespace App1.Services
 {
-    public class UserService: IUserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
 
@@ -49,10 +50,11 @@ namespace App1.Services
 
         public List<User> GetUsersByRoleType(RoleType roleType)
         {
-            return  _userRepository.GetUsersByRoleType(roleType); 
+            return _userRepository.GetUsersByRoleType(roleType);
         }
-    
-        public string GetUserFullNameById(int userId) { 
+
+        public string GetUserFullNameById(int userId)
+        {
             return _userRepository.GetUserByID(userId).FullName;
         }
 
@@ -84,6 +86,44 @@ namespace App1.Services
         public List<User> GetManagers()
         {
             return _userRepository.GetUsersByRoleType(RoleType.Manager);
+        }
+
+        public void UpdateUserRole(int userId, RoleType roleType)
+        {
+            try
+            {
+                var user = _userRepository.GetUserByID(userId);
+                if (user == null)
+                    return;
+
+                if (roleType == RoleType.Banned)
+                {
+                    bool hasBannedRole = false;
+                    foreach (var role in user.AssignedRoles)
+                    {
+                        if (role.RoleType == RoleType.Banned)
+                        {
+                            hasBannedRole = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasBannedRole)
+                    {
+                        user.AssignedRoles.Clear();
+                        _userRepository.AddRoleToUser(userId, new Role(RoleType.Banned, "Banned"));
+                    }
+                }
+                else
+                {
+                    user.AssignedRoles.Clear();
+                    _userRepository.AddRoleToUser(userId, new Role(RoleType.User, "User"));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException("Failed to update user role", ex);
+            }
         }
     }
 
