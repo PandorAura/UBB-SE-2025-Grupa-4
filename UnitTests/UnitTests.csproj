@@ -11,7 +11,12 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+	<UseWinUI>false</UseWinUI>
     <Platforms>AnyCPU;x64</Platforms>
+	<GenerateProjectPriFile>false</GenerateProjectPriFile>
+	<EnableMsixTooling>false</EnableMsixTooling>
+	<IncludePackagingOutputs>false</IncludePackagingOutputs>
+	<IsPackagingSupported>false</IsPackagingSupported>
   </PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,7 +31,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Uno.WinUI" Version="5.6.91" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
@@ -39,8 +43,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-	<PropertyGroup>
-		<GenerateLibraryLayout>true</GenerateLibraryLayout>
-	</PropertyGroup>
-
+	<Target Name="DisablePriGen" BeforeTargets="GenerateProjectPriFile">
+		<ItemGroup>
+			<PackagingOutputs Remove="@(PackagingOutputs)" />
+		</ItemGroup>
+	</Target>
 </Project>

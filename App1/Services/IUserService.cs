@@ -17,5 +17,6 @@ namespace App1.Services
         public RoleType GetHighestRoleTypeForUser(int ID);
 
         void UpdateUserRole(int userId, RoleType roleType);
+        public string GetUserFullNameById(int userId);
     }
 }
