@@ -53,9 +53,7 @@
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-
                     string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
-
 
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
