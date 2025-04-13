@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using App1.Models;
-
-namespace App1.Repositories
+﻿namespace App1.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using App1.Models;
+
     public class ReviewsRepository : IReviewsRepository
     {
         private readonly List<Review> reviews;

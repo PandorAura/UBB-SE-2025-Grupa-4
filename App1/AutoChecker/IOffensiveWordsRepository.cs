@@ -11,7 +11,7 @@ namespace App1.AutoChecker
         HashSet<string> LoadOffensiveWords();
 
         void AddWord(string word);
-        
+
         void DeleteWord(string word);
     }
 }
