@@ -1,19 +1,19 @@
-using App1.Models;
-using App1.Services;
-using App1.AutoChecker;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.Kernel.Sketches;
-using System.Windows.Input;
-
 namespace App1.ViewModels
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Input;
+    using App1.AutoChecker;
+    using App1.Models;
+    using App1.Services;
+    using LiveChartsCore;
+    using LiveChartsCore.Kernel.Sketches;
+    using LiveChartsCore.SkiaSharpView;
+
     public class MainPageViewModel : INotifyPropertyChanged
     {
         private readonly IReviewService reviewsService;
@@ -225,7 +225,7 @@ namespace App1.ViewModels
 
         public string UserUpgradeInfo
         {
-            get => userUpgradeInfo;
+            get => this.userUpgradeInfo;
             set
             {
                 this.userUpgradeInfo = value;

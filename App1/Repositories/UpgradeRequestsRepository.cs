@@ -1,12 +1,12 @@
-﻿using App1.Infrastructure;
-using App1.Models;
-using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Data;
-
-namespace App1.Repositories
+﻿namespace App1.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using App1.Infrastructure;
+    using App1.Models;
+    using Microsoft.Data.SqlClient;
+
     public class UpgradeRequestsRepository : IUpgradeRequestsRepository
     {
         private const string SELECTALLUPGRADEREQUESTSQUERY = "SELECT RequestId, RequestingUserId, RequestingUserName FROM UpgradeRequests";
@@ -32,7 +32,7 @@ namespace App1.Repositories
         {
             List<UpgradeRequest> upgradeRequestsList = new List<UpgradeRequest>();
 
-            using (ISqlConnection connection = connectionFactory.CreateConnection())
+            using (ISqlConnection connection = this.connectionFactory.CreateConnection())
             {
                 try
                 {
@@ -70,7 +70,7 @@ namespace App1.Repositories
 
         public void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            using (ISqlConnection connection = connectionFactory.CreateConnection())
+            using (ISqlConnection connection = this.connectionFactory.CreateConnection())
             {
                 try
                 {
@@ -95,7 +95,7 @@ namespace App1.Repositories
         {
             UpgradeRequest? retrievedUpgradeRequest = null;
 
-            using (ISqlConnection connection = connectionFactory.CreateConnection())
+            using (ISqlConnection connection = this.connectionFactory.CreateConnection())
             {
                 try
                 {
