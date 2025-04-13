@@ -10,28 +10,28 @@ namespace App1.Repositories
     public class UserRepo : IUserRepository
     {
         private readonly List<User> _usersList;
-
-        public UserRepo()
-        {
-            List<Role> basicUserRoles = new List<Role>
+        public static List<Role> basicUserRoles = new List<Role>
             {
                 new Role(RoleType.User, "user")
             };
-            List<Role> adminRoles = new List<Role>
+        public static List<Role> adminRoles = new List<Role>
             {
                 new Role(RoleType.User, "user"),
                 new Role(RoleType.Admin, "admin")
             };
-            List<Role> managerRoles = new List<Role>
+        public static List<Role> managerRoles = new List<Role>
             {
                 new Role(RoleType.User, "user"),
                 new Role(RoleType.Admin, "admin"),
                 new Role(RoleType.Manager, "manager")
             };
-            List<Role> bannedUserRoles = new List<Role>
+        public static List<Role> bannedUserRoles = new List<Role>
             {
                 new Role(RoleType.Banned, "banned")
             };
+        public UserRepo()
+        {
+           
             _usersList = new List<User>
             {
                 new User(
