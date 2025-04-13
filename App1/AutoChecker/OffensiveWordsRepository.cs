@@ -25,12 +25,12 @@ namespace App1.AutoChecker
 
         public HashSet<string> LoadOffensiveWords()
         {
-            var offensiveWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            using var connection = new SqlConnection(connectionString);
+            HashSet<string> offensiveWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            using SqlConnection connection = new SqlConnection(_connectionString);
             connection.Open();
 
-            using var command = new SqlCommand(SELECTOFFENSIVEWORDSQUERY, connection);
-            using var reader = command.ExecuteReader();
+            using SqlCommand command = new SqlCommand(SELECT_OFFENSIVE_WORDS_QUERY, connection);
+            using SqlDataReader reader = command.ExecuteReader();
 
             while (reader.Read())
             {
@@ -42,21 +42,21 @@ namespace App1.AutoChecker
 
         public void AddWord(string word)
         {
-            using var connection = new SqlConnection(connectionString);
+            using SqlConnection connection = new SqlConnection(_connectionString);
             connection.Open();
 
-            using var command = new SqlCommand(INSERTOFFENSIVEWORDQUERY, connection);
-            command.Parameters.AddWithValue(WORDPARAMETERNAME, word);
+            using SqlCommand command = new SqlCommand(INSERT_OFFENSIVE_WORD_QUERY, connection);
+            command.Parameters.AddWithValue(WORD_PARAMETER_NAME, word);
             command.ExecuteNonQuery();
         }
 
         public void DeleteWord(string word)
         {
-            using var connection = new SqlConnection(connectionString);
+            using SqlConnection connection = new SqlConnection(_connectionString);
             connection.Open();
 
-            using var command = new SqlCommand(DELETEOFFENSIVEWORDQUERY, connection);
-            command.Parameters.AddWithValue(WORDPARAMETERNAME, word);
+            using SqlCommand command = new SqlCommand(DELETE_OFFENSIVE_WORD_QUERY, connection);
+            command.Parameters.AddWithValue(WORD_PARAMETER_NAME, word);
             command.ExecuteNonQuery();
         }
     }

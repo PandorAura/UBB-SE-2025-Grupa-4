@@ -92,7 +92,7 @@ namespace App1.Services
         {
             try
             {
-                var user = _userRepository.GetUserByID(userId);
+                User user = _userRepository.GetUserByID(userId);
                 if (user == null)
                     return;
 

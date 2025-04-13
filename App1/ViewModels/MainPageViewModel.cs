@@ -14,28 +14,6 @@ using System.Windows.Input;
 
 namespace App1.ViewModels
 {
-    /*
-     * MVVM Improvement Suggestions:
-     *
-     * 1. Implement ICommand properties for all button actions to remove event handlers from code-behind
-     *    - Create a RelayCommand class to implement ICommand
-     *    - Example: public ICommand KeepBanCommand { get; private set; }
-     *    - Initialize in constructor: KeepBanCommand = new RelayCommand<User>(user => KeepBanForUser(user));
-     *
-     * 2. Create proper models with change notification instead of directly modifying properties
-     *    - Create UserModel that wraps User and provides proper change notification
-     *    - Implement service methods to update the model properly
-     *
-     * 3. Add proper data validation with INotifyDataErrorInfo
-     *
-     * 4. Move all remaining UI construction code to XAML using proper templates
-     *    - Replace dynamically created flyouts with templated popups in XAML
-     *    - Use proper DataTemplates for displaying user data
-     *
-     * 5. Use ObservableCollection<T> for all collections that may change
-     *
-     * 6. Implement a proper navigation service for managing views
-     */
     public class MainPageViewModel : INotifyPropertyChanged
     {
         private readonly IReviewService reviewsService;
@@ -60,27 +38,6 @@ namespace App1.ViewModels
         private string userUpgradeInfo;
         private bool isAppealUserBanned = true;
         private bool isWordListVisible = false;
-
-        public MainPageViewModel(
-            IReviewService reviewsService,
-            IUserService userService,
-            IUpgradeRequestsService upgradeRequestsService,
-            ICheckersService checkersService,
-            IAutoCheck autoCheck)
-        {
-            this.reviewsService = reviewsService ?? throw new ArgumentNullException(nameof(reviewsService));
-            this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            requestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
-            this.checkersService = checkersService ?? throw new ArgumentNullException(nameof(checkersService));
-            this.autoCheck = autoCheck ?? throw new ArgumentNullException(nameof(autoCheck));
-
-            // Initialize commands
-            InitializeCommands();
-
-            LoadAllData();
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public ICommand KeepBanCommand { get; private set; }
 
@@ -277,6 +234,54 @@ namespace App1.ViewModels
             }
         }
 
+        public MainPageViewModel(
+            IReviewService reviewsService,
+            IUserService userService,
+            IUpgradeRequestsService upgradeRequestsService,
+            ICheckersService checkersService,
+            IAutoCheck autoCheck)
+        {
+            _reviewsService = reviewsService ?? throw new ArgumentNullException(nameof(reviewsService));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _requestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
+            _checkersService = checkersService ?? throw new ArgumentNullException(nameof(checkersService));
+            _autoCheck = autoCheck ?? throw new ArgumentNullException(nameof(autoCheck));
+
+            InitializeCommands();
+
+            LoadAllData();
+        }
+
+        private void InitializeCommands()
+        {
+            KeepBanCommand = new RelayCommand(() => KeepBanForUser(SelectedAppealUser));
+            AcceptAppealCommand = new RelayCommand(() => AcceptAppealForUser(SelectedAppealUser));
+            CloseAppealCaseCommand = new RelayCommand(() => CloseAppealCase(SelectedAppealUser));
+            
+            HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(param => 
+                HandleUpgradeRequest(param.Item1, param.Item2));
+            
+            ResetReviewFlagsCommand = new RelayCommand<int>(reviewId => 
+                ResetReviewFlags(reviewId));
+            
+            HideReviewCommand = new RelayCommand<Tuple<int, int>>(param => 
+                HideReview(param.Item1, param.Item2));
+            
+            RunAICheckCommand = new RelayCommand<Review>(review => 
+                RunAICheck(review));
+            
+            RunAutoCheckCommand = new RelayCommand(() => RunAutoCheck());
+            
+            AddOffensiveWordCommand = new RelayCommand<string>(word => 
+                AddOffensiveWord(word));
+            
+            DeleteOffensiveWordCommand = new RelayCommand<string>(word => 
+                DeleteOffensiveWord(word));
+            
+            ShowWordListPopupCommand = new RelayCommand(() => ShowWordListPopup());
+            HideWordListPopupCommand = new RelayCommand(() => HideWordListPopup());
+        }
+
         public void LoadAllData()
         {
             LoadFlaggedReviews();
@@ -353,7 +358,7 @@ namespace App1.ViewModels
 
         public void RunAICheck(Review review)
         {
-            checkersService.RunAICheck(review);
+            _checkersService.RunAICheckForOneReview(review);
             LoadFlaggedReviews();
         }
 
@@ -411,7 +416,59 @@ namespace App1.ViewModels
 
         public string GetRoleNameBasedOnID(RoleType roleType)
         {
-            return requestsService.GetRoleNameBasedOnIdentifier(roleType);
+            return _requestsService.GetRoleNameBasedOnIdentifier(roleType);
+        }
+
+        private void LoadPieChart()
+        {
+            int bannedCount = 0, usersCount = 0, adminsCount = 0, managerCount = 0;
+
+            List<User> users = _userService.GetAllUsers();
+            foreach (User user in users)
+            {
+                
+                int count = user.AssignedRoles.Count;
+                switch (count)
+                {
+                    case 0: bannedCount++; break;
+                    case 1: usersCount++; break;
+                    case 2: adminsCount++; break;
+                    case 3: managerCount++; break;
+                }
+            }
+
+            PieChartSeries = new ISeries[]
+            {
+                new PieSeries<double> { Values = new double[] { bannedCount }, Name = "Banned" },
+                new PieSeries<double> { Values = new double[] { usersCount }, Name = "Users" },
+                new PieSeries<double> { Values = new double[] { adminsCount }, Name = "Admins" },
+                new PieSeries<double> { Values = new double[] { managerCount }, Name = "Managers" }
+            };
+        }
+
+        private void LoadBarChart()
+        {
+            int rejectedCount = _reviewsService.GetHiddenReviews().Count;
+            int pendingCount = _reviewsService.GetFlaggedReviews().Count;
+            int totalCount = _reviewsService.GetAllReviews().Count;
+
+            BarChartSeries = new ISeries[]
+            {
+                new ColumnSeries<double>
+                {
+                    Values = new double[] { rejectedCount, pendingCount, totalCount }
+                }
+            };
+
+            BarChartXAxes = new[] 
+            {
+                new Axis { Labels = new List<string> { "rejected", "pending", "total" } }
+            };
+
+            BarChartYAxes = new[] 
+            { 
+                new Axis { Name = "Total", MinLimit = 0 } 
+            };
         }
 
         public void LoadUserAppealDetails(User user)
@@ -419,7 +476,8 @@ namespace App1.ViewModels
             SelectedAppealUser = user;
             IsAppealUserBanned = true;
             UserStatusDisplay = GetUserStatusDisplay(user, true);
-            var reviews = GetUserReviews(user.UserId);
+            
+            List<Review> reviews = GetUserReviews(user.UserId);
             UserReviewsFormatted = new ObservableCollection<string>(
                 reviews.Select(r => FormatReviewContent(r)).ToList());
         }
@@ -453,8 +511,8 @@ namespace App1.ViewModels
             string requiredRoleName = GetRoleNameBasedOnID(currentRoleID + 1);
 
             UserUpgradeInfo = FormatUserUpgradeInfo(selectedUser, currentRoleName, requiredRoleName);
-
-            var reviews = GetUserReviews(selectedUser.UserId);
+            
+            List<Review> reviews = GetUserReviews(selectedUser.UserId);
             UserReviewsWithFlags = new ObservableCollection<string>(
                 reviews.Select(r => FormatReviewWithFlags(r)).ToList());
         }
