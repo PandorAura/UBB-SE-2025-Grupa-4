@@ -4,8 +4,14 @@ using Xunit;
 
 namespace UnitTests.Users
 {
+    /// <summary>
+    /// Unit tests for the <see cref="User"/> class.
+    /// </summary>
     public class UserTests
     {
+        /// <summary>
+        /// Verifies that the <see cref="User"/> constructor initializes all properties correctly.
+        /// </summary>
         [Fact]
         public void Constructor_ShouldInitializePropertiesCorrectly()
         {
@@ -31,20 +37,20 @@ namespace UnitTests.Users
             Assert.Equal(assignedRoles, user.AssignedRoles);
         }
 
+        /// <summary>
+        /// Verifies that the <see cref="User.ToString"/> method returns the correct string representation of the user.
+        /// </summary>
         [Fact]
         public void ToString_ShouldReturnCorrectStringRepresentation()
         {
-            // Arrange
             User user = new User
             {
                 UserId = 1,
                 EmailAddress = "test@example.com"
             };
 
-            // Act
             string result = user.ToString();
 
-            // Assert
             Assert.Equal("Id: 1, email: test@example.com", result);
         }
     }
