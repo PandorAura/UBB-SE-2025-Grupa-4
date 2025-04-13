@@ -28,14 +28,14 @@ namespace App1
                 .ConfigureServices((context, services) =>
                 {
                     // Configuration
-                    var config = new ConfigurationBuilder()
+                    IConfiguration config = new ConfigurationBuilder()
                         .AddUserSecrets<App>()
                         .AddEnvironmentVariables()
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    string connectionString = "Server=DESKTOP-E65E5LS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
-                    
+                    string connectionString = "Server=DESKTOP-KEB351O\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>();
                     services.AddSingleton<IOffensiveWordsRepository>(provider =>
@@ -55,8 +55,8 @@ namespace App1
                     services.AddSingleton<JobFactory>();
                     services.AddSingleton(provider =>
                     {
-                        var factory = new StdSchedulerFactory();
-                        var scheduler = factory.GetScheduler().Result;
+                        StdSchedulerFactory factory = new StdSchedulerFactory();
+                        IScheduler scheduler = factory.GetScheduler().Result;
                         scheduler.JobFactory = provider.GetRequiredService<JobFactory>();
                         return scheduler;
                     });
@@ -72,7 +72,7 @@ namespace App1
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-            var scheduler = Host.Services.GetRequiredService<IScheduler>();
+            IScheduler scheduler = Host.Services.GetRequiredService<IScheduler>();
             scheduler.Start().Wait(); 
 
             MainWindow = Host.Services.GetRequiredService<MainWindow>();

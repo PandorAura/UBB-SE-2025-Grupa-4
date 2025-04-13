@@ -39,7 +39,7 @@ public class EmailJob : IJob
             if (string.IsNullOrEmpty(smtpEmail) || string.IsNullOrEmpty(smtpPassword))
                 throw new Exception("SMTP credentials not configured in appsettings.json");
 
-            var reportData = await GatherReportData();
+            AdminReportData? reportData = GatherReportData();
 
             string emailContent = GenerateEmailContent(reportData);
 
@@ -49,12 +49,12 @@ public class EmailJob : IJob
 
             foreach (User admin in reportData.AdminUsers)
             {
-                var message = new MimeMessage();
+                MimeMessage message = new MimeMessage();
                 message.From.Add(new MailboxAddress("System Admin", smtpEmail));
                 message.To.Add(new MailboxAddress(admin.FullName, admin.EmailAddress));
                 message.Subject = $"Admin Report - {reportData.ReportDate:yyyy-MM-dd}";
 
-                var bodyBuilder = new BodyBuilder
+                BodyBuilder bodyBuilder = new BodyBuilder
                 {
                     HtmlBody = emailContent,
                     TextBody = GeneratePlainTextContent(reportData)
@@ -74,7 +74,7 @@ public class EmailJob : IJob
         }
     }
 
-    private async Task<AdminReportData> GatherReportData()
+    private AdminReportData GatherReportData()
     {
         DateTime reportDate = DateTime.Now;
         DateTime yesterday = reportDate.AddDays(DAYS_FROM_TODAY_TO_YESTERDAY);
