@@ -65,6 +65,10 @@ namespace App1.Repositories
         {
             try
             {
+                if (_usersList == null)
+                {
+                    throw new NullReferenceException("_usersList is null.");
+                }
                 return _usersList.Where(user => user.HasSubmittedAppeal).ToList();
             }
             catch (Exception ex)
@@ -77,7 +81,11 @@ namespace App1.Repositories
         {
             try
             {
-                return _usersList.Where(user => user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
+                if (_usersList == null)
+                {
+                    throw new NullReferenceException("_usersList is null.");
+                }
+                return _usersList.Where(user => user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
             }
             catch (Exception ex)
             {
@@ -87,27 +95,16 @@ namespace App1.Repositories
 
         public RoleType GetHighestRoleTypeForUser(int userId)
         {
-            try
+            var user = GetUserByID(userId);
+            if (user.AssignedRoles == null || !user.AssignedRoles.Any())
             {
-                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
-
-                if (user == null)
-                {
-                    throw new ArgumentException($"No user found with ID {userId}");
-                }
-
-                if (user.AssignedRoles.Count == 0)
-                {
-                    return RoleType.Banned;
-                }
-
-                return user.AssignedRoles.Max(role => role.RoleType);
+                throw new RepositoryException("User has no roles assigned.", new ArgumentException($"No roles found for user with ID {userId}"));
             }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve the highest role type for user with ID {userId}.", ex);
-            }
+
+            return user.AssignedRoles.Max(role => role.RoleType);
         }
+
+
 
         public User GetUserByID(int userId)
         {
@@ -130,7 +127,11 @@ namespace App1.Repositories
         {
             try
             {
-                return _usersList.Where(user => user.HasSubmittedAppeal && user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)).ToList();
+                if (_usersList == null)
+                {
+                    throw new NullReferenceException("_usersList is null.");
+                }
+                return _usersList.Where(user => user.HasSubmittedAppeal && user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)).ToList();
             }
             catch (Exception ex)
             {
@@ -157,6 +158,10 @@ namespace App1.Repositories
         {
             try
             {
+                if (_usersList == null)
+                {
+                    throw new NullReferenceException("_usersList is null.");
+                }
                 return _usersList;
             }
             catch (Exception ex)
@@ -164,6 +169,8 @@ namespace App1.Repositories
                 throw new RepositoryException("Failed to retrieve all users.", ex);
             }
         }
+
+
 
         public class RepositoryException : Exception
         {

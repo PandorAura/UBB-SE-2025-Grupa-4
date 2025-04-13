@@ -57,7 +57,7 @@ namespace UnitTests.Tests
     };
             var recentReviews = new List<Review>
     {
-        new Review(1, 1, "name", 9, "reviewText", DateTime.Now.AddDays(-1))
+        new Review(1, 1, 9, "name", DateTime.Now.AddDays(-1)),
     };
 
             // Setup mocks
@@ -65,7 +65,7 @@ namespace UnitTests.Tests
             _mockUserService.Setup(s => s.GetRegularUsers()).Returns(regularUsers);
             _mockUserService.Setup(s => s.GetBannedUsers()).Returns(bannedUsers);
             _mockReviewService.Setup(s => s.GetReviewsSince(It.IsAny<DateTime>())).Returns(recentReviews);
-            _mockReviewService.Setup(s => s.GetAverageRating()).Returns(4.0);
+            _mockReviewService.Setup(s => s.GetAverageRatingForVisibleReviews()).Returns(4.0);
             _mockReviewService.Setup(s => s.GetReviewsForReport()).Returns(recentReviews);
 
             // Since we can't easily mock the SmtpClient, we'll need a different approach
@@ -96,7 +96,7 @@ namespace UnitTests.Tests
             // Verify our services were called
             _mockUserService.Verify(s => s.GetAdminUsers(), Times.AtLeastOnce);
             _mockReviewService.Verify(s => s.GetReviewsSince(It.IsAny<DateTime>()), Times.AtLeastOnce);
-            _mockReviewService.Verify(s => s.GetAverageRating(), Times.AtLeastOnce);
+            _mockReviewService.Verify(s => s.GetAverageRatingForVisibleReviews(), Times.AtLeastOnce);
             _mockReviewService.Verify(s => s.GetReviewsForReport(), Times.AtLeastOnce);
         }
 
@@ -146,14 +146,14 @@ namespace UnitTests.Tests
 
             var recentReviews = new List<Review>
             {
-                new Review (1, 1, "name", 9, "reviewText", DateTime.Now.AddDays(-1))
+                new Review (1, 1, 9, "name", DateTime.Now.AddDays(-1)),
             };
 
             _mockUserService.Setup(s => s.GetAdminUsers()).Returns(adminUsers);
             _mockUserService.Setup(s => s.GetRegularUsers()).Returns(regularUsers);
             _mockUserService.Setup(s => s.GetBannedUsers()).Returns(bannedUsers);
             _mockReviewService.Setup(s => s.GetReviewsSince(It.IsAny<DateTime>())).Returns(recentReviews);
-            _mockReviewService.Setup(s => s.GetAverageRating()).Returns(4.0);
+            _mockReviewService.Setup(s => s.GetAverageRatingForVisibleReviews()).Returns(4.0);
             _mockReviewService.Setup(s => s.GetReviewsForReport()).Returns(recentReviews);
 
             // Use reflection to access private method
@@ -185,7 +185,7 @@ namespace UnitTests.Tests
 
             var recentReviews = new List<Review>
             {
-                new Review (1, 1, "name", 9, "reviewText", DateTime.Now.AddDays(-1))
+                new Review (1, 1, 9, "name", DateTime.Now.AddDays(-1)),
             };
 
             var reportData = new AdminReportData(
@@ -230,8 +230,8 @@ namespace UnitTests.Tests
             // Arrange
             var recentReviews = new List<Review>
             {
-                new Review (1, 1, "name", 9, "reviewText", DateTime.Now.AddDays(-1)),
-                new Review (2, 1, "name", 9, "reviewText", DateTime.Now.AddDays(-1))
+                new Review (1, 1, 9, "name", DateTime.Now.AddDays(-1)),
+                new Review (2, 1, 9, "name",  DateTime.Now.AddDays(-1))
             };
 
             // Create test template files if they don't exist
@@ -284,7 +284,7 @@ namespace UnitTests.Tests
 
             var recentReviews = new List<Review>
             {
-                new Review (1, 1, "name", 9, "reviewText", DateTime.Now.AddDays(-1))
+                new Review (1, 1, 9, "name", DateTime.Now.AddDays(-1)),
             };
 
             var reportData = new AdminReportData(

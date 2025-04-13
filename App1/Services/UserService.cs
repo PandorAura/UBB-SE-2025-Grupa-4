@@ -153,7 +153,14 @@ namespace App1.Services
 
         public List<User> GetManagers()
         {
-            return _userRepository.GetUsersByRoleType(RoleType.Manager);
+            try
+            {
+                return _userRepository.GetUsersByRoleType(RoleType.Manager);
+            }
+            catch (RepositoryException ex)
+            {
+                throw new UserServiceException("Failed to retrieve manager users.", ex);
+            }
         }
 
         public void UpdateUserRole(int userId, RoleType roleType)
