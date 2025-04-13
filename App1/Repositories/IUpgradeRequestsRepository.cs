@@ -9,11 +9,9 @@ namespace App1.Repositories
 {
     public interface IUpgradeRequestsRepository
     {
-        public List<UpgradeRequest> getAllRequests();
-
-        public void deleteRequestBasedOnRequestId(int requestId);
-
-        public UpgradeRequest getUpgradeRequest(int requestId);
-
+        List<UpgradeRequest> RetrieveAllUpgradeRequests();
+       
+        void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
+        UpgradeRequest RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
     }
 }

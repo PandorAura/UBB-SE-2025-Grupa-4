@@ -7,18 +7,14 @@ public class JobFactory : IJobFactory
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public JobFactory(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-        System.Diagnostics.Debug.WriteLine("JobFactory created");
-    }
+    public JobFactory(IServiceProvider serviceProvider) { _serviceProvider = serviceProvider; }
 
     public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine($"Creating job of type: {bundle.JobDetail.JobType.Name}");
-            return _serviceProvider.GetRequiredService(bundle.JobDetail.JobType) as IJob;
+            IJob? job = _serviceProvider.GetRequiredService(bundle.JobDetail.JobType) as IJob;
+            return job == null ? throw new Exception("Couldn't retrieve the required service") : job;
         }
         catch (Exception ex)
         {
@@ -27,8 +23,5 @@ public class JobFactory : IJobFactory
         }
     }
 
-    public void ReturnJob(IJob job)
-    {
-        (job as IDisposable)?.Dispose();
-    }
+    public void ReturnJob(IJob job) { (job as IDisposable)?.Dispose(); }
 }

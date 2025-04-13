@@ -28,7 +28,7 @@ namespace App1
                 .ConfigureServices((context, services) =>
                 {
                     // Configuration
-                    var config = new ConfigurationBuilder()
+                    IConfiguration config = new ConfigurationBuilder()
                         .AddUserSecrets<App>()
                         .AddEnvironmentVariables()
                         .Build();
@@ -37,8 +37,12 @@ namespace App1
                     string connectionString = "Server=192.168.0.137;Database=DrinksImdb;User Id=SA;Password=passwordSQL1;TrustServerCertificate=True;";
 
                     services.AddSingleton<IUserRepository, UserRepo>();
-                    services.AddSingleton<IReviewRepository, ReviewRepo>();
-                    services.AddSingleton<IAutoCheck, AutoCheck>(provider => new AutoCheck(connectionString));
+                    services.AddSingleton<IReviewsRepository, ReviewsRepository>();
+                    services.AddSingleton<IOffensiveWordsRepository>(provider =>
+                    {
+                        return new OffensiveWordsRepository(connectionString);
+                    });
+                    services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
                     services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
                     services.AddSingleton<IRolesRepository, RolesRepository>();
@@ -51,8 +55,8 @@ namespace App1
                     services.AddSingleton<JobFactory>();
                     services.AddSingleton(provider =>
                     {
-                        var factory = new StdSchedulerFactory();
-                        var scheduler = factory.GetScheduler().Result;
+                        StdSchedulerFactory factory = new StdSchedulerFactory();
+                        IScheduler scheduler = factory.GetScheduler().Result;
                         scheduler.JobFactory = provider.GetRequiredService<JobFactory>();
                         return scheduler;
                     });
@@ -68,7 +72,7 @@ namespace App1
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-            var scheduler = Host.Services.GetRequiredService<IScheduler>();
+            IScheduler scheduler = Host.Services.GetRequiredService<IScheduler>();
             scheduler.Start().Wait(); 
 
             MainWindow = Host.Services.GetRequiredService<MainWindow>();
