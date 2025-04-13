@@ -67,10 +67,10 @@ namespace App1.Services
 
         public List<Review> GetReviewsForReport()
         {
-            var date = DateTime.Now.AddDays(-1);
-            var count = _reviewsRepository.GetReviewCountAfterDate(date);
+            DateTime date = DateTime.Now.AddDays(-1);
+            int count = _reviewsRepository.GetReviewCountAfterDate(date);
 
-            var reviews = _reviewsRepository.GetMostRecentReviews(count);
+            List<Review> reviews = _reviewsRepository.GetMostRecentReviews(count);
             return reviews ?? [];
         }
 

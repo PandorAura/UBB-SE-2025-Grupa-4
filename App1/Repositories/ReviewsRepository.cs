@@ -25,7 +25,7 @@ namespace App1.Repositories
 
         private void AddSampleReviews()
         {
-            var sampleReviews = new[]
+            Review[] sampleReviews = new[]
             {
                 new Review(
                     reviewId: _nextReviewId++,
@@ -110,7 +110,7 @@ namespace App1.Repositories
             if (!_reviews.Any(review => !review.IsHidden))
                 return 0.0;
 
-            var average = _reviews
+            double average = _reviews
                 .Where(review => !review.IsHidden)
                 .Average(r => r.Rating);
             return Math.Round(average, 1);
@@ -153,7 +153,7 @@ namespace App1.Repositories
 
         public void UpdateReviewVisibility(int reviewId, bool isHidden)
         {
-            var currentReview = _reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            Review currentReview = _reviews.FirstOrDefault(review => review.ReviewId == reviewId);
 
             if (currentReview != null)
             {
@@ -163,7 +163,7 @@ namespace App1.Repositories
 
         public void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
-            var currentReview = _reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            Review currentReview = _reviews.FirstOrDefault(review => review.ReviewId == reviewId);
             
             if (currentReview != null)
             {
@@ -176,7 +176,7 @@ namespace App1.Repositories
             // Normally, this would be handled by the database
             int newId = _nextReviewId++;
             
-            var newReview = new Review(
+            Review newReview = new Review(
                 reviewId: newId,
                 userId: review.UserId,
                 rating: review.Rating,
@@ -192,7 +192,7 @@ namespace App1.Repositories
 
         public bool RemoveReviewById(int reviewId)
         {
-            var reviewToRemove = _reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            Review reviewToRemove = _reviews.FirstOrDefault(review => review.ReviewId == reviewId);
             
             if (reviewToRemove != null)
             {
