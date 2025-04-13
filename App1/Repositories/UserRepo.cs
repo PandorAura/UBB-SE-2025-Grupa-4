@@ -9,7 +9,7 @@ namespace App1.Repositories
 {
     public class UserRepo : IUserRepository
     {
-        private readonly List<User> _usersList;
+        private readonly List<User> usersList;
 
         public UserRepo()
         {
@@ -32,7 +32,7 @@ namespace App1.Repositories
             {
                 new Role(RoleType.Banned, "banned")
             };
-            _usersList = new List<User>
+            usersList = new List<User>
             {
                 new User(
                     userId: 1,
@@ -40,16 +40,14 @@ namespace App1.Repositories
                     fullName: "Bianca Georgiana Cirnu",
                     numberOfDeletedReviews: 2,
                     HasSubmittedAppeal: true,
-                    assignedRoles: basicUserRoles
-                    ),
+                    assignedRoles: basicUserRoles),
                 new User(
                     userId: 2,
                     emailAddress: "alexiabortos@gmail.com",
                     fullName: "Alexia Bortos",
                     numberOfDeletedReviews: 2,
                     HasSubmittedAppeal: true,
-                    assignedRoles: adminRoles
-                ),
+                    assignedRoles: adminRoles),
             };
         }
 
@@ -57,7 +55,7 @@ namespace App1.Repositories
         {
             try
             {
-                return _usersList.Where(user => user.HasSubmittedAppeal).ToList();
+                return usersList.Where(user => user.HasSubmittedAppeal).ToList();
             }
             catch (Exception ex)
             {
@@ -69,7 +67,7 @@ namespace App1.Repositories
         {
             try
             {
-                return _usersList.Where(user => user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
+                return usersList.Where(user => user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
             }
             catch (Exception ex)
             {
@@ -81,7 +79,7 @@ namespace App1.Repositories
         {
             try
             {
-                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                User? user = usersList.FirstOrDefault(user => user.UserId == userId);
 
                 if (user == null)
                 {
@@ -105,11 +103,12 @@ namespace App1.Repositories
         {
             try
             {
-                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                User? user = usersList.FirstOrDefault(user => user.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
                 }
+
                 return user;
             }
             catch (Exception ex)
@@ -122,22 +121,24 @@ namespace App1.Repositories
         {
             try
             {
-                return _usersList.Where(user => user.HasSubmittedAppeal && user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)).ToList();
+                return usersList.Where(user => user.HasSubmittedAppeal && user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)).ToList();
             }
             catch (Exception ex)
             {
                 throw new RepositoryException("Failed to retrieve banned users who have submitted appeals.", ex);
             }
         }
+
         public void AddRoleToUser(int userId, Role roleToAdd)
         {
             try
             {
-                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                User? user = usersList.FirstOrDefault(user => user.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
                 }
+
                 user.AssignedRoles.Add(roleToAdd);
             }
             catch (Exception ex)
@@ -145,11 +146,12 @@ namespace App1.Repositories
                 throw new RepositoryException($"Failed to add role to user with ID {userId}.", ex);
             }
         }
+
         public List<User> GetAllUsers()
         {
             try
             {
-                return _usersList;
+                return usersList;
             }
             catch (Exception ex)
             {
@@ -160,7 +162,9 @@ namespace App1.Repositories
         public class RepositoryException : Exception
         {
             public RepositoryException(string message, Exception innerException)
-                : base(message, innerException) { }
+                : base(message, innerException)
+            {
+            }
         }
     }
 }

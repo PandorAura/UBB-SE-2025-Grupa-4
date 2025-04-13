@@ -21,33 +21,10 @@ namespace App1.Services
         private static readonly string ProjectRoot = GetProjectRoot();
         private static readonly string LogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
 
-        private static void LogToFile(string message)
-        {
-            try
-            {
-                File.AppendAllText(LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}\n");
-            }
-            catch
-            {
-                // Fallback to console if logging fails
-                Console.WriteLine($"LOG FAILED: {message}");
-            }
-        }
-
         private readonly ReviewsRepository reviewsRepo;
         private readonly IReviewService reviewsService;
         private readonly IAutoCheck autoCheck;
         private static readonly string ModelPath = Path.Combine(GetProjectRoot(), "Models", "curseword_model.zip");
-
-        private static string GetProjectRoot([CallerFilePath] string filePath = "")
-        {
-            var dir = new FileInfo(filePath).Directory;
-            while (dir != null && !dir.GetFiles("*.csproj").Any())
-            {
-                dir = dir.Parent;
-            }
-            return dir?.FullName ?? throw new Exception("Project root not found!");
-        }
 
         public CheckersService(IReviewService reviewsService, IAutoCheck autoCheck)
         {
@@ -82,16 +59,20 @@ namespace App1.Services
                     messages.Add("Review not found.");
                 }
             }
+
             return messages;
         }
+
         public HashSet<string> GetOffensiveWordsList()
         {
             return this.autoCheck.GetOffensiveWordsList();
         }
+
         public void AddOffensiveWord(string newWord)
         {
             this.autoCheck.AddOffensiveWord(newWord);
         }
+
         public void DeleteOffensiveWord(string word)
         {
             this.autoCheck.DeleteOffensiveWord(word);
@@ -120,9 +101,32 @@ namespace App1.Services
             }
         }
 
+        private static void LogToFile(string message)
+        {
+            try
+            {
+                File.AppendAllText(LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}\n");
+            }
+            catch
+            {
+                // Fallback to console if logging fails
+                Console.WriteLine($"LOG FAILED: {message}");
+            }
+        }
+
+        private static string GetProjectRoot([CallerFilePath] string filePath = "")
+        {
+            var dir = new FileInfo(filePath).Directory;
+            while (dir != null && !dir.GetFiles("*.csproj").Any())
+            {
+                dir = dir.Parent;
+            }
+
+            return dir?.FullName ?? throw new Exception("Project root not found!");
+        }
+
         private static bool CheckReviewWithAI(string reviewText)
         {
-            
             var result = OffensiveTextDetector.DetectOffensiveContent(reviewText);
             Console.WriteLine("Hugging Face Response: " + result);
 
@@ -142,7 +146,7 @@ namespace App1.Services
                     foreach (var item in predictions)
                     {
                         if (item.TryGetValue("label", out var labelObj) &&
-                            labelObj.ToString().ToLower() == "hate" &&
+                            labelObj.ToString()?.ToLower() == "hate" &&
                             item.TryGetValue("score", out var scoreObj))
                         {
                             return Convert.ToSingle(scoreObj);
@@ -157,15 +161,12 @@ namespace App1.Services
 
             return 0.0f; // default if parsing fails
         }
-
-
     }
 
-    
     public static class OffensiveTextDetector
     {
         private static readonly string HuggingFaceApiUrl = "https://api-inference.huggingface.co/models/facebook/roberta-hate-speech-dynabench-r1-target";
-        private static readonly string HuggingFaceApiToken = ""; 
+        private static readonly string HuggingFaceApiToken = "";
 
         public static string DetectOffensiveContent(string text)
         {
@@ -196,5 +197,4 @@ namespace App1.Services
             }
         }
     }
-
 }

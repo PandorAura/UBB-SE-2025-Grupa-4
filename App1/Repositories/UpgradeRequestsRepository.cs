@@ -9,17 +9,17 @@ namespace App1.Repositories
 {
     public class UpgradeRequestsRepository : IUpgradeRequestsRepository
     {
-        private readonly ISqlConnectionFactory _connectionFactory;
-        private readonly ISqlDataAdapter _dataAdapter;
+        private const string SELECTALLUPGRADEREQUESTSQUERY = "SELECT RequestId, RequestingUserId, RequestingUserName FROM UpgradeRequests";
+        private const string SELECTUPGRADEREQUESTBYIDENTIFIERQUERY = "SELECT RequestId, RequestingUserId, RequestingUserName FROM UpgradeRequests WHERE RequestId = @upgradeRequestIdentifier";
+        private const string DELETEUPGRADEREQUESTQUERY = "DELETE FROM UpgradeRequests WHERE RequestId=@upgradeRequestIdentifier";
 
-        private const string SELECT_ALL_UPGRADE_REQUESTS_QUERY = "SELECT RequestId, RequestingUserId, RequestingUserName FROM UpgradeRequests";
-        private const string SELECT_UPGRADE_REQUEST_BY_IDENTIFIER_QUERY = "SELECT RequestId, RequestingUserId, RequestingUserName FROM UpgradeRequests WHERE RequestId = @upgradeRequestIdentifier";
-        private const string DELETE_UPGRADE_REQUEST_QUERY = "DELETE FROM UpgradeRequests WHERE RequestId=@upgradeRequestIdentifier";
+        private readonly ISqlConnectionFactory connectionFactory;
+        private readonly ISqlDataAdapter dataAdapter;
 
         public UpgradeRequestsRepository(ISqlConnectionFactory connectionFactory, ISqlDataAdapter dataAdapter)
         {
-            _connectionFactory = connectionFactory;
-            _dataAdapter = dataAdapter;
+            this.connectionFactory = connectionFactory;
+            this.dataAdapter = dataAdapter;
         }
 
         // Legacy constructor for backward compatibility
@@ -32,13 +32,13 @@ namespace App1.Repositories
         {
             List<UpgradeRequest> upgradeRequestsList = new List<UpgradeRequest>();
 
-            using (var connection = _connectionFactory.CreateConnection())
+            using (var connection = connectionFactory.CreateConnection())
             {
                 try
                 {
                     connection.Open();
                     var selectUpgradeRequestsCommand = connection.CreateCommand();
-                    selectUpgradeRequestsCommand.CommandText = SELECT_ALL_UPGRADE_REQUESTS_QUERY;
+                    selectUpgradeRequestsCommand.CommandText = SELECTALLUPGRADEREQUESTSQUERY;
 
                     using (var upgradeRequestsDataReader = selectUpgradeRequestsCommand.ExecuteReader())
                     {
@@ -51,6 +51,7 @@ namespace App1.Repositories
 
                             upgradeRequestsList.Add(upgradeRequest);
                         }
+
                         upgradeRequestsDataReader.Close();
                     }
                 }
@@ -69,13 +70,13 @@ namespace App1.Repositories
 
         public void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            using (var connection = _connectionFactory.CreateConnection())
+            using (var connection = connectionFactory.CreateConnection())
             {
                 try
                 {
                     connection.Open();
                     var deleteCommand = connection.CreateCommand();
-                    deleteCommand.CommandText = DELETE_UPGRADE_REQUEST_QUERY;
+                    deleteCommand.CommandText = DELETEUPGRADEREQUESTQUERY;
                     deleteCommand.Parameters.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier);
                     deleteCommand.ExecuteNonQuery();
                 }
@@ -92,15 +93,15 @@ namespace App1.Repositories
 
         public UpgradeRequest RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            UpgradeRequest retrievedUpgradeRequest = null;
+            UpgradeRequest? retrievedUpgradeRequest = null;
 
-            using (var connection = _connectionFactory.CreateConnection())
+            using (var connection = connectionFactory.CreateConnection())
             {
                 try
                 {
                     connection.Open();
                     var selectUpgradeRequestCommand = connection.CreateCommand();
-                    selectUpgradeRequestCommand.CommandText = SELECT_UPGRADE_REQUEST_BY_IDENTIFIER_QUERY;
+                    selectUpgradeRequestCommand.CommandText = SELECTUPGRADEREQUESTBYIDENTIFIERQUERY;
                     selectUpgradeRequestCommand.Parameters.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier);
 
                     using (var upgradeRequestDataReader = selectUpgradeRequestCommand.ExecuteReader())
@@ -110,9 +111,9 @@ namespace App1.Repositories
                             retrievedUpgradeRequest = new UpgradeRequest(
                                 upgradeRequestDataReader.GetInt32(0),
                                 upgradeRequestDataReader.GetInt32(1),
-                                upgradeRequestDataReader.GetString(2)
-                            );
+                                upgradeRequestDataReader.GetString(2));
                         }
+
                         upgradeRequestDataReader.Close();
                     }
                 }

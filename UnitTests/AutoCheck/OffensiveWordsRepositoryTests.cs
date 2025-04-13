@@ -1,6 +1,6 @@
 ﻿using App1.AutoChecker;
 using System;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using Xunit;
 
@@ -9,21 +9,13 @@ namespace UnitTests.Autocheck
     // integration tests
     public class OffensiveWordsRepositoryTests : IDisposable
     {
-        private readonly string _connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=TestDb;Trusted_Connection=True;";
-        private readonly OffensiveWordsRepository _repository;
+        private readonly string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=TestDb;Trusted_Connection=True;";
+        private readonly OffensiveWordsRepository repository;
 
         public OffensiveWordsRepositoryTests()
         {
-            _repository = new OffensiveWordsRepository(_connectionString);
+            repository = new OffensiveWordsRepository(connectionString);
             CleanupTable();
-        }
-
-        private void CleanupTable()
-        {
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-            using var cmd = new SqlCommand("DELETE FROM OffensiveWords", conn);
-            cmd.ExecuteNonQuery();
         }
 
         public void Dispose()
@@ -34,16 +26,16 @@ namespace UnitTests.Autocheck
         [Fact]
         public void LoadOffensiveWords_WhenEmpty_ReturnsEmptySet()
         {
-            var result = _repository.LoadOffensiveWords();
+            var result = repository.LoadOffensiveWords();
             Assert.Empty(result);
         }
 
         [Fact]
         public void AddWord_ThenLoadOffensiveWords_ContainsWord()
         {
-            _repository.AddWord("troll");
+            repository.AddWord("troll");
 
-            var result = _repository.LoadOffensiveWords();
+            var result = repository.LoadOffensiveWords();
 
             Assert.Contains("troll", result, StringComparer.OrdinalIgnoreCase);
         }
@@ -51,10 +43,10 @@ namespace UnitTests.Autocheck
         [Fact]
         public void AddWord_Twice_DoesNotDuplicate()
         {
-            _repository.AddWord("jerk");
-            _repository.AddWord("jerk");
+            repository.AddWord("jerk");
+            repository.AddWord("jerk");
 
-            var result = _repository.LoadOffensiveWords();
+            var result = repository.LoadOffensiveWords();
 
             var count = result.Count(w => w.Equals("jerk", StringComparison.OrdinalIgnoreCase));
             Assert.Equal(1, count);
@@ -63,12 +55,20 @@ namespace UnitTests.Autocheck
         [Fact]
         public void DeleteWord_RemovesWord()
         {
-            _repository.AddWord("annoying");
-            _repository.DeleteWord("annoying");
+            repository.AddWord("annoying");
+            repository.DeleteWord("annoying");
 
-            var result = _repository.LoadOffensiveWords();
+            var result = repository.LoadOffensiveWords();
 
             Assert.DoesNotContain("annoying", result, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private void CleanupTable()
+        {
+            using var conn = new SqlConnection(connectionString);
+            conn.Open();
+            using var cmd = new SqlCommand("DELETE FROM OffensiveWords", conn);
+            cmd.ExecuteNonQuery();
         }
     }
 }
