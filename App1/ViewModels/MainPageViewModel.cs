@@ -14,28 +14,6 @@ using System.Windows.Input;
 
 namespace App1.ViewModels
 {
-    /*
-     * MVVM Improvement Suggestions:
-     * 
-     * 1. Implement ICommand properties for all button actions to remove event handlers from code-behind
-     *    - Create a RelayCommand class to implement ICommand
-     *    - Example: public ICommand KeepBanCommand { get; private set; }
-     *    - Initialize in constructor: KeepBanCommand = new RelayCommand<User>(user => KeepBanForUser(user));
-     * 
-     * 2. Create proper models with change notification instead of directly modifying properties
-     *    - Create UserModel that wraps User and provides proper change notification
-     *    - Implement service methods to update the model properly
-     * 
-     * 3. Add proper data validation with INotifyDataErrorInfo
-     * 
-     * 4. Move all remaining UI construction code to XAML using proper templates
-     *    - Replace dynamically created flyouts with templated popups in XAML
-     *    - Use proper DataTemplates for displaying user data
-     * 
-     * 5. Use ObservableCollection<T> for all collections that may change
-     * 
-     * 6. Implement a proper navigation service for managing views
-     */
     public class MainPageViewModel : INotifyPropertyChanged
     {
         private readonly IReviewService _reviewsService;
@@ -61,7 +39,6 @@ namespace App1.ViewModels
         private bool _isAppealUserBanned = true;
         private bool _isWordListVisible = false;
 
-        #region Commands
         public ICommand KeepBanCommand { get; private set; }
         public ICommand AcceptAppealCommand { get; private set; }
         public ICommand CloseAppealCaseCommand { get; private set; }
@@ -74,7 +51,6 @@ namespace App1.ViewModels
         public ICommand DeleteOffensiveWordCommand { get; private set; }
         public ICommand ShowWordListPopupCommand { get; private set; }
         public ICommand HideWordListPopupCommand { get; private set; }
-        #endregion
 
         public ObservableCollection<Review> FlaggedReviews
         {
@@ -258,7 +234,6 @@ namespace App1.ViewModels
             _checkersService = checkersService ?? throw new ArgumentNullException(nameof(checkersService));
             _autoCheck = autoCheck ?? throw new ArgumentNullException(nameof(autoCheck));
 
-            // Initialize commands
             InitializeCommands();
 
             LoadAllData();

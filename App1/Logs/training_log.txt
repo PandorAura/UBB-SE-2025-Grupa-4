@@ -1021,3 +1021,5 @@
 2025-04-13 16:41:36 - C:\Users\tudor\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
 2025-04-13 16:49:33 - C:\Users\tudor\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
 2025-04-13 16:55:11 - C:\Users\tudor\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-13 17:08:06 - C:\Users\tudor\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
+2025-04-13 17:10:30 - C:\Users\tudor\Source\Repos\UBB-SE-2025-Spice-ImdbForDrinks\App1\Models\curseword_model.zip
