@@ -1,28 +1,44 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.UI.Xaml;
-using App1.Services;
-using App1.Repositories;
-using Quartz;
-using Quartz.Impl;
-using Microsoft.Extensions.Hosting;
-using App1.Views;
-using App1.AutoChecker;
-using App1.Models;
-using System.Collections.Generic;
-using System;
-
-namespace App1
+﻿namespace App1
 {
+    using System;
+    using System.Collections.Generic;
+    using App1.AutoChecker;
+    using App1.Models;
+    using App1.Repositories;
+    using App1.Services;
+    using App1.Views;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.UI.Xaml;
+    using Quartz;
+    using Quartz.Impl;
+
     public partial class App : Application
     {
         public static IHost Host { get; private set; }
+
         public static Window MainWindow { get; set; }
 
         public App()
         {
             this.InitializeComponent();
-            ConfigureHost();
+            this.ConfigureHost();
+        }
+
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
+        {
+            IScheduler scheduler = Host.Services.GetRequiredService<IScheduler>();
+            scheduler.Start().Wait();
+
+            MainWindow = Host.Services.GetRequiredService<MainWindow>();
+            MainWindow.Activate();
+
+            // Prevent app suspension
+            Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += (s, e) =>
+            {
+                MainWindow?.Activate();
+            };
         }
 
         private void ConfigureHost()
@@ -40,7 +56,12 @@ namespace App1
                     string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
 
                     services.AddSingleton<IUserRepository, UserRepo>();
-                    services.AddSingleton<IReviewsRepository, ReviewsRepository>();
+                    services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
+                    {
+                        ReviewsRepository repository = new ReviewsRepository();
+                        repository.LoadReviews(ReviewsSampleData.GetSampleReviews());
+                        return repository;
+                    });
                     services.AddSingleton<IOffensiveWordsRepository>(provider =>
                     {
                         return new OffensiveWordsRepository(connectionString);
@@ -49,8 +70,8 @@ namespace App1
                     services.AddSingleton<ICheckersService, CheckersService>();
                     services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
                     services.AddSingleton<IRolesRepository, RolesRepository>();
-                    services.AddSingleton<IUserService, UserService>(); 
-                    services.AddSingleton<IReviewService, ReviewsService>(); 
+                    services.AddSingleton<IUserService, UserService>();
+                    services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
                     services.AddTransient<EmailJob>();
 
@@ -68,24 +89,8 @@ namespace App1
                     services.AddTransient<EmailJob>();
                     services.AddTransient<MainPage>();
                     services.AddTransient<MainWindow>();
-
                 })
                 .Build();
-        }
-
-        protected override void OnLaunched(LaunchActivatedEventArgs args)
-        {
-            IScheduler scheduler = Host.Services.GetRequiredService<IScheduler>();
-            scheduler.Start().Wait(); 
-
-            MainWindow = Host.Services.GetRequiredService<MainWindow>();
-            MainWindow.Activate();
-
-            // Prevent app suspension
-            Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += (s, e) =>
-            {
-                MainWindow?.Activate();
-            };
         }
 
         public static class ReviewsSampleData

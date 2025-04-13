@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using Microsoft.ML;
-using Microsoft.ML.Data;
-using Microsoft.ML.FastTree;
-using static Microsoft.ML.DataOperationsCatalog;
-
-namespace App1.AiCheck
+﻿namespace App1.AiCheck
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
+    using Microsoft.ML;
+    using Microsoft.ML.Data;
+    using Microsoft.ML.FastTree;
+    using static Microsoft.ML.DataOperationsCatalog;
+
     /// <summary>
     /// Handles the training and evaluation of the review content classification model.
     /// </summary>
