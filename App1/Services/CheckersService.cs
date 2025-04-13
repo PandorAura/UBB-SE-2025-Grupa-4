@@ -1,21 +1,25 @@
-﻿using System;
-using App1.Models;
-using App1.Repositories;
-using App1.Services;
-using Microsoft.ML;
-using System.IO;
-using System.Collections.Generic;
-using App1.AutoChecker;
-using System.Runtime.CompilerServices;
-using App1.AiCheck;
-using System.Threading.Tasks;
-using System.Net.Http;
-using System.Text;
-using Newtonsoft.Json;
-using System.Linq;
+﻿// <copyright file="CheckersService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace App1.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Runtime.CompilerServices;
+    using System.Text;
+    using System.Threading.Tasks;
+    using App1.AiCheck;
+    using App1.AutoChecker;
+    using App1.Models;
+    using App1.Repositories;
+    using App1.Services;
+    using Microsoft.ML;
+    using Newtonsoft.Json;
+
     public class CheckersService : ICheckersService
     {
         private static readonly string ProjectRoot = GetProjectRoot();
@@ -30,51 +34,29 @@ namespace App1.Services
             this.reviewsService = reviewsService;
             this.autoCheck = autoCheck;
         }
-        private static void LogToFile(string message)
-        {
-            File.AppendAllText(LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}\n");
-        }
-
-        private static string GetProjectRoot([CallerFilePath] string filePath = "")
-        {
-            DirectoryInfo? directory = new FileInfo(filePath).Directory;
-            while (directory != null && !directory.GetFiles("*.csproj").Any())
-            {
-                directory = directory.Parent;
-            }
-            return directory?.FullName ?? throw new Exception("Project root not found!");
-        }
 
         public List<string> RunAutoCheck(List<Review> receivedReviews)
-            {
-                dir = dir.Parent;
-            }
+        {
+            List<string> checkingMessages = new List<string>();
+
             foreach (Review currentReview in receivedReviews)
             {
-                
-                bool reviewIsOffensive = autoCheck.AutoCheckReview(currentReview.Content);
+                bool reviewIsOffensive = this.autoCheck.AutoCheckReview(currentReview.Content);
                 if (reviewIsOffensive)
                 {
-                    CheckingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
-                    reviewsService.HideReview(currentReview.ReviewId);
-                    reviewsService.ResetReviewFlags(currentReview.ReviewId);
+                    checkingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
+                    this.reviewsService.HideReview(currentReview.ReviewId);
+                    this.reviewsService.ResetReviewFlags(currentReview.ReviewId);
                 }
                 else
                 {
-                    CheckingMessages.Add($"Review {currentReview.ReviewId} is not offensive.");
-                }
-                
-            }
-            return CheckingMessages;
-        }
-       
-                else
-                {
-                    messages.Add("Review not found.");
+                    checkingMessages.Add($"Review {currentReview.ReviewId} is not offensive.");
                 }
             }
-            return messages;
+
+            return checkingMessages;
         }
+
         public HashSet<string> GetOffensiveWordsList()
         {
             return this.autoCheck.GetOffensiveWordsList();
@@ -90,58 +72,68 @@ namespace App1.Services
             this.autoCheck.DeleteOffensiveWord(word);
         }
 
-            }
-            bool reviewIsOffensive = CheckReviewWithAI(review.Content);
-            if(!reviewIsOffensive)
+        public void RunAICheckForOneReview(Review review)
+        {
+            if (review == null)
             {
                 Console.WriteLine("Review not found.");
                 return;
             }
-            Console.WriteLine($"Review {review.ReviewId} is offensive. Hiding the review.");
-            reviewsService.HideReview(review.ReviewId);
-            reviewsService.ResetReviewFlags(review.ReviewId);
-        }
-                }
-            }
-            else
+
+            bool reviewIsOffensive = CheckReviewWithAI(review.Content);
+            if (!reviewIsOffensive)
             {
                 Console.WriteLine("Review not found.");
+                return;
             }
+
+            Console.WriteLine($"Review {review.ReviewId} is offensive. Hiding the review.");
+            this.reviewsService.HideReview(review.ReviewId);
+            this.reviewsService.ResetReviewFlags(review.ReviewId);
+        }
+
+        private static void LogToFile(string message)
+        {
+            File.AppendAllText(LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}\n");
         }
 
         private static string GetProjectRoot([CallerFilePath] string filePath = "")
         {
-            var dir = new FileInfo(filePath).Directory;
-            while (dir != null && !dir.GetFiles("*.csproj").Any())
+            DirectoryInfo? directory = new FileInfo(filePath).Directory;
+            while (directory != null && !directory.GetFiles("*.csproj").Any())
             {
-                dir = dir.Parent;
-            
+                directory = directory.Parent;
+            }
+
+            return directory?.FullName ?? throw new Exception("Project root not found!");
+        }
+
+        private static bool CheckReviewWithAI(string reviewText)
+        {
             string analysisReportResult = OffensiveTextDetector.DetectOffensiveContent(reviewText);
             Console.WriteLine("Hugging Face Response: " + analysisReportResult);
             float offesiveContentThreshold = 0.1f;
             float hateSpeachScore = GetConfidenceScoreForHateSpeach(analysisReportResult);
             return hateSpeachScore >= offesiveContentThreshold;
-            
-            var result = OffensiveTextDetector.DetectOffensiveContent(reviewText);
-            Console.WriteLine("Hugging Face Response: " + result);
+        }
 
-            float threshold = 0.1f;
-            float score = GetConfidenceScore(result);
+        private static float GetConfidenceScoreForHateSpeach(string analisysReportAsJsonString)
+        {
+            try
+            {
                 List<List<Dictionary<string, string>>>? analisysReportToList = JsonConvert.DeserializeObject<List<List<Dictionary<string, string>>>>(analisysReportAsJsonString);
                 List<Dictionary<string, string>>? analisysReportToListForCurrentReview = analisysReportToList?.FirstOrDefault() ?? null;
-                if(analisysReportToListForCurrentReview!=null && analisysReportToListForCurrentReview.Count!=0)
+                if (analisysReportToListForCurrentReview != null && analisysReportToListForCurrentReview.Count != 0)
                 {
-                    foreach(Dictionary<string, string> statisticForCharacteristic in analisysReportToListForCurrentReview)
-                        if(statisticForCharacteristic.ContainsKey("label") && statisticForCharacteristic["label"] == "hate" && statisticForCharacteristic.ContainsKey("score"))
-                            return float.Parse(statisticForCharacteristic["score"]);
-                        if (item.TryGetValue("label", out var labelObj) &&
-                            labelObj.ToString().ToLower() == "hate" &&
-                            item.TryGetValue("score", out var scoreObj))
+                    foreach (Dictionary<string, string> statisticForCharacteristic in analisysReportToListForCurrentReview)
+                    {
+                        if (statisticForCharacteristic.ContainsKey("label") && statisticForCharacteristic["label"] == "hate" && statisticForCharacteristic.ContainsKey("score"))
                         {
-                            return Convert.ToSingle(scoreObj);
+                            return float.Parse(statisticForCharacteristic["score"]);
                         }
                     }
                 }
+
                 return 0;
             }
             catch (Exception ex)
@@ -155,7 +147,7 @@ namespace App1.Services
     public static class OffensiveTextDetector
     {
         private static readonly string HuggingFaceApiUrl = "https://api-inference.huggingface.co/models/facebook/roberta-hate-speech-dynabench-r1-target";
-        private static readonly string HuggingFaceApiToken = "";
+        private static readonly string HuggingFaceApiToken = string.Empty;
 
         public static string DetectOffensiveContent(string text)
         {
@@ -166,14 +158,16 @@ namespace App1.Services
             {
                 HttpResponseMessage response = client.PostAsync(HuggingFaceApiUrl, jsonContent).GetAwaiter().GetResult();
                 if (response.IsSuccessStatusCode)
+                {
                     return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                }
+
                 return $"Error: {response.StatusCode}";
             }
             catch (Exception ex)
             {
                 return $"Exception: {ex.Message}";
             }
-            
         }
     }
 }

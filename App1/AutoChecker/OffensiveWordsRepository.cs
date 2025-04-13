@@ -26,10 +26,10 @@ namespace App1.AutoChecker
         public HashSet<string> LoadOffensiveWords()
         {
             HashSet<string> offensiveWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
 
-            using SqlCommand command = new SqlCommand(SELECT_OFFENSIVE_WORDS_QUERY, connection);
+            using SqlCommand command = new SqlCommand(SELECTOFFENSIVEWORDSQUERY, connection);
             using SqlDataReader reader = command.ExecuteReader();
 
             while (reader.Read())
@@ -42,21 +42,21 @@ namespace App1.AutoChecker
 
         public void AddWord(string word)
         {
-            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
 
-            using SqlCommand command = new SqlCommand(INSERT_OFFENSIVE_WORD_QUERY, connection);
-            command.Parameters.AddWithValue(WORD_PARAMETER_NAME, word);
+            using SqlCommand command = new SqlCommand(INSERTOFFENSIVEWORDQUERY, connection);
+            command.Parameters.AddWithValue(WORDPARAMETERNAME, word);
             command.ExecuteNonQuery();
         }
 
         public void DeleteWord(string word)
         {
-            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
 
-            using SqlCommand command = new SqlCommand(DELETE_OFFENSIVE_WORD_QUERY, connection);
-            command.Parameters.AddWithValue(WORD_PARAMETER_NAME, word);
+            using SqlCommand command = new SqlCommand(DELETEOFFENSIVEWORDQUERY, connection);
+            command.Parameters.AddWithValue(WORDPARAMETERNAME, word);
             command.ExecuteNonQuery();
         }
     }

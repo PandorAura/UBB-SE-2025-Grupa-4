@@ -23,21 +23,11 @@ namespace App1.AiCheck
         private const float TestFraction = 0.2f;
         private const char CsvSeparator = '}';
 
-        /// <summary>
-        /// Gets the project root directory by traversing up from the current file.
-        /// </summary>
-        /// <param name="filePath">The path of the current file (automatically provided by the compiler).</param>
-        /// <returns>The full path to the project root directory.</returns>
-        /// <exception cref="Exception">Thrown when the project root cannot be found.</exception>
-        private static string GetProjectRoot([CallerFilePath] string filePath = "")
-        {
-            DirectoryInfo directory = new FileInfo(filePath).Directory;
-            while (directory != null && !directory.GetFiles("*.csproj").Any())
-            {
-                directory = directory.Parent;
-            }
-            return directory?.FullName ?? throw new Exception("Project root not found!");
-        }
+        // File paths
+        private static readonly string ProjectRoot = GetProjectRoot();
+        private static readonly string DefaultDataPath = Path.Combine(ProjectRoot, "AiCheck", "review_data.csv");
+        private static readonly string DefaultModelPath = Path.Combine(ProjectRoot, "Models", "curseword_model.zip");
+        private static readonly string DefaultLogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
 
         /// <summary>
         /// Trains a binary classification model to detect offensive content in reviews.
@@ -132,7 +122,7 @@ namespace App1.AiCheck
         /// <exception cref="Exception">Thrown when the project root cannot be found.</exception>
         private static string GetProjectRoot([CallerFilePath] string filePath = "")
         {
-            var directory = new FileInfo(filePath).Directory;
+            DirectoryInfo? directory = new FileInfo(filePath).Directory;
             while (directory != null && !directory.GetFiles("*.csproj").Any())
             {
                 directory = directory.Parent;
@@ -206,14 +196,20 @@ namespace App1.AiCheck
                 foreach (string line in File.ReadLines(dataPath).Skip(1))
                 {
                     if (string.IsNullOrWhiteSpace(line))
-                    { continue; }
+                    {
+                        continue;
+                    }
 
                     if (!line.Contains(CsvSeparator))
-                    { return false; }
+                    {
+                        return false;
+                    }
 
                     string[] columns = line.Split(CsvSeparator);
                     if (columns.Length < 2)
-                    { return false; }
+                    {
+                        return false;
+                    }
 
                     // Check if the second column is a valid boolean value (0 or 1)
                     bool isBoolean = bool.TryParse(columns[1].Trim(), out _);
