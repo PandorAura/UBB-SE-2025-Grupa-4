@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace App1.AutoChecker
+﻿namespace App1.AutoChecker
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Microsoft.Data.SqlClient;
+
     public class OffensiveWordsRepository : IOffensiveWordsRepository
     {
         private const string SELECTOFFENSIVEWORDSQUERY = "SELECT Word FROM OffensiveWords";
@@ -26,7 +26,7 @@ namespace App1.AutoChecker
         public HashSet<string> LoadOffensiveWords()
         {
             HashSet<string> offensiveWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            using SqlConnection connection = new SqlConnection(connectionString);
+            using SqlConnection connection = new SqlConnection(this.connectionString);
             connection.Open();
 
             using SqlCommand command = new SqlCommand(SELECTOFFENSIVEWORDSQUERY, connection);
@@ -42,7 +42,7 @@ namespace App1.AutoChecker
 
         public void AddWord(string word)
         {
-            using SqlConnection connection = new SqlConnection(connectionString);
+            using SqlConnection connection = new SqlConnection(this.connectionString);
             connection.Open();
 
             using SqlCommand command = new SqlCommand(INSERTOFFENSIVEWORDQUERY, connection);
@@ -52,7 +52,7 @@ namespace App1.AutoChecker
 
         public void DeleteWord(string word)
         {
-            using SqlConnection connection = new SqlConnection(connectionString);
+            using SqlConnection connection = new SqlConnection(this.connectionString);
             connection.Open();
 
             using SqlCommand command = new SqlCommand(DELETEOFFENSIVEWORDQUERY, connection);

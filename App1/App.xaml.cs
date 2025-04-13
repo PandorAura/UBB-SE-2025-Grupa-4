@@ -1,25 +1,44 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.UI.Xaml;
-using App1.Services;
-using App1.Repositories;
-using Quartz;
-using Quartz.Impl;
-using Microsoft.Extensions.Hosting;
-using App1.Views;
-using App1.AutoChecker;
-
-namespace App1
+﻿namespace App1
 {
+    using System;
+    using System.Collections.Generic;
+    using App1.AutoChecker;
+    using App1.Models;
+    using App1.Repositories;
+    using App1.Services;
+    using App1.Views;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.UI.Xaml;
+    using Quartz;
+    using Quartz.Impl;
+
     public partial class App : Application
     {
         public static IHost Host { get; private set; }
+
         public static Window MainWindow { get; set; }
 
         public App()
         {
             this.InitializeComponent();
-            ConfigureHost();
+            this.ConfigureHost();
+        }
+
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
+        {
+            IScheduler scheduler = Host.Services.GetRequiredService<IScheduler>();
+            scheduler.Start().Wait();
+
+            MainWindow = Host.Services.GetRequiredService<MainWindow>();
+            MainWindow.Activate();
+
+            // Prevent app suspension
+            Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += (s, e) =>
+            {
+                MainWindow?.Activate();
+            };
         }
 
         private void ConfigureHost()
@@ -34,10 +53,15 @@ namespace App1
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    string connectionString = "Server=KYLIAN-MBAPPÉ-P;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+                    string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
 
                     services.AddSingleton<IUserRepository, UserRepo>();
-                    services.AddSingleton<IReviewsRepository, ReviewsRepository>();
+                    services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
+                    {
+                        ReviewsRepository repository = new ReviewsRepository();
+                        repository.LoadReviews(ReviewsSampleData.GetSampleReviews());
+                        return repository;
+                    });
                     services.AddSingleton<IOffensiveWordsRepository>(provider =>
                     {
                         return new OffensiveWordsRepository(connectionString);
@@ -46,8 +70,8 @@ namespace App1
                     services.AddSingleton<ICheckersService, CheckersService>();
                     services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
                     services.AddSingleton<IRolesRepository, RolesRepository>();
-                    services.AddSingleton<IUserService, UserService>(); 
-                    services.AddSingleton<IReviewService, ReviewsService>(); 
+                    services.AddSingleton<IUserService, UserService>();
+                    services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
                     services.AddTransient<EmailJob>();
 
@@ -65,24 +89,71 @@ namespace App1
                     services.AddTransient<EmailJob>();
                     services.AddTransient<MainPage>();
                     services.AddTransient<MainWindow>();
-
                 })
                 .Build();
         }
 
-        protected override void OnLaunched(LaunchActivatedEventArgs args)
+        public static class ReviewsSampleData
         {
-            IScheduler scheduler = Host.Services.GetRequiredService<IScheduler>();
-            scheduler.Start().Wait(); 
-
-            MainWindow = Host.Services.GetRequiredService<MainWindow>();
-            MainWindow.Activate();
-
-            // Prevent app suspension
-            Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += (s, e) =>
+            public static IEnumerable<Review> GetSampleReviews()
             {
-                MainWindow?.Activate();
-            };
+                return new List<Review>
+                {
+                    new Review(
+                        reviewId: 0,
+                        userId: 1,
+                        rating: 5,
+                        content: "Terrible mix, a complete mess dick ass taste",
+                        createdDate: DateTime.Now.AddHours(-1),
+                        numberOfFlags: 1,
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 3,
+                        rating: 4,
+                        content: "Good experience",
+                        createdDate: DateTime.Now.AddHours(-5),
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 1,
+                        rating: 2,
+                        content: "Such a bitter aftertaste",
+                        createdDate: DateTime.Now.AddDays(-1),
+                        numberOfFlags: 3,
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 2,
+                        rating: 5,
+                        content: "Excellent!",
+                        createdDate: DateTime.Now.AddDays(-2),
+                        numberOfFlags: 1,
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 3,
+                        rating: 5,
+                        content: "dunce",
+                        createdDate: DateTime.Now.AddDays(-2),
+                        numberOfFlags: 1,
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 2,
+                        rating: 5,
+                        content: "Amazing",
+                        createdDate: DateTime.Now.AddDays(-2),
+                        isHidden: false),
+                    new Review(
+                        reviewId: 0,
+                        userId: 2,
+                        rating: 5,
+                        content: "My favorite!",
+                        createdDate: DateTime.Now.AddDays(-2),
+                        isHidden: false),
+                };
+            }
         }
     }
 }
