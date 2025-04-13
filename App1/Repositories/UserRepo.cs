@@ -9,7 +9,7 @@ namespace App1.Repositories
 {
     public class UserRepo : IUserRepository
     {
-        private readonly List<User> _usersList;
+        private readonly List<User> usersList;
 
         public UserRepo()
         {
@@ -32,7 +32,7 @@ namespace App1.Repositories
             {
                 new Role(RoleType.Banned, "banned")
             };
-            _usersList = new List<User>
+            usersList = new List<User>
             {
                 new User(
                     userId: 1,
@@ -110,11 +110,12 @@ namespace App1.Repositories
         {
             try
             {
-                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                User? user = usersList.FirstOrDefault(user => user.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
                 }
+
                 return user;
             }
             catch (Exception ex)
@@ -138,15 +139,17 @@ namespace App1.Repositories
                 throw new RepositoryException("Failed to retrieve banned users who have submitted appeals.", ex);
             }
         }
+
         public void AddRoleToUser(int userId, Role roleToAdd)
         {
             try
             {
-                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                User? user = usersList.FirstOrDefault(user => user.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
                 }
+
                 user.AssignedRoles.Add(roleToAdd);
             }
             catch (Exception ex)
@@ -154,6 +157,7 @@ namespace App1.Repositories
                 throw new RepositoryException($"Failed to add role to user with ID {userId}.", ex);
             }
         }
+
         public List<User> GetAllUsers()
         {
             try
@@ -175,7 +179,9 @@ namespace App1.Repositories
         public class RepositoryException : Exception
         {
             public RepositoryException(string message, Exception innerException)
-                : base(message, innerException) { }
+                : base(message, innerException)
+            {
+            }
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.FastTree;
+using static Microsoft.ML.DataOperationsCatalog;
 
 namespace App1.AiCheck
 {
@@ -13,12 +15,6 @@ namespace App1.AiCheck
     /// </summary>
     public class ReviewModelTrainer
     {
-        // File paths
-        private static readonly string ProjectRoot = GetProjectRoot();
-        private static readonly string DefaultDataPath = Path.Combine(ProjectRoot, "AiCheck", "review_data.csv");
-        private static readonly string DefaultModelPath = Path.Combine(ProjectRoot, "Models", "curseword_model.zip");
-        private static readonly string DefaultLogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
-
         // Model training parameters
         private const int NumberOfTrees = 100;
         private const int NumberOfLeaves = 50;
@@ -27,21 +23,11 @@ namespace App1.AiCheck
         private const float TestFraction = 0.2f;
         private const char CsvSeparator = '}';
 
-        /// <summary>
-        /// Gets the project root directory by traversing up from the current file.
-        /// </summary>
-        /// <param name="filePath">The path of the current file (automatically provided by the compiler).</param>
-        /// <returns>The full path to the project root directory.</returns>
-        /// <exception cref="Exception">Thrown when the project root cannot be found.</exception>
-        private static string GetProjectRoot([CallerFilePath] string filePath = "")
-        {
-            var directory = new FileInfo(filePath).Directory;
-            while (directory != null && !directory.GetFiles("*.csproj").Any())
-            {
-                directory = directory.Parent;
-            }
-            return directory?.FullName ?? throw new Exception("Project root not found!");
-        }
+        // File paths
+        private static readonly string ProjectRoot = GetProjectRoot();
+        private static readonly string DefaultDataPath = Path.Combine(ProjectRoot, "AiCheck", "review_data.csv");
+        private static readonly string DefaultModelPath = Path.Combine(ProjectRoot, "Models", "curseword_model.zip");
+        private static readonly string DefaultLogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
 
         /// <summary>
         /// Trains a binary classification model to detect offensive content in reviews.
@@ -59,8 +45,8 @@ namespace App1.AiCheck
         /// <returns>True if training was successful, false otherwise.</returns>
         public static bool TrainModel(string customDataPath)
         {
-            var modelPath = Path.Combine(Path.GetDirectoryName(customDataPath), "test_model.zip");
-            var logPath = Path.Combine(Path.GetDirectoryName(customDataPath), "test_training_log.txt");
+            string modelPath = Path.Combine(Path.GetDirectoryName(customDataPath), "test_model.zip");
+            string logPath = Path.Combine(Path.GetDirectoryName(customDataPath), "test_training_log.txt");
             return TrainModel(customDataPath, modelPath, logPath);
         }
 
@@ -88,19 +74,19 @@ namespace App1.AiCheck
                 EnsureDirectoriesExist(modelPath, logPath);
 
                 // Initialize MLContext with a fixed seed for reproducibility
-                var machineLearningContext = new MLContext(seed: 0);
+                MLContext machineLearningContext = new MLContext(seed: 0);
 
                 // Load and prepare the training data
-                var trainingData = LoadTrainingData(machineLearningContext, dataPath);
+                IDataView trainingData = LoadTrainingData(machineLearningContext, dataPath);
 
                 // Create and configure the model pipeline
-                var modelPipeline = CreateModelPipeline(machineLearningContext);
+                IEstimator<ITransformer> modelPipeline = CreateModelPipeline(machineLearningContext);
 
                 // Split data into training and testing sets
-                var trainTestSplit = machineLearningContext.Data.TrainTestSplit(trainingData, testFraction: TestFraction);
+                TrainTestData trainTestSplit = machineLearningContext.Data.TrainTestSplit(trainingData, testFraction: TestFraction);
 
                 // Train the model
-                var trainedModel = modelPipeline.Fit(trainTestSplit.TrainSet);
+                ITransformer trainedModel = modelPipeline.Fit(trainTestSplit.TrainSet);
 
                 // Evaluate the model on the test set
                 EvaluateModel(machineLearningContext, trainedModel, trainTestSplit.TestSet, logPath);
@@ -129,6 +115,23 @@ namespace App1.AiCheck
         }
 
         /// <summary>
+        /// Gets the project root directory by traversing up from the current file.
+        /// </summary>
+        /// <param name="filePath">The path of the current file (automatically provided by the compiler).</param>
+        /// <returns>The full path to the project root directory.</returns>
+        /// <exception cref="Exception">Thrown when the project root cannot be found.</exception>
+        private static string GetProjectRoot([CallerFilePath] string filePath = "")
+        {
+            DirectoryInfo? directory = new FileInfo(filePath).Directory;
+            while (directory != null && !directory.GetFiles("*.csproj").Any())
+            {
+                directory = directory.Parent;
+            }
+
+            return directory?.FullName ?? throw new Exception("Project root not found!");
+        }
+
+        /// <summary>
         /// Ensures that all required directories exist.
         /// </summary>
         private static void EnsureDirectoriesExist(string modelPath, string logPath)
@@ -154,8 +157,7 @@ namespace App1.AiCheck
             return machineLearningContext.Data.LoadFromTextFile<ReviewData>(
                 path: dataPath,
                 separatorChar: CsvSeparator,
-                hasHeader: true
-            );
+                hasHeader: true);
         }
 
         /// <summary>
@@ -168,7 +170,7 @@ namespace App1.AiCheck
             try
             {
                 // Read the first line to check the header format
-                string firstLine = File.ReadLines(dataPath).FirstOrDefault();
+                string? firstLine = File.ReadLines(dataPath).FirstOrDefault();
                 if (string.IsNullOrEmpty(firstLine))
                 {
                     return false;
@@ -182,8 +184,8 @@ namespace App1.AiCheck
 
                 // Check if the header has the expected columns
                 string[] headerColumns = firstLine.Split(CsvSeparator);
-                if (headerColumns.Length < 2 || 
-                    !headerColumns[0].Trim().Equals("ReviewContent", StringComparison.OrdinalIgnoreCase) || 
+                if (headerColumns.Length < 2 ||
+                    !headerColumns[0].Trim().Equals("ReviewContent", StringComparison.OrdinalIgnoreCase) ||
                     !headerColumns[1].Trim().Equals("IsOffensiveContent", StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
@@ -194,19 +196,25 @@ namespace App1.AiCheck
                 foreach (string line in File.ReadLines(dataPath).Skip(1))
                 {
                     if (string.IsNullOrWhiteSpace(line))
+                    {
                         continue;
+                    }
 
                     if (!line.Contains(CsvSeparator))
+                    {
                         return false;
+                    }
 
                     string[] columns = line.Split(CsvSeparator);
                     if (columns.Length < 2)
+                    {
                         return false;
+                    }
 
                     // Check if the second column is a valid boolean value (0 or 1)
                     bool isBoolean = bool.TryParse(columns[1].Trim(), out _);
                     bool isInteger = int.TryParse(columns[1].Trim(), out int value);
-                    
+
                     if (!isBoolean && (!isInteger || (value != 0 && value != 1)))
                     {
                         return false;
@@ -240,8 +248,7 @@ namespace App1.AiCheck
                 numberOfTrees: NumberOfTrees,
                 numberOfLeaves: NumberOfLeaves,
                 minimumExampleCountPerLeaf: MinimumExampleCountPerLeaf,
-                learningRate: LearningRate
-            ));
+                learningRate: LearningRate));
         }
 
         /// <summary>
@@ -254,11 +261,11 @@ namespace App1.AiCheck
         private static void EvaluateModel(MLContext machineLearningContext, ITransformer trainedModel, IDataView testData, string logPath)
         {
             // Transform the test data using the trained model
-            var predictions = trainedModel.Transform(testData);
+            IDataView predictions = trainedModel.Transform(testData);
 
             // Convert predictions to a list for easy comparison
-            var predictedResults = machineLearningContext.Data.CreateEnumerable<ReviewPrediction>(predictions, reuseRowObject: false).ToList();
-            var actualResults = machineLearningContext.Data.CreateEnumerable<ReviewData>(testData, reuseRowObject: false).ToList();
+            List<ReviewPrediction> predictedResults = machineLearningContext.Data.CreateEnumerable<ReviewPrediction>(predictions, reuseRowObject: false).ToList();
+            List<ReviewData> actualResults = machineLearningContext.Data.CreateEnumerable<ReviewData>(testData, reuseRowObject: false).ToList();
 
             // Compare predictions with actual values and log mistakes
             int correctPredictions = 0;
@@ -266,8 +273,8 @@ namespace App1.AiCheck
 
             for (int index = 0; index < predictedResults.Count; index++)
             {
-                var prediction = predictedResults[index];
-                var actual = actualResults[index];
+                ReviewPrediction prediction = predictedResults[index];
+                ReviewData actual = actualResults[index];
 
                 // If the prediction is incorrect, log it
                 if (prediction.IsPredictedOffensive != actual.IsOffensiveContent)

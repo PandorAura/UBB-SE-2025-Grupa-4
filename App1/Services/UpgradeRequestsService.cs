@@ -55,9 +55,10 @@ namespace App1.Services
                 UpgradeRequest currentUpgradeRequest = this.upgradeRequestsRepository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
                 int requestingUserIdentifier = currentUpgradeRequest.RequestingUserIdentifier;
                 RoleType currentHighestRoleType = this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier);
-                Role nextRoleLevel = rolesRepository.GetNextRole(currentHighestRoleType);
+                Role nextRoleLevel = rolesRepository.GetNextRoleInHierarchy(currentHighestRoleType);
                 this.userRepository.AddRoleToUser(requestingUserIdentifier, nextRoleLevel);
             }
+
             this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
         }
     }
