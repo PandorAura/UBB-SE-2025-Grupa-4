@@ -7,10 +7,22 @@ using Windows.System;
 
 namespace App1.Repositories
 {
+    /// <summary>
+    /// Repository for managing user data and operations.
+    /// </summary>
     public class UserRepo : IUserRepository
     {
+        /// <summary>
+        /// Internal list of users managed by the repository.
+        /// </summary>
         private readonly List<User> _usersList;
-        public static List<Role> basicUserRoles = new List<Role>
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserRepo"/> class with default user data.
+        /// </summary>
+        public UserRepo()
+        {
+            List<Role> basicUserRoles = new List<Role>
             {
                 new Role(RoleType.User, "user")
             };
@@ -41,22 +53,39 @@ namespace App1.Repositories
                     numberOfDeletedReviews: 2,
                     HasSubmittedAppeal: true,
                     assignedRoles: basicUserRoles
-                    ),
+                ),
                 new User(
-                    userId: 2,
-                    emailAddress: "alexiabortos@gmail.com",
-                    fullName: "Alexia Bortos",
-                    numberOfDeletedReviews: 2,
-                    HasSubmittedAppeal: true,
+                    userId: 3,
+                    emailAddress: "admin.one@example.com",
+                    fullName: "Admin One",
+                    numberOfDeletedReviews: 0,
+                    HasSubmittedAppeal: false,
                     assignedRoles: adminRoles
                 ),
+                new User(
+                    userId: 5,
+                    emailAddress: "admin.two@example.com",
+                    fullName: "Admin Two",
+                    numberOfDeletedReviews: 0,
+                    HasSubmittedAppeal: false,
+                    assignedRoles: adminRoles
+                )
             };
         }
 
+        /// <summary>
+        /// Retrieves all users who have submitted appeals.
+        /// </summary>
+        /// <returns>A list of users who have submitted appeals.</returns>
+        /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
         public List<User> GetUsersWhoHaveSubmittedAppeals()
         {
             try
             {
+                if (_usersList == null)
+                {
+                    throw new NullReferenceException("_usersList is null.");
+                }
                 return _usersList.Where(user => user.HasSubmittedAppeal).ToList();
             }
             catch (Exception ex)
@@ -65,11 +94,21 @@ namespace App1.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieves all users with a specific role type.
+        /// </summary>
+        /// <param name="roleType">The role type to filter users by.</param>
+        /// <returns>A list of users with the specified role type.</returns>
+        /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
         public List<User> GetUsersByRoleType(RoleType roleType)
         {
             try
             {
-                return _usersList.Where(user => user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
+                if (_usersList == null)
+                {
+                    throw new NullReferenceException("_usersList is null.");
+                }
+                return _usersList.Where(user => user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
             }
             catch (Exception ex)
             {
@@ -77,39 +116,41 @@ namespace App1.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieves the highest role type assigned to a user.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <returns>The highest role type assigned to the user.</returns>
+        /// <exception cref="RepositoryException">Thrown when the user has no roles or does not exist.</exception>
         public RoleType GetHighestRoleTypeForUser(int userId)
         {
-            try
+            var user = GetUserByID(userId);
+            if (user.AssignedRoles == null || !user.AssignedRoles.Any())
             {
-                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
-
-                if (user == null)
-                {
-                    throw new ArgumentException($"No user found with ID {userId}");
-                }
-
-                if (user.AssignedRoles.Count == 0)
-                {
-                    return RoleType.Banned;
-                }
-
-                return user.AssignedRoles.Max(role => role.RoleType);
+                throw new RepositoryException("User has no roles assigned.", new ArgumentException($"No roles found for user with ID {userId}"));
             }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve the highest role type for user with ID {userId}.", ex);
-            }
+
+            return user.AssignedRoles.Max(role => role.RoleType);
         }
 
+
+
+        /// <summary>
+        /// Retrieves a user by their ID.
+        /// </summary>
+        /// <param name="userId">The ID of the user to retrieve.</param>
+        /// <returns>The user with the specified ID.</returns>
+        /// <exception cref="RepositoryException">Thrown when the user does not exist or an error occurs.</exception>
         public User GetUserByID(int userId)
         {
             try
             {
-                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                User? user = _usersList.FirstOrDefault(user => user.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
                 }
+
                 return user;
             }
             catch (Exception ex)
@@ -118,26 +159,43 @@ namespace App1.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieves all banned users who have submitted appeals.
+        /// </summary>
+        /// <returns>A list of banned users who have submitted appeals.</returns>
+        /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
         public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
         {
             try
             {
-                return _usersList.Where(user => user.HasSubmittedAppeal && user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)).ToList();
+                if (_usersList == null)
+                {
+                    throw new NullReferenceException("_usersList is null.");
+                }
+                return _usersList.Where(user => user.HasSubmittedAppeal && user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)).ToList();
             }
             catch (Exception ex)
             {
                 throw new RepositoryException("Failed to retrieve banned users who have submitted appeals.", ex);
             }
         }
+
+        /// <summary>
+        /// Adds a role to a user.
+        /// </summary>
+        /// <param name="userId">The ID of the user to add the role to.</param>
+        /// <param name="roleToAdd">The role to add to the user.</param>
+        /// <exception cref="RepositoryException">Thrown when the user does not exist or an error occurs.</exception>
         public void AddRoleToUser(int userId, Role roleToAdd)
         {
             try
             {
-                User user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                User? user = _usersList.FirstOrDefault(user => user.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
                 }
+
                 user.AssignedRoles.Add(roleToAdd);
             }
             catch (Exception ex)
@@ -145,10 +203,20 @@ namespace App1.Repositories
                 throw new RepositoryException($"Failed to add role to user with ID {userId}.", ex);
             }
         }
+
+        /// <summary>
+        /// Retrieves all users.
+        /// </summary>
+        /// <returns>A list of all users.</returns>
+        /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
         public List<User> GetAllUsers()
         {
             try
             {
+                if (_usersList == null)
+                {
+                    throw new NullReferenceException("_usersList is null.");
+                }
                 return _usersList;
             }
             catch (Exception ex)
@@ -157,10 +225,20 @@ namespace App1.Repositories
             }
         }
 
+        /// <summary>
+        /// Exception class for repository-related errors.
+        /// </summary>
         public class RepositoryException : Exception
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RepositoryException"/> class.
+            /// </summary>
+            /// <param name="message">The error message.</param>
+            /// <param name="innerException">The inner exception.</param>
             public RepositoryException(string message, Exception innerException)
-                : base(message, innerException) { }
+                : base(message, innerException)
+            {
+            }
         }
     }
 }

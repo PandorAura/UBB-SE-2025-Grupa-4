@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
@@ -11,14 +11,26 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+	<UseWinUI>false</UseWinUI>
     <Platforms>AnyCPU;x64</Platforms>
+	<GenerateProjectPriFile>false</GenerateProjectPriFile>
+	<EnableMsixTooling>false</EnableMsixTooling>
+	<IncludePackagingOutputs>false</IncludePackagingOutputs>
+	<IsPackagingSupported>false</IsPackagingSupported>
   </PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<CodeAnalysisRuleSet>SE.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Uno.WinUI" Version="5.6.91" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
@@ -31,8 +43,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-	<PropertyGroup>
-		<GenerateLibraryLayout>true</GenerateLibraryLayout>
-	</PropertyGroup>
-
+	<Target Name="DisablePriGen" BeforeTargets="GenerateProjectPriFile">
+		<ItemGroup>
+			<PackagingOutputs Remove="@(PackagingOutputs)" />
+		</ItemGroup>
+	</Target>
 </Project>

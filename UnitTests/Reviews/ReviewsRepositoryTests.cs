@@ -9,11 +9,88 @@ namespace UnitTests.Reviews
 {
     public class ReviewsRepositoryTests
     {
+        private static IEnumerable<Review> CreateTestReviews()
+        {
+            return new List<Review>
+            {
+                new Review(
+                    reviewId: 0,
+                    userId: 1,
+                    rating: 5,
+                    content: "Terrible mix, a complete mess dick ass taste",
+                    createdDate: DateTime.Now.AddHours(-1),
+                    numberOfFlags: 1,
+                    isHidden: false),
+                new Review(
+                    reviewId: 0,
+                    userId: 3,
+                    rating: 4,
+                    content: "Good experience",
+                    createdDate: DateTime.Now.AddHours(-5),
+                    isHidden: false),
+                new Review(
+                    reviewId: 0,
+                    userId: 1,
+                    rating: 2,
+                    content: "Such a bitter aftertaste",
+                    createdDate: DateTime.Now.AddDays(-1),
+                    numberOfFlags: 3,
+                    isHidden: false),
+                new Review(
+                    reviewId: 0,
+                    userId: 2,
+                    rating: 5,
+                    content: "Excellent!",
+                    createdDate: DateTime.Now.AddDays(-2),
+                    numberOfFlags: 1,
+                    isHidden: false),
+                new Review(
+                    reviewId: 0,
+                    userId: 3,
+                    rating: 5,
+                    content: "dunce",
+                    createdDate: DateTime.Now.AddDays(-2),
+                    numberOfFlags: 1,
+                    isHidden: false),
+                new Review(
+                    reviewId: 0,
+                    userId: 2,
+                    rating: 5,
+                    content: "Amazing",
+                    createdDate: DateTime.Now.AddDays(-2),
+                    isHidden: false),
+                new Review(
+                    reviewId: 0,
+                    userId: 2,
+                    rating: 5,
+                    content: "My favorite!",
+                    createdDate: DateTime.Now.AddDays(-2),
+                    isHidden: false),
+            };
+        }
+
+        private ReviewsRepository CreateRepositoryWithTestData()
+        {
+            var repository = new ReviewsRepository();
+            repository.LoadReviews(CreateTestReviews());
+            return repository;
+        }
+
+        [Fact]
+        public void LoadsReviews_InvalidData_ThrowsException()
+        {
+            // Arrange
+            var repository = new ReviewsRepository();
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => repository.LoadReviews(null));
+        }
+
         [Fact]
         public void GetAllReviews_ReturnsAllReviews()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
 
             // Act
             var reviews = repository.GetAllReviews();
@@ -27,7 +104,7 @@ namespace UnitTests.Reviews
         public void GetReviewsSince_ReturnsReviewsAfterDate()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var date = DateTime.Now.AddDays(-2);
 
             // Act
@@ -43,7 +120,7 @@ namespace UnitTests.Reviews
         public void GetAverageRatingForVisibleReviews_ReturnsCorrectAverage()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var allReviews = repository.GetAllReviews();
             var visibleReviews = allReviews.Where(review => !review.IsHidden).ToList();
             var expectedAverage = visibleReviews.Any() ? Math.Round(visibleReviews.Average(review => review.Rating), 1) : 0.0;
@@ -56,11 +133,25 @@ namespace UnitTests.Reviews
         }
 
         [Fact]
-        public void GetMostRecentReviews_ReturnsCorrectNumberOfReviews()
+        public void GetAverageRatingForVisibleReviews_NoVisibleReviews_ReturnsZero()
         {
             // Arrange
             var repository = new ReviewsRepository();
-            var count = 3;
+            double expectedAverage = 0.0;
+
+            // Act
+            var average = repository.GetAverageRatingForVisibleReviews();
+
+            // Assert
+            Assert.Equal(expectedAverage, average);
+        }
+
+        [Fact]
+        public void GetMostRecentReviews_ReturnsCorrectNumberOfReviews()
+        {
+            // Arrange
+            var repository = CreateRepositoryWithTestData();
+            var count = 3;  
 
             // Act
             var reviews = repository.GetMostRecentReviews(count);
@@ -69,7 +160,7 @@ namespace UnitTests.Reviews
             Assert.NotNull(reviews);
             Assert.True(reviews.Count <= count);
             Assert.All(reviews, review => Assert.False(review.IsHidden));
-            
+
             // Verify they are ordered by date (most recent first)
             for (int i = 0; i < reviews.Count - 1; i++)
             {
@@ -81,7 +172,7 @@ namespace UnitTests.Reviews
         public void GetReviewCountAfterDate_ReturnsCorrectCount()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var date = DateTime.Now.AddDays(-2);
             var allReviews = repository.GetAllReviews();
             var expectedCount = allReviews.Count(review => review.CreatedDate >= date && !review.IsHidden);
@@ -97,7 +188,7 @@ namespace UnitTests.Reviews
         public void GetFlaggedReviews_ReturnsReviewsWithMinFlags()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var minFlags = 1;
             var allReviews = repository.GetAllReviews();
             var expectedReviews = allReviews.Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden).ToList();
@@ -116,7 +207,7 @@ namespace UnitTests.Reviews
         public void GetReviewsByUser_ReturnsCorrectReviews()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var userId = 1;
             var allReviews = repository.GetAllReviews();
             var expectedReviews = allReviews.Where(review => review.UserId == userId && !review.IsHidden).ToList();
@@ -129,7 +220,7 @@ namespace UnitTests.Reviews
             Assert.Equal(expectedReviews.Count, reviews.Count);
             Assert.All(reviews, review => Assert.Equal(userId, review.UserId));
             Assert.All(reviews, review => Assert.False(review.IsHidden));
-            
+
             // Verify they are ordered by date (most recent first)
             for (int i = 0; i < reviews.Count - 1; i++)
             {
@@ -141,7 +232,7 @@ namespace UnitTests.Reviews
         public void GetReviewById_ReturnsCorrectReview()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var allReviews = repository.GetAllReviews();
             var reviewId = allReviews.First().ReviewId;
 
@@ -157,7 +248,7 @@ namespace UnitTests.Reviews
         public void GetReviewById_ReturnsNullForNonExistentId()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var nonExistentId = 9999;
 
             // Act
@@ -171,7 +262,7 @@ namespace UnitTests.Reviews
         public void UpdateReviewVisibility_UpdatesIsHidden()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var allReviews = repository.GetAllReviews();
             var reviewId = allReviews.First().ReviewId;
             var isHidden = true;
@@ -189,7 +280,7 @@ namespace UnitTests.Reviews
         public void UpdateNumberOfFlagsForReview_UpdatesNumberOfFlags()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var allReviews = repository.GetAllReviews();
             var reviewId = allReviews.First().ReviewId;
             var numberOfFlags = 5;
@@ -207,7 +298,7 @@ namespace UnitTests.Reviews
         public void AddReview_ReturnsNewId()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var allReviews = repository.GetAllReviews();
             var maxId = allReviews.Max(review => review.ReviewId);
             var newReview = new Review(
@@ -234,7 +325,7 @@ namespace UnitTests.Reviews
         public void RemoveReviewById_RemovesReview()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var allReviews = repository.GetAllReviews();
             var reviewId = allReviews.First().ReviewId;
 
@@ -251,7 +342,7 @@ namespace UnitTests.Reviews
         public void RemoveReviewById_ReturnsFalseForNonExistentId()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var nonExistentId = 9999;
 
             // Act
@@ -265,7 +356,7 @@ namespace UnitTests.Reviews
         public void GetHiddenReviews_ReturnsHiddenReviews()
         {
             // Arrange
-            var repository = new ReviewsRepository();
+            var repository = CreateRepositoryWithTestData();
             var allReviews = repository.GetAllReviews();
             var reviewId = allReviews.First().ReviewId;
             repository.UpdateReviewVisibility(reviewId, true);
