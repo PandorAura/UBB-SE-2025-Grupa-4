@@ -69,7 +69,7 @@ namespace App1.Repositories
                     fullName: "Admin Two",
                     numberOfDeletedReviews: 0,
                     HasSubmittedAppeal: false,
-                    assignedRoles: adminRoles
+                    assignedRoles: AdminRoles
                 ),
             };
         }

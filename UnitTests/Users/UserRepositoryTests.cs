@@ -203,7 +203,7 @@ namespace UnitTests.Repositories
         [Fact]
         public void GetHighestRoleTypeForUser_ShouldReturnCorrectRoleType()
         {
-            var highestRole = _userRepo.GetHighestRoleTypeForUser(3); 
+            var highestRole = _userRepo.GetHighestRoleTypeForUser(5); 
 
             Assert.Equal(RoleType.Admin, highestRole);
         }
