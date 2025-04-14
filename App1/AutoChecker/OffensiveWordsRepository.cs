@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using App1.Infrastructure;
     using Microsoft.Data.SqlClient;
 
     public class OffensiveWordsRepository : IOffensiveWordsRepository
@@ -16,21 +17,21 @@
 
         private const string DELETEOFFENSIVEWORDQUERY = "DELETE FROM OffensiveWords WHERE Word = @Word";
         private const string WORDPARAMETERNAME = "@Word";
-        private readonly string connectionString;
+        private readonly IDbConnectionFactory connectionFactory;
 
-        public OffensiveWordsRepository(string connectionString)
+        public OffensiveWordsRepository(IDbConnectionFactory connectionFactory)
         {
-            this.connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            this.connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
         public HashSet<string> LoadOffensiveWords()
         {
             HashSet<string> offensiveWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            using SqlConnection connection = new SqlConnection(this.connectionString);
+            using var connection = this.connectionFactory.CreateConnection();
             connection.Open();
 
-            using SqlCommand command = new SqlCommand(SELECTOFFENSIVEWORDSQUERY, connection);
-            using SqlDataReader reader = command.ExecuteReader();
+            using var command = new SqlCommand(SELECTOFFENSIVEWORDSQUERY, connection);
+            using var reader = command.ExecuteReader();
 
             while (reader.Read())
             {
@@ -42,20 +43,30 @@
 
         public void AddWord(string word)
         {
-            using SqlConnection connection = new SqlConnection(this.connectionString);
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                return;
+            }
+
+            using var connection = this.connectionFactory.CreateConnection();
             connection.Open();
 
-            using SqlCommand command = new SqlCommand(INSERTOFFENSIVEWORDQUERY, connection);
+            using var command = new SqlCommand(INSERTOFFENSIVEWORDQUERY, connection);
             command.Parameters.AddWithValue(WORDPARAMETERNAME, word);
             command.ExecuteNonQuery();
         }
 
         public void DeleteWord(string word)
         {
-            using SqlConnection connection = new SqlConnection(this.connectionString);
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                return;
+            }
+
+            using var connection = this.connectionFactory.CreateConnection();
             connection.Open();
 
-            using SqlCommand command = new SqlCommand(DELETEOFFENSIVEWORDQUERY, connection);
+            using var command = new SqlCommand(DELETEOFFENSIVEWORDQUERY, connection);
             command.Parameters.AddWithValue(WORDPARAMETERNAME, word);
             command.ExecuteNonQuery();
         }

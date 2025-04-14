@@ -13,6 +13,9 @@
     using Microsoft.UI.Xaml;
     using Quartz;
     using Quartz.Impl;
+    using System.Data.SqlClient;
+    using App1.Infrastructure;
+    using App1.Converters;
 
     public partial class App : Application
     {
@@ -50,12 +53,11 @@
                     IConfiguration config = new ConfigurationBuilder()
                         .AddUserSecrets<App>()
                         .AddEnvironmentVariables()
+                        .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-
-                    string connectionString = "Server=DESKTOP-KEB351O\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
-
+                    string connectionString = config.GetConnectionString("DefaultConnection");
 
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
@@ -66,16 +68,22 @@
                     });
                     services.AddSingleton<IOffensiveWordsRepository>(provider =>
                     {
-                        return new OffensiveWordsRepository(connectionString);
+                        return new OffensiveWordsRepository(new SqlConnectionFactory(connectionString));
                     });
                     services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
-                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
+                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => 
+                    {
+                        return new UpgradeRequestsRepository(new SqlConnectionFactory(connectionString));
+                    });
                     services.AddSingleton<IRolesRepository, RolesRepository>();
                     services.AddSingleton<IUserService, UserService>();
                     services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
                     services.AddTransient<EmailJob>();
+
+                    var userService = services.BuildServiceProvider().GetRequiredService<IUserService>();
+                    UserIdToNameConverter.Initialize(userService);
 
                     // Quartz Configuration
                     services.AddSingleton<JobFactory>();
@@ -105,7 +113,7 @@
                         reviewId: 0,
                         userId: 1,
                         rating: 5,
-                        content: "Terrible mix, a complete mess dick ass taste",
+                        content: "Terrible mix, a complete mess",
                         createdDate: DateTime.Now.AddHours(-1),
                         numberOfFlags: 1,
                         isHidden: false),
@@ -126,7 +134,7 @@
                         isHidden: false),
                     new Review(
                         reviewId: 0,
-                        userId: 2,
+                        userId: 5,
                         rating: 5,
                         content: "Excellent!",
                         createdDate: DateTime.Now.AddDays(-2),
@@ -142,14 +150,14 @@
                         isHidden: false),
                     new Review(
                         reviewId: 0,
-                        userId: 2,
+                        userId: 5,
                         rating: 5,
                         content: "Amazing",
                         createdDate: DateTime.Now.AddDays(-2),
                         isHidden: false),
                     new Review(
                         reviewId: 0,
-                        userId: 2,
+                        userId: 1,
                         rating: 5,
                         content: "My favorite!",
                         createdDate: DateTime.Now.AddDays(-2),

@@ -28,14 +28,14 @@ namespace App1.Repositories
         public static List<Role> AdminRoles = new List<Role>
             {
                 new Role(RoleType.User, "user"),
-                new Role(RoleType.Admin, "admin")
+                new Role(RoleType.Admin, "admin"),
             };
 
         public static List<Role> ManagerRoles = new List<Role>
             {
                 new Role(RoleType.User, "user"),
                 new Role(RoleType.Admin, "admin"),
-                new Role(RoleType.Manager, "manager")
+                new Role(RoleType.Manager, "manager"),
             };
 
         public static List<Role> BannedUserRoles = new List<Role>
@@ -69,8 +69,8 @@ namespace App1.Repositories
                     fullName: "Admin Two",
                     numberOfDeletedReviews: 0,
                     HasSubmittedAppeal: false,
-                    assignedRoles: BasicUserRoles
-                )
+                    assignedRoles: adminRoles
+                ),
             };
         }
 
@@ -133,8 +133,6 @@ namespace App1.Repositories
 
             return user.AssignedRoles.Max(role => role.RoleType);
         }
-
-
 
         /// <summary>
         /// Retrieves a user by their ID.

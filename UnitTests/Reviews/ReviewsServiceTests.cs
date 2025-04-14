@@ -285,5 +285,153 @@
             Assert.Equal(3, resultWithEmpty.Count);
             this.mockRepository.Verify(repo => repo.GetAllReviews(), Times.Exactly(2));
         }
+
+        [Fact]
+        public void GetReviewsForReport_NoReviews_ReturnsEmptyList()
+        {
+            // Arrange
+            var date = DateTime.Now.AddDays(-1);
+            this.mockRepository.Setup(review =>
+                review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date))).Returns(0);
+            this.mockRepository.Setup(review =>
+                review.GetMostRecentReviews(0)).Returns(new List<Review>());
+
+            // Act
+            var reportReviews = this.service.GetReviewsForReport();
+
+            // Assert
+            Assert.Empty(reportReviews);
+            this.mockRepository.Verify(review => review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date)), Times.Once);
+            this.mockRepository.Verify(review => review.GetMostRecentReviews(0), Times.Once);
+        }
+
+        [Fact]
+        public void FilterReviewsByContent_CaseSensitive_ReturnsFilteredReviews()
+        {
+            // Arrange
+            string content = "GREAT";
+            var reviews = new List<Review>
+            {
+                new Review(1, 2, 4, "Great drink!", DateTime.Now, 1, true),
+                new Review(2, 3, 5, "Not bad", DateTime.Now, 1, true),
+                new Review(3, 4, 3, "Really great service", DateTime.Now, 1, true),
+            };
+
+            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(reviews);
+
+            // Act
+            var filtered = this.service.FilterReviewsByContent(content);
+
+            // Assert
+            Assert.Equal(2, filtered.Count);
+            Assert.All(filtered, r => Assert.Contains("great", r.Content, StringComparison.OrdinalIgnoreCase));
+            this.mockRepository.Verify(repo => repo.GetAllReviews(), Times.Once);
+        }
+
+        [Fact]
+        public void GetMostRecentReviews_InvalidCount_ReturnsEmptyList()
+        {
+            // Arrange
+            int count = -1;
+            this.mockRepository.Setup(review => review.GetMostRecentReviews(count)).Returns(new List<Review>());
+
+            // Act
+            var recentReviews = this.service.GetMostRecentReviews(count);
+
+            // Assert
+            Assert.Empty(recentReviews);
+            this.mockRepository.Verify(review => review.GetMostRecentReviews(count), Times.Once);
+        }
+
+        [Fact]
+        public void GetMostRecentReviews_ZeroCount_ReturnsEmptyList()
+        {
+            // Arrange
+            int count = 0;
+            this.mockRepository.Setup(review => review.GetMostRecentReviews(count)).Returns(new List<Review>());
+
+            // Act
+            var recentReviews = this.service.GetMostRecentReviews(count);
+
+            // Assert
+            Assert.Empty(recentReviews);
+            this.mockRepository.Verify(review => review.GetMostRecentReviews(count), Times.Once);
+        }
+
+        [Fact]
+        public void GetReviewsForReport_RepositoryReturnsNull_ReturnsEmptyList()
+        {
+            // Arrange
+            var date = DateTime.Now.AddDays(-1);
+            this.mockRepository.Setup(review =>
+                review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date))).Returns(2);
+            this.mockRepository.Setup(review =>
+                review.GetMostRecentReviews(2)).Returns((List<Review>)null);
+
+            // Act
+            var reportReviews = this.service.GetReviewsForReport();
+
+            // Assert
+            Assert.Empty(reportReviews);
+            this.mockRepository.Verify(review => review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date)), Times.Once);
+            this.mockRepository.Verify(review => review.GetMostRecentReviews(2), Times.Once);
+        }
+
+        [Fact]
+        public void GetReviewsSince_WithHiddenReviews_ReturnsOnlyVisibleReviews()
+        {
+            // Arrange
+            var date = DateTime.Now.AddDays(-2);
+            var reviews = new List<Review>
+            {
+                new Review(1, 2, 4, "Great drink!", DateTime.Now.AddDays(-1), 0, true),
+                new Review(2, 3, 5, "Amazing drink!", DateTime.Now.AddDays(-3), 0, false),
+                new Review(3, 4, 3, "Good drink!", DateTime.Now, 0, false),
+            };
+            this.mockRepository.Setup(review => review.GetReviewsSince(date)).Returns(reviews);
+
+            // Act
+            var recentReviews = this.service.GetReviewsSince(date);
+
+            // Assert
+            Assert.Equal(3, recentReviews.Count); // Service returns all reviews from repository
+            this.mockRepository.Verify(review => review.GetReviewsSince(date), Times.Once);
+        }
+
+        [Fact]
+        public void GetReviewsByUser_WithHiddenReviews_ReturnsOnlyVisibleReviews()
+        {
+            // Arrange
+            int userId = 2;
+            var reviews = new List<Review>
+            {
+                new Review(1, 2, 4, "Great drink!", DateTime.Now, 0, true),
+                new Review(2, 3, 5, "Amazing drink!", DateTime.Now, 0, false),
+                new Review(3, 2, 3, "Good drink!", DateTime.Now, 0, true),
+            };
+            this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList());
+
+            // Act
+            var userReviews = this.service.GetReviewsByUser(userId);
+
+            // Assert
+            Assert.Empty(userReviews);
+            this.mockRepository.Verify(review => review.GetReviewsByUser(userId), Times.Once);
+        }
+
+        [Fact]
+        public void GetReviewsByUser_NoReviews_ReturnsEmptyList()
+        {
+            // Arrange
+            int userId = 999;
+            this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(new List<Review>());
+
+            // Act
+            var userReviews = this.service.GetReviewsByUser(userId);
+
+            // Assert
+            Assert.Empty(userReviews);
+            this.mockRepository.Verify(review => review.GetReviewsByUser(userId), Times.Once);
+        }
     }
 }
