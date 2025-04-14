@@ -15,6 +15,7 @@
     using Quartz.Impl;
     using System.Data.SqlClient;
     using App1.Infrastructure;
+    using App1.Converters;
 
     public partial class App : Application
     {
@@ -81,6 +82,9 @@
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
                     services.AddTransient<EmailJob>();
 
+                    var userService = services.BuildServiceProvider().GetRequiredService<IUserService>();
+                    UserIdToNameConverter.Initialize(userService);
+
                     // Quartz Configuration
                     services.AddSingleton<JobFactory>();
                     services.AddSingleton(provider =>
@@ -109,7 +113,7 @@
                         reviewId: 0,
                         userId: 1,
                         rating: 5,
-                        content: "Terrible mix, a complete mess dick ass taste",
+                        content: "Terrible mix, a complete mess",
                         createdDate: DateTime.Now.AddHours(-1),
                         numberOfFlags: 1,
                         isHidden: false),
@@ -130,7 +134,7 @@
                         isHidden: false),
                     new Review(
                         reviewId: 0,
-                        userId: 2,
+                        userId: 5,
                         rating: 5,
                         content: "Excellent!",
                         createdDate: DateTime.Now.AddDays(-2),
@@ -146,14 +150,14 @@
                         isHidden: false),
                     new Review(
                         reviewId: 0,
-                        userId: 2,
+                        userId: 5,
                         rating: 5,
                         content: "Amazing",
                         createdDate: DateTime.Now.AddDays(-2),
                         isHidden: false),
                     new Review(
                         reviewId: 0,
-                        userId: 2,
+                        userId: 1,
                         rating: 5,
                         content: "My favorite!",
                         createdDate: DateTime.Now.AddDays(-2),
