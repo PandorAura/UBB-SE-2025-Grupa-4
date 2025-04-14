@@ -20,7 +20,7 @@ namespace App1.Converters
                 try
                 {
                     var user = _userService.GetUserById(userId);
-                    return user?.FullName ?? $"User {userId}";
+                    return string.IsNullOrEmpty(user?.FullName) ? $"User {userId}" : user.FullName;
                 }
                 catch
                 {
