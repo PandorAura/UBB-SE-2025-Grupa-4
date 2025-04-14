@@ -42,6 +42,11 @@
 
         public void AddWord(string word)
         {
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                return;
+            }
+
             using SqlConnection connection = new SqlConnection(this.connectionString);
             connection.Open();
 
@@ -52,6 +57,11 @@
 
         public void DeleteWord(string word)
         {
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                return;
+            }
+
             using SqlConnection connection = new SqlConnection(this.connectionString);
             connection.Open();
 

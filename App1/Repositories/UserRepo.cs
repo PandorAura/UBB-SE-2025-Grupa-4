@@ -29,13 +29,13 @@ namespace App1.Repositories
             List<Role> adminRoles = new List<Role>
             {
                 new Role(RoleType.User, "user"),
-                new Role(RoleType.Admin, "admin")
+                new Role(RoleType.Admin, "admin"),
             };
             List<Role> managerRoles = new List<Role>
             {
                 new Role(RoleType.User, "user"),
                 new Role(RoleType.Admin, "admin"),
-                new Role(RoleType.Manager, "manager")
+                new Role(RoleType.Manager, "manager"),
             };
             List<Role> bannedUserRoles = new List<Role>
             {
@@ -129,8 +129,6 @@ namespace App1.Repositories
 
             return user.AssignedRoles.Max(role => role.RoleType);
         }
-
-
 
         /// <summary>
         /// Retrieves a user by their ID.
