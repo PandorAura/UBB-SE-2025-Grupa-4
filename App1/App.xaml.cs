@@ -2,7 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.SqlClient;
     using App1.AutoChecker;
+    using App1.Converters;
+    using App1.Infrastructure;
     using App1.Models;
     using App1.Repositories;
     using App1.Services;
@@ -13,21 +16,21 @@
     using Microsoft.UI.Xaml;
     using Quartz;
     using Quartz.Impl;
-    using System.Data.SqlClient;
-    using App1.Infrastructure;
-    using App1.Converters;
 
     public partial class App : Application
     {
-        public static IHost Host { get; private set; }
-
-        public static Window MainWindow { get; set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="App"/> class.
+        /// </summary>
         public App()
         {
             this.InitializeComponent();
             this.ConfigureHost();
         }
+
+        public static IHost Host { get; private set; }
+
+        public static Window MainWindow { get; set; }
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
@@ -49,16 +52,9 @@
             Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    // Configuration
-                    IConfiguration config = new ConfigurationBuilder()
-                        .AddUserSecrets<App>()
-                        .AddEnvironmentVariables()
-                        .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
-                        .Build();
+                    IConfiguration config = new ConfigurationBuilder().AddUserSecrets<App>().AddEnvironmentVariables().AddJsonFile("appSettings.json", optional: false, reloadOnChange: true).Build();
                     services.AddSingleton<IConfiguration>(config);
-
                     string connectionString = config.GetConnectionString("DefaultConnection");
-
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
                     {
@@ -72,7 +68,7 @@
                     });
                     services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
-                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => 
+                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider =>
                     {
                         return new UpgradeRequestsRepository(new SqlConnectionFactory(connectionString));
                     });
@@ -82,7 +78,7 @@
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
                     services.AddTransient<EmailJob>();
 
-                    var userService = services.BuildServiceProvider().GetRequiredService<IUserService>();
+                    IUserService userService = services.BuildServiceProvider().GetRequiredService<IUserService>();
                     UserIdToNameConverter.Initialize(userService);
 
                     // Quartz Configuration

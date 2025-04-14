@@ -90,12 +90,12 @@
 
         public Review GetReviewById(int reviewId)
         {
-            return reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            return this.reviews.FirstOrDefault(review => review.ReviewId == reviewId);
         }
 
         public void UpdateReviewVisibility(int reviewId, bool isHidden)
         {
-            Review currentReview = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            Review? currentReview = this.reviews.FirstOrDefault(review => review.ReviewId == reviewId);
 
             if (currentReview != null)
             {
@@ -105,7 +105,7 @@
 
         public void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
-            Review currentReview = this.reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            Review? currentReview = this.reviews.FirstOrDefault(review => review.ReviewId == reviewId);
             if (currentReview != null)
             {
                 currentReview.NumberOfFlags = numberOfFlags;
@@ -130,7 +130,7 @@
 
         public bool RemoveReviewById(int reviewId)
         {
-            Review reviewToRemove = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            Review? reviewToRemove = this.reviews.FirstOrDefault(review => review.ReviewId == reviewId);
             if (reviewToRemove != null)
             {
                 this.reviews.Remove(reviewToRemove);

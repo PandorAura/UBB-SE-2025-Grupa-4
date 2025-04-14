@@ -1,311 +1,167 @@
-﻿using Xunit;
-using Moq;
-using App1.Services;
-using App1.Models;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Quartz;
-using System.IO;
-using System.Text;
-using MailKit.Net.Smtp;
-using MimeKit;
-using System.Reflection;
-using System.Linq;
-using Moq.Protected;
-using App1.Repositories;
-
-namespace UnitTests.Tests
+﻿namespace UnitTests.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Text;
+    using System.Threading.Tasks;
+    using App1.Models;
+    using App1.Repositories;
+    using App1.Services;
+    using MailKit.Net.Smtp;
+    using Microsoft.Extensions.Configuration;
+    using MimeKit;
+    using Moq;
+    using Moq.Protected;
+    using Quartz;
+    using Xunit;
+
     public class EmailJobTests
     {
-        private readonly Mock<IUserService> _mockUserService;
-        private readonly Mock<IReviewService> _mockReviewService;
-        private readonly Mock<IConfiguration> _mockConfiguration; 
-        private readonly Mock<ITemplateProvider> _mockTemplateProvider;
-        private readonly Mock<IEmailSender> _mockEmailSender;
-        private readonly Mock<IUserRepository> _userRepository;
-        private readonly Mock<IReviewsRepository> _reviewRepository;
-        
-        private readonly EmailJob _emailJob;
+        private readonly Mock<IUserService> mockUserService;
+        private readonly Mock<IReviewService> mockReviewService;
+        private readonly Mock<IConfiguration> mockConfiguration;
+        private readonly Mock<ITemplateProvider> mockTemplateProvider;
+        private readonly Mock<IEmailSender> mockEmailSender;
+        private readonly Mock<IUserRepository> userRepository;
+        private readonly Mock<IReviewsRepository> reviewRepository;
+        private readonly EmailJob emailJob;
 
-        private readonly List<User> _adminUsers = new List<User>
+        private readonly List<User> adminUsers = new List<User> { new User(1, "admin@example.com", "Admin User", 0, false, UserRepo.AdminRoles), new User(2, "admin2@example.com", "Second Admin", 0, false, UserRepo.AdminRoles) };
+
+        private readonly List<User> regularUsers = [new User(3, "user@example.com", "Regular User", 0, false, UserRepo.BasicUserRoles), new User(4, "user2@example.com", "Another User", 1, false, UserRepo.BasicUserRoles)];
+
+        private readonly List<User> bannedUsers = new List<User> { new User(5, "banned@example.com", "Banned User", 3, true, UserRepo.BannedUserRoles) };
+
+        private readonly List<User> allUsers = new List<User>
         {
             new User(1, "admin@example.com", "Admin User", 0, false, UserRepo.AdminRoles),
-            new User(2, "admin2@example.com", "Second Admin", 0, false,UserRepo.AdminRoles)
-        };
-
-        private readonly List<User> _regularUsers = new List<User>
-        {
-            new User(3, "user@example.com", "Regular User", 0, false, UserRepo.BasicUserRoles),
-            new User(4, "user2@example.com", "Another User", 1, false, UserRepo.BasicUserRoles)
-        };
-
-        private readonly List<User> _bannedUsers = new List<User>
-        {
-            new User(5, "banned@example.com", "Banned User", 3, true, UserRepo.BannedUserRoles)
-        };
-
-        private readonly List<User> _allUsers = new List<User>
-        {
-            new User(1, "admin@example.com", "Admin User", 0, false, UserRepo.AdminRoles),
-            new User(2, "admin2@example.com", "Second Admin", 0, false,UserRepo.AdminRoles),
+            new User(2, "admin2@example.com", "Second Admin", 0, false, UserRepo.AdminRoles),
             new User(3, "user@example.com", "Regular User", 0, false, UserRepo.BasicUserRoles),
             new User(4, "user2@example.com", "Another User", 1, false, UserRepo.BasicUserRoles),
-            new User(5, "banned@example.com", "Banned User", 3, true, UserRepo.BannedUserRoles)
-
+            new User(5, "banned@example.com", "Banned User", 3, true, UserRepo.BannedUserRoles),
         };
 
-        private readonly List<Review> _reviews = new List<Review>
-        {
-            new Review(1, 3, 4, "Good product", DateTime.Now.AddDays(-1)),
-            new Review(2, 4, 5, "Excellent service", DateTime.Now.AddDays(-2))
-        };
+        private readonly List<Review> reviews = new List<Review> { new Review(1, 3, 4, "Good product", DateTime.Now.AddDays(-1)), new Review(2, 4, 5, "Excellent service", DateTime.Now.AddDays(-2)) };
 
         public EmailJobTests()
         {
-            _mockUserService = new Mock<IUserService>();
-            _mockReviewService = new Mock<IReviewService>();
-            _mockConfiguration = new Mock<IConfiguration>();
-
-            // user service setup
-            _mockUserService.Setup(userService => userService.GetAdminUsers()).Returns(_adminUsers);
-            _mockUserService.Setup(userService => userService.GetAllUsers()).Returns(_allUsers);
-            _mockUserService.Setup(userService => userService.GetBannedUsers()).Returns(_bannedUsers);
-            _mockUserService.Setup(userService => userService.GetUserById(It.IsAny<int>())).Returns<int>(id => _allUsers.FirstOrDefault(u => u.UserId == id));
-            _mockUserService.Setup(userService => userService.GetRegularUsers()).Returns(_regularUsers);
-            // review service setup
-            _mockReviewService.Setup(s => s.GetReviewsSince(It.IsAny<DateTime>())).Returns(_reviews);
-            _mockReviewService.Setup(s => s.GetAverageRatingForVisibleReviews()).Returns(4.5);
-            _mockReviewService.Setup(s => s.GetReviewsForReport()).Returns(_reviews);
-
-            // configuration setup
-            _mockConfiguration.SetupGet(x => x["SMTP_MODERATOR_EMAIL"]).Returns("moderator@example.com");
-            _mockConfiguration.SetupGet(x => x["SMTP_MODERATOR_PASSWORD"]).Returns("password123");
-            
+            this.mockUserService = new Mock<IUserService>();
+            this.mockReviewService = new Mock<IReviewService>();
+            this.mockConfiguration = new Mock<IConfiguration>();
+            this.mockUserService.Setup(userService => userService.GetAdminUsers()).Returns(this.adminUsers);
+            this.mockUserService.Setup(userService => userService.GetAllUsers()).Returns(this.allUsers);
+            this.mockUserService.Setup(userService => userService.GetBannedUsers()).Returns(this.bannedUsers);
+            this.mockUserService.Setup(userService => userService.GetUserById(It.IsAny<int>())).Returns<int>(id => this.allUsers.FirstOrDefault(u => u.UserId == id));
+            this.mockUserService.Setup(userService => userService.GetRegularUsers()).Returns(this.regularUsers);
+            this.mockReviewService.Setup(s => s.GetReviewsSince(It.IsAny<DateTime>())).Returns(this.reviews);
+            this.mockReviewService.Setup(s => s.GetAverageRatingForVisibleReviews()).Returns(4.5);
+            this.mockReviewService.Setup(s => s.GetReviewsForReport()).Returns(this.reviews);
+            this.mockConfiguration.SetupGet(x => x["SMTP_MODERATOR_EMAIL"]).Returns("moderator@example.com");
+            this.mockConfiguration.SetupGet(x => x["SMTP_MODERATOR_PASSWORD"]).Returns("password123");
             FileTemplateProvider mockFileTemplateProvider = new FileTemplateProvider();
+            this.mockTemplateProvider = new Mock<ITemplateProvider>();
+            this.mockTemplateProvider.Setup(p => p.GetEmailTemplate()).Returns(mockFileTemplateProvider.GetEmailTemplate());
+            this.mockTemplateProvider.Setup(p => p.GetPlainTextTemplate()).Returns(mockFileTemplateProvider.GetPlainTextTemplate());
+            this.mockTemplateProvider.Setup(p => p.GetReviewRowTemplate()).Returns(mockFileTemplateProvider.GetReviewRowTemplate());
+            this.mockEmailSender = new Mock<IEmailSender>();
+            this.mockEmailSender.Setup(s => s.SendEmailAsync(It.IsAny<MimeMessage>(), It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 
-            // template provider setup
-            _mockTemplateProvider = new Mock<ITemplateProvider>();
-            _mockTemplateProvider.Setup(p => p.GetEmailTemplate()).Returns(mockFileTemplateProvider.GetEmailTemplate());
-
-            _mockTemplateProvider.Setup(p => p.GetPlainTextTemplate()).Returns(mockFileTemplateProvider.GetPlainTextTemplate());
-            _mockTemplateProvider.Setup(p => p.GetReviewRowTemplate()).Returns(mockFileTemplateProvider.GetReviewRowTemplate());
-            // email sender setup
-            _mockEmailSender = new Mock<IEmailSender>();
-            _mockEmailSender.Setup(s => s.SendEmailAsync(It.IsAny<MimeMessage>(), It.IsAny<string>(), It.IsAny<string>()))
-                           .Returns(Task.CompletedTask);
-
-            _emailJob = new EmailJob(
-                    _mockUserService.Object,
-                    _mockReviewService.Object,
-                    _mockConfiguration.Object,
-                    _mockEmailSender.Object,
-                    _mockTemplateProvider.Object);
+            this.emailJob = new EmailJob(this.mockUserService.Object, this.mockReviewService.Object, this.mockConfiguration.Object, this.mockEmailSender.Object, this.mockTemplateProvider.Object);
         }
 
-         [Fact]
+        [Fact]
         public async Task Execute_ShouldSendEmailsToAllAdmins()
         {
-            // Arrange
-            var jobContext = Mock.Of<IJobExecutionContext>();
-            
-            // Act
-            await _emailJob.Execute(jobContext);
-            
-            // Assert - verify that SendEmailAsync was called once for each admin
-            _mockEmailSender.Verify(
-                sender => sender.SendEmailAsync(
-                    It.IsAny<MimeMessage>(),
-                    "moderator@example.com",
-                    "password123"),
-                Times.Exactly(_adminUsers.Count));
-            
-            // Verify the "To" addresses for each admin user
-            foreach (var admin in _adminUsers)
+            IJobExecutionContext jobContext = Mock.Of<IJobExecutionContext>();
+            await this.emailJob.Execute(jobContext);
+            this.mockEmailSender.Verify(sender => sender.SendEmailAsync(It.IsAny<MimeMessage>(), "moderator@example.com", "password123"), Times.Exactly(this.adminUsers.Count));
+            foreach (User admin in this.adminUsers)
             {
-                _mockEmailSender.Verify(
-                    sender => sender.SendEmailAsync(
-                        It.Is<MimeMessage>(msg => msg.To.Any(to => to.ToString().Contains(admin.EmailAddress))),
-                        "moderator@example.com",
-                        "password123"),
-                    Times.Once);
+                this.mockEmailSender.Verify(
+                    sender => sender.SendEmailAsync(It.Is<MimeMessage>(msg => msg.To.Any(to => to.ToString().Contains(admin.EmailAddress))), "moderator@example.com", "password123"), Times.Once);
             }
         }
 
         [Fact]
         public async Task Execute_WithoutCredentials_ShouldNotSendEmails()
         {
-            // Arrange
-            _mockConfiguration.SetupGet(x => x["SMTP_MODERATOR_EMAIL"]).Returns((string?)null);
-            
-            var emailJob = new EmailJob(
-                _mockUserService.Object,
-                _mockReviewService.Object,
-                _mockConfiguration.Object);
-                
-            var jobContext = Mock.Of<IJobExecutionContext>();
-
-            // Act
+            this.mockConfiguration.SetupGet(x => x["SMTP_MODERATOR_EMAIL"]).Returns((string?)null);
+            EmailJob emailJob = new EmailJob(this.mockUserService.Object, this.mockReviewService.Object, this.mockConfiguration.Object);
+            IJobExecutionContext jobContext = Mock.Of<IJobExecutionContext>();
             await emailJob.Execute(jobContext);
-
-            // Assert
-            _mockEmailSender.Verify(
-                sender => sender.SendEmailAsync(
-                    It.IsAny<MimeMessage>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()),
-                Times.Never);
+            this.mockEmailSender.Verify(sender => sender.SendEmailAsync(It.IsAny<MimeMessage>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
-        
+
         [Fact]
         public async Task Execute_WithoutPassword_ShouldNotSendEmails()
         {
-            // Arrange
-            _mockConfiguration.SetupGet(x => x["SMTP_MODERATOR_PASSWORD"]).Returns((string?)null);
-            
-            var emailJob = new EmailJob(
-                _mockUserService.Object,
-                _mockReviewService.Object,
-                _mockConfiguration.Object);
-                
-            var jobContext = Mock.Of<IJobExecutionContext>();
-
-            // Act
+            this.mockConfiguration.SetupGet(x => x["SMTP_MODERATOR_PASSWORD"]).Returns((string?)null);
+            EmailJob emailJob = new EmailJob(this.mockUserService.Object, this.mockReviewService.Object, this.mockConfiguration.Object);
+            IJobExecutionContext jobContext = Mock.Of<IJobExecutionContext>();
             await emailJob.Execute(jobContext);
-
-            // Assert
-            _mockEmailSender.Verify(
-                sender => sender.SendEmailAsync(
-                    It.IsAny<MimeMessage>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()),
-                Times.Never);
+            this.mockEmailSender.Verify(sender => sender.SendEmailAsync(It.IsAny<MimeMessage>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
         public void GatherReportData_ShouldIncludeCorrectReportData()
         {
-            // Act
-            var result = typeof(EmailJob)
-                .GetMethod("GatherReportData", BindingFlags.NonPublic | BindingFlags.Instance)!
-                .Invoke(_emailJob, null) as AdminReportData;
-
-            // Assert
+            AdminReportData? result = typeof(EmailJob).GetMethod("GatherReportData", BindingFlags.NonPublic | BindingFlags.Instance) !.Invoke(this.emailJob, null) as AdminReportData;
             Assert.NotNull(result);
-            Assert.Equal(_adminUsers.Count + _regularUsers.Count, result.ActiveUsersCount); // 2 admins + 2 regulars = 4
-            Assert.Equal(_bannedUsers.Count, result.BannedUsersCount); // 1 banned user
-            Assert.Equal(_reviews.Count, result.NewReviewsCount); // 2 reviews
+            Assert.Equal(this.adminUsers.Count + this.regularUsers.Count, result.ActiveUsersCount);
+            Assert.Equal(this.bannedUsers.Count, result.BannedUsersCount);
+            Assert.Equal(this.reviews.Count, result.NewReviewsCount);
             Assert.Equal(4.5, result.AverageRating);
-            Assert.Equal(_reviews, result.RecentReviews);
+            Assert.Equal(this.reviews, result.RecentReviews);
         }
-        
+
         [Fact]
         public async Task Execute_ShouldIncludeCorrectEmailSubject()
         {
-            // Arrange
-            var jobContext = Mock.Of<IJobExecutionContext>();
-            
-            // Act
-            await _emailJob.Execute(jobContext);
-            
-            // Assert
-            _mockEmailSender.Verify(
-                sender => sender.SendEmailAsync(
-                    It.Is<MimeMessage>(msg => 
-                        msg.Subject.Contains("Admin Report") && 
-                        msg.Subject.Contains(DateTime.Now.ToString("yyyy-MM-dd"))),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()),
-                Times.AtLeastOnce);
+            IJobExecutionContext jobContext = Mock.Of<IJobExecutionContext>();
+            await this.emailJob.Execute(jobContext);
+            this.mockEmailSender.Verify(sender => sender.SendEmailAsync(It.Is<MimeMessage>(message => message.Subject.Contains("Admin Report") && message.Subject.Contains(DateTime.Now.ToString("yyyy-MM-dd"))), It.IsAny<string>(), It.IsAny<string>()), Times.AtLeastOnce);
         }
-        
+
         [Fact]
         public async Task Execute_ShouldIncludeCorrectEmailContent()
         {
-            // Arrange
-            var jobContext = Mock.Of<IJobExecutionContext>();
-            
-            // Act
-            await _emailJob.Execute(jobContext);
-            
-            // Assert
-            _mockEmailSender.Verify(
-                sender => sender.SendEmailAsync(
-                    It.Is<MimeMessage>(msg => 
-                        msg.HtmlBody.Contains("Active Users:") &&
-                        msg.HtmlBody.Contains("Banned Users:") &&
-                        msg.HtmlBody.Contains("New Reviews:") &&
-                        msg.HtmlBody.Contains("Average Rating:")),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()),
-                Times.Never);
+            IJobExecutionContext jobContext = Mock.Of<IJobExecutionContext>();
+            await this.emailJob.Execute(jobContext);
+            this.mockEmailSender.Verify(sender => sender.SendEmailAsync(It.Is<MimeMessage>(message => message.HtmlBody.Contains("Active Users:") && message.HtmlBody.Contains("Banned Users:") && message.HtmlBody.Contains("New Reviews:") && message.HtmlBody.Contains("Average Rating:")), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
-        
+
         [Fact]
         public async Task Execute_ShouldIncludeRecentReviewsInCorrectFormat()
         {
-            // Arrange
-            var jobContext = Mock.Of<IJobExecutionContext>();
-            
-            // Act
-            await _emailJob.Execute(jobContext);
-            
-            // Assert - verify that each review is included in the email
-            foreach (var review in _reviews)
+            IJobExecutionContext jobContext = Mock.Of<IJobExecutionContext>();
+            await this.emailJob.Execute(jobContext);
+            foreach (Review review in this.reviews)
             {
-                var user = _allUsers.First(u => u.UserId == review.UserId);
-                
-                _mockEmailSender.Verify(
-                    sender => sender.SendEmailAsync(
-                        It.Is<MimeMessage>(msg => 
-                            msg.HtmlBody.Contains(user.FullName) &&
-                            msg.HtmlBody.Contains(review.Rating.ToString())),
-                        It.IsAny<string>(),
-                        It.IsAny<string>()),
-                    Times.AtLeastOnce);
+                User user = this.allUsers.First(u => u.UserId == review.UserId);
+                this.mockEmailSender.Verify(sender => sender.SendEmailAsync(It.Is<MimeMessage>(message => message.HtmlBody.Contains(user.FullName) && message.HtmlBody.Contains(review.Rating.ToString())), It.IsAny<string>(), It.IsAny<string>()), Times.AtLeastOnce);
             }
         }
 
         [Fact]
         public async Task Execute_WithNoReviews_ShouldHandleEmptyList()
         {
-            // Arrange
-            _mockReviewService.Setup(s => s.GetReviewsForReport()).Returns(new List<Review>());
-
-            var emailJob = new EmailJob(
-                _mockUserService.Object,
-                _mockReviewService.Object,
-                _mockConfiguration.Object);
-
-            var jobContext = Mock.Of<IJobExecutionContext>();
-
-            // Act
+            this.mockReviewService.Setup(reviewService => reviewService.GetReviewsForReport()).Returns(new List<Review>());
+            EmailJob emailJob = new EmailJob(this.mockUserService.Object, this.mockReviewService.Object, this.mockConfiguration.Object);
+            IJobExecutionContext jobContext = Mock.Of<IJobExecutionContext>();
             await emailJob.Execute(jobContext);
-
-            // Assert
-            _mockEmailSender.Verify(
-                sender => sender.SendEmailAsync(
-                    It.Is<MimeMessage>(msg => msg.HtmlBody.Contains("No recent reviews")),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()),
-                Times.Never);
+            this.mockEmailSender.Verify(sender => sender.SendEmailAsync(It.Is<MimeMessage>(message => message.HtmlBody.Contains("No recent reviews")), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             Assert.True(1 == 1);
         }
 
-            [Fact]
+        [Fact]
         public async Task Execute_WithExceptionInSendMail_ShouldHandleException()
         {
-            // Arrange
-            _mockEmailSender.Setup(s => s.SendEmailAsync(It.IsAny<MimeMessage>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ThrowsAsync(new Exception("SMTP failure"));
-                
-            var jobContext = Mock.Of<IJobExecutionContext>();
-            
-            // Act & Assert
-            // Test that no exception is thrown (the job catches all exceptions)
-            await _emailJob.Execute(jobContext);
+            this.mockEmailSender.Setup(s => s.SendEmailAsync(It.IsAny<MimeMessage>(), It.IsAny<string>(), It.IsAny<string>())).ThrowsAsync(new Exception("SMTP failure"));
+            IJobExecutionContext jobContext = Mock.Of<IJobExecutionContext>();
+            await this.emailJob.Execute(jobContext);
         }
     }
 }

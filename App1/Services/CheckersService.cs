@@ -143,31 +143,4 @@ namespace App1.Services
             }
         }
     }
-
-    public static class OffensiveTextDetector
-    {
-        private static readonly string HuggingFaceApiUrl = "https://api-inference.huggingface.co/models/facebook/roberta-hate-speech-dynabench-r1-target";
-        private static readonly string HuggingFaceApiToken = string.Empty;
-
-        public static string DetectOffensiveContent(string text)
-        {
-            HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {HuggingFaceApiToken}");
-            StringContent jsonContent = new StringContent(JsonConvert.SerializeObject(text), Encoding.UTF8, "application/json");
-            try
-            {
-                HttpResponseMessage response = client.PostAsync(HuggingFaceApiUrl, jsonContent).GetAwaiter().GetResult();
-                if (response.IsSuccessStatusCode)
-                {
-                    return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                }
-
-                return $"Error: {response.StatusCode}";
-            }
-            catch (Exception ex)
-            {
-                return $"Exception: {ex.Message}";
-            }
-        }
-    }
 }

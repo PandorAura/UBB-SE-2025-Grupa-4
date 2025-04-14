@@ -52,7 +52,7 @@ namespace App1.Repositories
                     emailAddress: "bianca.georgiana.cirnu@gmail.com",
                     fullName: "Bianca Georgiana Cirnu",
                     numberOfDeletedReviews: 2,
-                    HasSubmittedAppeal: true,
+                    hasSubmittedAppeal: true,
                     assignedRoles: AdminRoles
                 ),
                 new User(
@@ -60,7 +60,7 @@ namespace App1.Repositories
                     emailAddress: "admin.one@example.com",
                     fullName: "Admin One",
                     numberOfDeletedReviews: 0,
-                    HasSubmittedAppeal: false,
+                    hasSubmittedAppeal: false,
                     assignedRoles: BasicUserRoles
                 ),
                 new User(
@@ -68,7 +68,7 @@ namespace App1.Repositories
                     emailAddress: "admin.two@example.com",
                     fullName: "Admin Two",
                     numberOfDeletedReviews: 0,
-                    HasSubmittedAppeal: false,
+                    hasSubmittedAppeal: false,
                     assignedRoles: AdminRoles
                 ),
             };
