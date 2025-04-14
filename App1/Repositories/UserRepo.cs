@@ -20,30 +20,31 @@ namespace App1.Repositories
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRepo"/> class with default user data.
         /// </summary>
-        public UserRepo()
+        public static List<Role> BasicUserRoles = new List<Role>
         {
-            List<Role> basicUserRoles = new List<Role>
-            {
                 new Role(RoleType.User, "user")
-            };
-        public static List<Role> adminRoles = new List<Role>
+        };
+
+        public static List<Role> AdminRoles = new List<Role>
             {
                 new Role(RoleType.User, "user"),
                 new Role(RoleType.Admin, "admin")
             };
-        public static List<Role> managerRoles = new List<Role>
+
+        public static List<Role> ManagerRoles = new List<Role>
             {
                 new Role(RoleType.User, "user"),
                 new Role(RoleType.Admin, "admin"),
                 new Role(RoleType.Manager, "manager")
             };
-        public static List<Role> bannedUserRoles = new List<Role>
+
+        public static List<Role> BannedUserRoles = new List<Role>
             {
                 new Role(RoleType.Banned, "banned")
             };
+
         public UserRepo()
         {
-           
             _usersList = new List<User>
             {
                 new User(
@@ -52,7 +53,7 @@ namespace App1.Repositories
                     fullName: "Bianca Georgiana Cirnu",
                     numberOfDeletedReviews: 2,
                     HasSubmittedAppeal: true,
-                    assignedRoles: basicUserRoles
+                    assignedRoles: AdminRoles
                 ),
                 new User(
                     userId: 3,
@@ -60,7 +61,7 @@ namespace App1.Repositories
                     fullName: "Admin One",
                     numberOfDeletedReviews: 0,
                     HasSubmittedAppeal: false,
-                    assignedRoles: adminRoles
+                    assignedRoles: BasicUserRoles
                 ),
                 new User(
                     userId: 5,
@@ -68,7 +69,7 @@ namespace App1.Repositories
                     fullName: "Admin Two",
                     numberOfDeletedReviews: 0,
                     HasSubmittedAppeal: false,
-                    assignedRoles: adminRoles
+                    assignedRoles: BasicUserRoles
                 )
             };
         }

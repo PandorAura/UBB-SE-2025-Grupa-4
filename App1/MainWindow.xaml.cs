@@ -70,7 +70,7 @@ namespace App1
                 ITrigger trigger = TriggerBuilder.Create()
                     .WithIdentity("autoTrigger", "emailGroup")
                     .StartNow()
-                    .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Wednesday, 22, 20))
+                    .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Monday, 11, 40))
                     .Build();
 
                 await _scheduler.ScheduleJob(job, trigger);

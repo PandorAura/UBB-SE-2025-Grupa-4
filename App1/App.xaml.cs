@@ -54,7 +54,7 @@
                     services.AddSingleton<IConfiguration>(config);
 
 
-                    string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+                    string connectionString = "Server=DESKTOP-KEB351O\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
 
 
                     services.AddSingleton<IUserRepository, UserRepo>();

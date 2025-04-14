@@ -124,12 +124,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackagingOutputs Include="C:\Users\antonia\.nuget\packages\uno.winui\5.6.91\lib\net8.0-windows10.0.19041.0\Uno.UI.Toolkit.pri">
+		<!--<PackagingOutputs Include="C:\Users\antonia\.nuget\packages\uno.winui\5.6.91\lib\net8.0-windows10.0.19041.0\Uno.UI.Toolkit.pri">
 			<ProjectName>App1</ProjectName>
-			<!-- Define the project name here -->
 			<OutputGroup>Default</OutputGroup>
-			<!-- Define a default OutputGroup -->
-		</PackagingOutputs>
+			
+		</PackagingOutputs>-->
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
