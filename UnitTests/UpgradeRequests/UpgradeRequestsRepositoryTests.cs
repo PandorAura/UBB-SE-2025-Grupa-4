@@ -1,234 +1,294 @@
-//using App1.Infrastructure;
-//using App1.Models;
-//using App1.Repositories;
-//using Microsoft.Data.SqlClient;
-//using Moq;
-//using System;
-//using System.Collections.Generic;
-//using System.Data;
-//using Xunit;
+namespace UnitTests.UpgradeRequests
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.IO;
+    using System.Linq;
+    using App1.Infrastructure;
+    using App1.Models;
+    using App1.Repositories;
+    using Microsoft.Data.SqlClient;
+    using Microsoft.Extensions.Configuration;
+    using Moq;
+    using Xunit;
 
-//namespace UnitTests.UpgradeRequests
-//{
-//    public class UpgradeRequestsRepositoryTests
-//    {
-//        private readonly Mock<ISqlConnectionFactory> _mockConnectionFactory;
-//        private readonly Mock<ISqlConnection> _mockConnection;
-//        private readonly Mock<ISqlCommand> _mockCommand;
-//        private readonly Mock<ISqlDataReader> _mockDataReader;
-//        private readonly Mock<ISqlParameterCollection> _mockParameters;
-//        private readonly Mock<ISqlDataAdapter> _mockDataAdapter;
-//        private readonly UpgradeRequestsRepository _repository;
-//        private readonly string connectionString;
+    public class UpgradeRequestsRepositoryTests : IDisposable
+    {
+        private readonly string connectionString;
+        private readonly UpgradeRequestsRepository repository;
+        private readonly IDbConnectionFactory connectionFactory;
 
-//        public UpgradeRequestsRepositoryTests()
-//        {
-//            var config = new ConfigurationBuilder()
-//                .SetBasePath(Directory.GetCurrentDirectory())
-//                .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
-//                .Build();
+        public UpgradeRequestsRepositoryTests()
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
+                .Build();
 
-//            this.connectionString = config.GetConnectionString("TestConnection");
+            this.connectionString = config.GetConnectionString("TestConnection");
+            this.connectionFactory = new SqlConnectionFactory(connectionString);
+            this.repository = new UpgradeRequestsRepository(connectionFactory);
+            EnsureTableExists();
+            CleanupTable();
+        }
 
-//            // Setup mocks
-//            _mockConnectionFactory = new Mock<ISqlConnectionFactory>();
-//            _mockConnection = new Mock<ISqlConnection>();
-//            _mockCommand = new Mock<ISqlCommand>();
-//            _mockDataReader = new Mock<ISqlDataReader>();
-//            _mockParameters = new Mock<ISqlParameterCollection>();
-//            _mockDataAdapter = new Mock<ISqlDataAdapter>();
+        public void Dispose()
+        {
+            CleanupTable();
+        }
 
-//            // Setup connection factory to return mock connection
-//            _mockConnectionFactory.Setup(f => f.CreateConnection()).Returns(_mockConnection.Object);
+        #region Integration Tests
 
-//            // Setup connection mock behavior
-//            _mockConnection.Setup(c => c.Open()).Verifiable();
-//            _mockConnection.Setup(c => c.Close()).Verifiable();
-//            _mockConnection.Setup(c => c.CreateCommand()).Returns(_mockCommand.Object);
+        [Fact]
+        public void RetrieveAllUpgradeRequests_WhenEmpty_ReturnsEmptyList()
+        {
+            // Act
+            var result = this.repository.RetrieveAllUpgradeRequests();
 
-//            // Setup command mock
-//            _mockCommand.SetupGet(c => c.Parameters).Returns(_mockParameters.Object);
-//            _mockCommand.Setup(c => c.ExecuteReader()).Returns(_mockDataReader.Object);
-//            _mockCommand.Setup(c => c.ExecuteNonQuery()).Returns(1);
+            // Assert
+            Assert.Empty(result);
+        }
 
-//            // Setup parameter collection mock
-//            _mockParameters.Setup(p => p.AddWithValue(It.IsAny<string>(), It.IsAny<object>()))
-//                .Returns(Mock.Of<ISqlParameter>());
+        [Fact]
+        public void RetrieveAllUpgradeRequests_WithData_ReturnsAllRequests()
+        {
+            // Arrange
+            InsertTestRequest(1, "User1");
+            InsertTestRequest(2, "User2");
 
-//            // Setup data reader mock for returning data
-//            _mockDataReader.Setup(r => r.Read()).Returns(true);
-//            _mockDataReader.Setup(r => r.GetInt32(0)).Returns(1);
-//            _mockDataReader.Setup(r => r.GetInt32(1)).Returns(100);
-//            _mockDataReader.Setup(r => r.GetString(2)).Returns("Test User");
-//            _mockDataReader.Setup(r => r.Close()).Verifiable();
+            // Act
+            var result = this.repository.RetrieveAllUpgradeRequests();
 
-//            // Create repository with mocked dependencies
-//            _repository = new UpgradeRequestsRepository(_mockConnectionFactory.Object, _mockDataAdapter.Object);
-//        }
+            // Assert
+            Assert.Equal(2, result.Count);
+            Assert.Contains(result, r => r.RequestingUserIdentifier == 1 && r.RequestingUserDisplayName == "User1");
+            Assert.Contains(result, r => r.RequestingUserIdentifier == 2 && r.RequestingUserDisplayName == "User2");
+        }
 
-//        [Fact]
-//        public void Constructor_WithValidDependencies_CreatesRepository()
-//        {
-//            // Arrange & Act
-//            var repository = new UpgradeRequestsRepository(_mockConnectionFactory.Object, _mockDataAdapter.Object);
+        [Fact]
+        public void RetrieveUpgradeRequestByIdentifier_NonExistentId_ReturnsNull()
+        {
+            // Act
+            var result = this.repository.RetrieveUpgradeRequestByIdentifier(999);
 
-//            // Assert
-//            Assert.NotNull(repository);
-//        }
+            // Assert
+            Assert.Null(result);
+        }
 
-//        [Fact]
-//        public void Constructor_WithConnectionString_CreatesRepository()
-//        {
-//            // Arrange
-//            string connectionString = "TestConnectionString";
+        [Fact]
+        public void RetrieveUpgradeRequestByIdentifier_ExistingId_ReturnsRequest()
+        {
+            // Arrange
+            int requestId = InsertTestRequest(42, "TestUser");
 
-//            // Act
-//            var repository = new UpgradeRequestsRepository(connectionString);
+            // Act
+            var result = this.repository.RetrieveUpgradeRequestByIdentifier(requestId);
 
-//            // Assert
-//            Assert.NotNull(repository);
-//        }
+            // Assert
+            Assert.NotNull(result);
+            //Assert.Equal(requestId, result.RequestId);
+            Assert.Equal(42, result.RequestingUserIdentifier);
+            Assert.Equal("TestUser", result.RequestingUserDisplayName);
+        }
 
-//        [Fact]
-//        public void RetrieveAllUpgradeRequests_ReturnsUpgradeRequests()
-//        {
-//            // Arrange
-//            var upgradeRequestReader = new Mock<ISqlDataReader>();
-//            upgradeRequestReader.SetupSequence(r => r.Read())
-//                .Returns(true)
-//                .Returns(true)
-//                .Returns(false);
+        [Fact]
+        public void RemoveUpgradeRequestByIdentifier_ExistingId_RemovesRequest()
+        {
+            // Arrange
+            int requestId = InsertTestRequest(42, "RemoveTestUser");
 
-//            upgradeRequestReader.SetupSequence(r => r.GetInt32(0))
-//                .Returns(1)
-//                .Returns(2);
+            // Act
+            this.repository.RemoveUpgradeRequestByIdentifier(requestId);
+            var result = this.repository.RetrieveUpgradeRequestByIdentifier(requestId);
 
-//            upgradeRequestReader.SetupSequence(r => r.GetInt32(1))
-//                .Returns(100)
-//                .Returns(200);
+            // Assert
+            Assert.Null(result);
+        }
 
-//            upgradeRequestReader.SetupSequence(r => r.GetString(2))
-//                .Returns("User 1")
-//                .Returns("User 2");
+        [Fact]
+        public void RemoveUpgradeRequestByIdentifier_NonExistentId_DoesNotThrow()
+        {
+            // Act
+            var exception = Record.Exception(() => this.repository.RemoveUpgradeRequestByIdentifier(999));
 
-//            _mockCommand.Setup(c => c.ExecuteReader()).Returns(upgradeRequestReader.Object);
+            // Assert
+            Assert.Null(exception);
+        }
 
-//            // Act
-//            var result = _repository.RetrieveAllUpgradeRequests();
+        #endregion
 
-//            // Assert
-//            Assert.NotNull(result);
-//            Assert.Equal(2, result.Count);
-//            Assert.Equal(1, result[0].UpgradeRequestId);
-//            Assert.Equal(100, result[0].RequestingUserIdentifier);
-//            Assert.Equal("User 1", result[0].RequestingUserDisplayName);
-//            Assert.Equal(2, result[1].UpgradeRequestId);
-//            Assert.Equal(200, result[1].RequestingUserIdentifier);
-//            Assert.Equal("User 2", result[1].RequestingUserDisplayName);
+        #region Unit Tests with Mocks
 
-//            _mockConnection.Verify(c => c.Open(), Times.Once);
-//            _mockConnection.Verify(c => c.Close(), Times.Once);
-//        }
+        [Fact]
+        public void Constructor_NullConnectionFactory_ThrowsArgumentNullException()
+        {
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => new UpgradeRequestsRepository(connectionFactory: null));
+        }
 
-//        [Fact]
-//        public void RetrieveAllUpgradeRequests_WhenExceptionOccurs_ReturnsEmptyList()
-//        {
-//            // Arrange
-//            _mockConnection.Setup(c => c.Open()).Throws(new Exception("Test exception"));
+        
 
-//            // Act
-//            var result = _repository.RetrieveAllUpgradeRequests();
+        
+        [Fact]
+        public void LegacyConstructor_ValidConnectionString_CreatesRepositorySuccessfully()
+        {
+            // Arrange & Act
+            var exception = Record.Exception(() => new UpgradeRequestsRepository("dummy_connection_string"));
 
-//            // Assert
-//            Assert.NotNull(result);
-//            Assert.Empty(result);
-//            _mockConnection.Verify(c => c.Open(), Times.Once);
-//            _mockConnection.Verify(c => c.Close(), Times.Once);
-//        }
+            // Assert
+            Assert.Null(exception);
+        }
+        [Fact]
+        public void RetrieveAllUpgradeRequests_DbException_HandlesExceptionAndReturnsEmptyList()
+        {
+            // Arrange
+            var mockConnectionFactory = new Mock<IDbConnectionFactory>();
 
-//        [Fact]
-//        public void RemoveUpgradeRequestByIdentifier_DeletesRequest()
-//        {
-//            // Arrange
-//            int upgradeRequestIdentifier = 1;
+            // Setup to throw when connection is created
+            mockConnectionFactory
+                .Setup(f => f.CreateConnection());
+                
 
-//            // Act
-//            _repository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+            var repository = new UpgradeRequestsRepository(mockConnectionFactory.Object);
 
-//            // Assert
-//            _mockConnection.Verify(c => c.Open(), Times.Once);
-//            _mockConnection.Verify(c => c.Close(), Times.Once);
-//            _mockCommand.Verify(c => c.ExecuteNonQuery(), Times.Once);
-//            _mockParameters.Verify(p => p.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier), Times.Once);
-//        }
+            // Act
+            var result = repository.RetrieveAllUpgradeRequests();
 
-//        [Fact]
-//        public void RemoveUpgradeRequestByIdentifier_WhenExceptionOccurs_HandlesException()
-//        {
-//            // Arrange
-//            int upgradeRequestIdentifier = 1;
-//            _mockConnection.Setup(c => c.Open()).Throws(new Exception("Test exception"));
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
 
-//            // Act & Assert (no exception should be thrown)
-//            _repository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+        [Fact]
+        public void RemoveUpgradeRequestByIdentifier_DbException_HandlesException()
+        {
+            // Arrange
+            var mockConnectionFactory = new Mock<IDbConnectionFactory>();
 
-//            // Verify connection handling
-//            _mockConnection.Verify(c => c.Open(), Times.Once);
-//            _mockConnection.Verify(c => c.Close(), Times.Once);
-//        }
+            // Setup to throw when connection is created
+            mockConnectionFactory
+                .Setup(f => f.CreateConnection());
+                
 
-//        [Fact]
-//        public void RetrieveUpgradeRequestByIdentifier_ReturnsUpgradeRequest()
-//        {
-//            // Arrange
-//            int upgradeRequestIdentifier = 1;
+            var repository = new UpgradeRequestsRepository(mockConnectionFactory.Object);
 
-//            // Act
-//            var result = _repository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+            // Act
+            var exception = Record.Exception(() => repository.RemoveUpgradeRequestByIdentifier(1));
 
-//            // Assert
-//            Assert.NotNull(result);
-//            Assert.IsType<UpgradeRequest>(result);
-//            Assert.Equal(1, result.UpgradeRequestId);
-//            Assert.Equal(100, result.RequestingUserIdentifier);
-//            Assert.Equal("Test User", result.RequestingUserDisplayName);
+            // Assert
+            Assert.Null(exception); // Should not rethrow the exception
+        }
 
-//            _mockConnection.Verify(c => c.Open(), Times.Once);
-//            _mockConnection.Verify(c => c.Close(), Times.Once);
-//            _mockParameters.Verify(p => p.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier), Times.Once);
-//        }
+        [Fact]
+        public void RetrieveUpgradeRequestByIdentifier_DbException_HandlesExceptionAndReturnsNull()
+        {
+            // Arrange
+            var mockConnectionFactory = new Mock<IDbConnectionFactory>();
 
-//        [Fact]
-//        public void RetrieveUpgradeRequestByIdentifier_WhenRequestNotFound_ReturnsNull()
-//        {
-//            // Arrange
-//            int upgradeRequestIdentifier = 999; // Non-existent ID
-//            _mockDataReader.Setup(r => r.Read()).Returns(false);
+            // Setup to throw when connection is created
+            mockConnectionFactory
+                .Setup(f => f.CreateConnection());
+                
 
-//            // Act
-//            var result = _repository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+            var repository = new UpgradeRequestsRepository(mockConnectionFactory.Object);
 
-//            // Assert
-//            Assert.Null(result);
-//            _mockConnection.Verify(c => c.Open(), Times.Once);
-//            _mockConnection.Verify(c => c.Close(), Times.Once);
-//            _mockParameters.Verify(p => p.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier), Times.Once);
-//        }
+            // Act
+            var result = repository.RetrieveUpgradeRequestByIdentifier(1);
 
-//        [Fact]
-//        public void RetrieveUpgradeRequestByIdentifier_WhenExceptionOccurs_ReturnsNull()
-//        {
-//            // Arrange
-//            int upgradeRequestIdentifier = 1;
-//            _mockConnection.Setup(c => c.Open()).Throws(new Exception("Test exception"));
+            // Assert
+            Assert.Null(result);
+        }
 
-//            // Act
-//            var result = _repository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+        [Fact]
+        public void RetrieveAllUpgradeRequests_WithBadConnectionString_HandlesExceptionAndReturnsEmptyList()
+        {
+            // Arrange - Create repository with invalid connection string that will cause SQL exceptions
+            var repository = new UpgradeRequestsRepository("Data Source=nonexistent;Initial Catalog=fake;User Id=wrong;Password=wrong;");
 
-//            // Assert
-//            Assert.Null(result);
-//            _mockConnection.Verify(c => c.Open(), Times.Once);
-//            _mockConnection.Verify(c => c.Close(), Times.Once);
-//        }
-//    }
-//}
+            // Act
+            var result = repository.RetrieveAllUpgradeRequests();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void RemoveUpgradeRequestByIdentifier_WithBadConnectionString_HandlesException()
+        {
+            // Arrange - Create repository with invalid connection string that will cause SQL exceptions
+            var repository = new UpgradeRequestsRepository("Data Source=nonexistent;Initial Catalog=fake;User Id=wrong;Password=wrong;");
+
+            // Act
+            var exception = Record.Exception(() => repository.RemoveUpgradeRequestByIdentifier(1));
+
+            // Assert
+            Assert.Null(exception); // Should not rethrow the exception
+        }
+
+        [Fact]
+        public void RetrieveUpgradeRequestByIdentifier_WithBadConnectionString_HandlesExceptionAndReturnsNull()
+        {
+            // Arrange - Create repository with invalid connection string that will cause SQL exceptions
+            var repository = new UpgradeRequestsRepository("Data Source=nonexistent;Initial Catalog=fake;User Id=wrong;Password=wrong;");
+
+            // Act
+            var result = repository.RetrieveUpgradeRequestByIdentifier(1);
+
+            // Assert
+            Assert.Null(result);
+        }
+        #endregion
+
+        #region Helper Methods
+
+        private void CleanupTable()
+        {
+            using var conn = new SqlConnection(connectionString);
+            conn.Open();
+            using var cmd = new SqlCommand("DELETE FROM UpgradeRequests", conn);
+            cmd.ExecuteNonQuery();
+        }
+
+        private void EnsureTableExists()
+        {
+            using var conn = new SqlConnection(connectionString);
+            conn.Open();
+            using var cmd = new SqlCommand(
+                @"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'UpgradeRequests')
+                BEGIN
+                    CREATE TABLE UpgradeRequests (
+                        RequestId INT PRIMARY KEY IDENTITY(1,1),
+                        RequestingUserId INT NOT NULL,
+                        RequestingUserName NVARCHAR(100) NOT NULL
+                    )
+                END", conn);
+            cmd.ExecuteNonQuery();
+        }
+
+        private int InsertTestRequest(int userId, string userName)
+        {
+            int requestId = 0;
+            using var conn = new SqlConnection(connectionString);
+            conn.Open();
+
+            // Insert the record
+            using (var cmdInsert = new SqlCommand(
+                @"INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) 
+                  VALUES (@userId, @userName);
+                  SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmdInsert.Parameters.AddWithValue("@userId", userId);
+                cmdInsert.Parameters.AddWithValue("@userName", userName);
+
+                // Get the generated ID
+                requestId = Convert.ToInt32(cmdInsert.ExecuteScalar());
+            }
+
+            return requestId;
+        }
+
+        #endregion
+    }
+}

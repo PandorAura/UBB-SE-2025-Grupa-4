@@ -52,21 +52,14 @@ namespace App1.Repositories
                     assignedRoles: basicUserRoles
                 ),
                 new User(
-                    userId: 3,
+                    userId: 2,
                     emailAddress: "admin.one@example.com",
                     fullName: "Admin One",
                     numberOfDeletedReviews: 0,
                     HasSubmittedAppeal: false,
                     assignedRoles: adminRoles
-                ),
-                new User(
-                    userId: 5,
-                    emailAddress: "admin.two@example.com",
-                    fullName: "Admin Two",
-                    numberOfDeletedReviews: 0,
-                    HasSubmittedAppeal: false,
-                    assignedRoles: adminRoles
                 )
+                
             };
         }
 
