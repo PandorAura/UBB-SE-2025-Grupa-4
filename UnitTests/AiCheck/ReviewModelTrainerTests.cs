@@ -27,7 +27,7 @@ namespace UnitTests.AiCheck
             Console.WriteLine($"Test data path: {TestDataPath}");
             Console.WriteLine($"Test model path: {TestModelPath}");
             Console.WriteLine($"Test log path: {TestLogPath}");
-            
+
             EnsureTestDirectoriesExist();
             CreateRobustTestDataFile();
 
@@ -39,6 +39,7 @@ namespace UnitTests.AiCheck
             if (!File.Exists(TestDataPath))
             {
                 Console.WriteLine("WARNING: Test data file doesn't exist after CreateRobustTestDataFile call!");
+
                 // Try to create it again with absolute path validation
                 CreateRobustTestDataFile();
                 Console.WriteLine($"Test data file exists after retry: {File.Exists(TestDataPath)}");
@@ -385,6 +386,7 @@ namespace UnitTests.AiCheck
         {
             // Arrange
             EnsureTestDirectoriesExist();
+
             // Create completely empty file
             File.WriteAllText(TestDataPath, string.Empty);
 
@@ -698,12 +700,13 @@ namespace UnitTests.AiCheck
                 {
                     Console.WriteLine($"Test log file not found for cleanup: {TestLogPath}");
                 }
-                
+
                 Console.WriteLine("Cleanup completed successfully");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error during cleanup: {ex.Message}");
+
                 // Continue execution, don't throw from cleanup
             }
         }
