@@ -1,20 +1,31 @@
-﻿using App1.AutoChecker;
-using System;
-using Microsoft.Data.SqlClient;
-using System.Linq;
-using Xunit;
-
-namespace UnitTests.Autocheck
+﻿namespace UnitTests.Autocheck
 {
+    using System;
+    using System.Linq;
+    using App1.AutoChecker;
+    using App1.Infrastructure;
+    using Microsoft.Data.SqlClient;
+    using Microsoft.Extensions.Configuration;
+    using Xunit;
+    using System.IO;
+
     // integration tests
     public class OffensiveWordsRepositoryTests : IDisposable
     {
-        private readonly string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=TestDb;Integrated Security=True;TrustServerCertificate=True;";
+        private readonly string connectionString;
         private readonly OffensiveWordsRepository repository;
+        private readonly IDbConnectionFactory connectionFactory;
 
         public OffensiveWordsRepositoryTests()
         {
-            repository = new OffensiveWordsRepository(connectionString);
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            this.connectionString = config.GetConnectionString("TestConnection");
+            this.connectionFactory = new SqlConnectionFactory(connectionString);
+            this.repository = new OffensiveWordsRepository(connectionFactory);
             EnsureTableExists();
             CleanupTable();
         }
@@ -27,16 +38,16 @@ namespace UnitTests.Autocheck
         [Fact]
         public void LoadOffensiveWords_WhenEmpty_ReturnsEmptySet()
         {
-            var result = repository.LoadOffensiveWords();
+            var result = this.repository.LoadOffensiveWords();
             Assert.Empty(result);
         }
 
         [Fact]
         public void AddWord_ThenLoadOffensiveWords_ContainsWord()
         {
-            repository.AddWord("troll");
+            this.repository.AddWord("troll");
 
-            var result = repository.LoadOffensiveWords();
+            var result = this.repository.LoadOffensiveWords();
 
             Assert.Contains("troll", result, StringComparer.OrdinalIgnoreCase);
         }
@@ -44,74 +55,66 @@ namespace UnitTests.Autocheck
         [Fact]
         public void DeleteWord_RemovesWord()
         {
-            repository.AddWord("annoying");
-            repository.DeleteWord("annoying");
+            this.repository.AddWord("annoying");
+            this.repository.DeleteWord("annoying");
 
-            var result = repository.LoadOffensiveWords();
+            var result = this.repository.LoadOffensiveWords();
 
             Assert.DoesNotContain("annoying", result, StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]
-        public void Constructor_NullConnectionString_ThrowsArgumentNullException()
+        public void Constructor_NullConnectionFactory_ThrowsArgumentNullException()
         {
-            // Act & Assert
             Assert.Throws<ArgumentNullException>(() => new OffensiveWordsRepository(null));
         }
 
         [Fact]
         public void AddWord_NullWord_DoesNotThrow()
         {
-            // Act & Assert
-            var exception = Record.Exception(() => repository.AddWord(null));
+            var exception = Record.Exception(() => this.repository.AddWord(null));
             Assert.Null(exception);
         }
 
         [Fact]
         public void AddWord_EmptyWord_DoesNotThrow()
         {
-            // Act & Assert
-            var exception = Record.Exception(() => repository.AddWord(string.Empty));
+            var exception = Record.Exception(() => this.repository.AddWord(string.Empty));
             Assert.Null(exception);
         }
 
         [Fact]
         public void AddWord_WhitespaceWord_DoesNotThrow()
         {
-            // Act & Assert
-            var exception = Record.Exception(() => repository.AddWord("   "));
+            var exception = Record.Exception(() => this.repository.AddWord("   "));
             Assert.Null(exception);
         }
 
         [Fact]
         public void DeleteWord_NullWord_DoesNotThrow()
         {
-            // Act & Assert
-            var exception = Record.Exception(() => repository.DeleteWord(null));
+            var exception = Record.Exception(() => this.repository.DeleteWord(null));
             Assert.Null(exception);
         }
 
         [Fact]
         public void DeleteWord_EmptyWord_DoesNotThrow()
         {
-            // Act & Assert
-            var exception = Record.Exception(() => repository.DeleteWord(string.Empty));
+            var exception = Record.Exception(() => this.repository.DeleteWord(string.Empty));
             Assert.Null(exception);
         }
 
         [Fact]
         public void DeleteWord_WhitespaceWord_DoesNotThrow()
         {
-            // Act & Assert
-            var exception = Record.Exception(() => repository.DeleteWord("   "));
+            var exception = Record.Exception(() => this.repository.DeleteWord("   "));
             Assert.Null(exception);
         }
 
         [Fact]
         public void DeleteWord_NonExistentWord_DoesNotThrow()
         {
-            // Act & Assert
-            var exception = Record.Exception(() => repository.DeleteWord("nonexistent"));
+            var exception = Record.Exception(() => this.repository.DeleteWord("nonexistent"));
             Assert.Null(exception);
         }
 

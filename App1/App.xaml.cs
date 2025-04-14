@@ -13,6 +13,8 @@
     using Microsoft.UI.Xaml;
     using Quartz;
     using Quartz.Impl;
+    using System.Data.SqlClient;
+    using App1.Infrastructure;
 
     public partial class App : Application
     {
@@ -50,10 +52,11 @@
                     IConfiguration config = new ConfigurationBuilder()
                         .AddUserSecrets<App>()
                         .AddEnvironmentVariables()
+                        .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
                         .Build();
                     services.AddSingleton<IConfiguration>(config);
 
-                    string connectionString = "Server=ALEXIA_ZEN\\SQLEXPRESS;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;";
+                    string connectionString = config.GetConnectionString("DefaultConnection");
 
                     services.AddSingleton<IUserRepository, UserRepo>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
@@ -64,11 +67,14 @@
                     });
                     services.AddSingleton<IOffensiveWordsRepository>(provider =>
                     {
-                        return new OffensiveWordsRepository(connectionString);
+                        return new OffensiveWordsRepository(new SqlConnectionFactory(connectionString));
                     });
                     services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
-                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => new UpgradeRequestsRepository(connectionString));
+                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider => 
+                    {
+                        return new UpgradeRequestsRepository(new SqlConnectionFactory(connectionString));
+                    });
                     services.AddSingleton<IRolesRepository, RolesRepository>();
                     services.AddSingleton<IUserService, UserService>();
                     services.AddSingleton<IReviewService, ReviewsService>();
