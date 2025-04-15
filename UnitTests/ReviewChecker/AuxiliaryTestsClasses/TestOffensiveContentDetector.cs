@@ -1,16 +1,15 @@
-﻿using App1.AutoChecker;
-using App1.Models;
-using App1.Services;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UnitTests.ReviewChecker.AuxiliaryTestsClasses
+﻿namespace UnitTests.ReviewChecker.AuxiliaryTestsClasses
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using System.Text;
+    using System.Threading.Tasks;
+    using App1.AutoChecker;
+    using App1.Models;
+    using App1.Services;
+    using Moq;
 
     public class TestOffensiveContentDetector
     {
@@ -18,7 +17,7 @@ namespace UnitTests.ReviewChecker.AuxiliaryTestsClasses
 
         public string MockDetectOffensiveContent(string text)
         {
-            if (IsOffensive)
+            if (this.IsOffensive)
             {
                 return "[[{\"label\":\"hate\",\"score\":\"0.9\"}]]";
             }

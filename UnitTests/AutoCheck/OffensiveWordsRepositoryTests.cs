@@ -1,40 +1,51 @@
 ﻿namespace UnitTests.Autocheck
 {
     using System;
-    using System.Linq;
+    using System.IO;
     using App1.AutoChecker;
     using App1.Infrastructure;
     using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.Configuration;
     using Xunit;
-    using System.IO;
 
-    // integration tests
+    /// <summary>
+    /// Contains integration tests for the <see cref="OffensiveWordsRepository"/> class.
+    /// </summary>
     public class OffensiveWordsRepositoryTests : IDisposable
     {
         private readonly string connectionString;
         private readonly OffensiveWordsRepository repository;
         private readonly IDbConnectionFactory connectionFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OffensiveWordsRepositoryTests"/> class.
+        /// Sets up configuration, database connection, and clears the test table.
+        /// </summary>
         public OffensiveWordsRepositoryTests()
         {
-            var config = new ConfigurationBuilder()
+            IConfigurationRoot configurationRoot = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            this.connectionString = config.GetConnectionString("TestConnection");
-            this.connectionFactory = new SqlConnectionFactory(connectionString);
-            this.repository = new OffensiveWordsRepository(connectionFactory);
-            EnsureTableExists();
-            CleanupTable();
+            this.connectionString = configurationRoot.GetConnectionString("TestConnection");
+            this.connectionFactory = new SqlConnectionFactory(this.connectionString);
+            this.repository = new OffensiveWordsRepository(this.connectionFactory);
+            this.EnsureTableExists();
+            this.CleanupTable();
         }
 
+        /// <summary>
+        /// Performs cleanup after each test by clearing the test table.
+        /// </summary>
         public void Dispose()
         {
-            CleanupTable();
+            this.CleanupTable();
         }
 
+        /// <summary>
+        /// Verifies that loading words from an empty table returns an empty result set.
+        /// </summary>
         [Fact]
         public void LoadOffensiveWords_WhenEmpty_ReturnsEmptySet()
         {
@@ -42,6 +53,9 @@
             Assert.Empty(result);
         }
 
+        /// <summary>
+        /// Adds a word and verifies that it is returned by LoadOffensiveWords.
+        /// </summary>
         [Fact]
         public void AddWord_ThenLoadOffensiveWords_ContainsWord()
         {
@@ -52,6 +66,9 @@
             Assert.Contains("troll", result, StringComparer.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Adds and then deletes a word, ensuring it is no longer returned.
+        /// </summary>
         [Fact]
         public void DeleteWord_RemovesWord()
         {
@@ -63,12 +80,18 @@
             Assert.DoesNotContain("annoying", result, StringComparer.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Verifies that the repository constructor throws an exception if the connection factory is null.
+        /// </summary>
         [Fact]
         public void Constructor_NullConnectionFactory_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new OffensiveWordsRepository(null));
         }
 
+        /// <summary>
+        /// Ensures that adding a null word does not throw an exception.
+        /// </summary>
         [Fact]
         public void AddWord_NullWord_DoesNotThrow()
         {
@@ -76,6 +99,9 @@
             Assert.Null(exception);
         }
 
+        /// <summary>
+        /// Ensures that adding an empty string does not throw an exception.
+        /// </summary>
         [Fact]
         public void AddWord_EmptyWord_DoesNotThrow()
         {
@@ -83,6 +109,9 @@
             Assert.Null(exception);
         }
 
+        /// <summary>
+        /// Ensures that adding a whitespace-only string does not throw an exception.
+        /// </summary>
         [Fact]
         public void AddWord_WhitespaceWord_DoesNotThrow()
         {
@@ -90,6 +119,9 @@
             Assert.Null(exception);
         }
 
+        /// <summary>
+        /// Ensures that deleting a null word does not throw an exception.
+        /// </summary>
         [Fact]
         public void DeleteWord_NullWord_DoesNotThrow()
         {
@@ -97,6 +129,9 @@
             Assert.Null(exception);
         }
 
+        /// <summary>
+        /// Ensures that deleting an empty word does not throw an exception.
+        /// </summary>
         [Fact]
         public void DeleteWord_EmptyWord_DoesNotThrow()
         {
@@ -104,6 +139,9 @@
             Assert.Null(exception);
         }
 
+        /// <summary>
+        /// Ensures that deleting a whitespace-only word does not throw an exception.
+        /// </summary>
         [Fact]
         public void DeleteWord_WhitespaceWord_DoesNotThrow()
         {
@@ -111,6 +149,9 @@
             Assert.Null(exception);
         }
 
+        /// <summary>
+        /// Ensures that deleting a word that does not exist does not throw an exception.
+        /// </summary>
         [Fact]
         public void DeleteWord_NonExistentWord_DoesNotThrow()
         {
@@ -118,17 +159,23 @@
             Assert.Null(exception);
         }
 
+        /// <summary>
+        /// Clears all records from the OffensiveWords table.
+        /// </summary>
         private void CleanupTable()
         {
-            using var conn = new SqlConnection(connectionString);
+            using SqlConnection conn = new SqlConnection(this.connectionString);
             conn.Open();
             using var cmd = new SqlCommand("DELETE FROM OffensiveWords", conn);
             cmd.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// Ensures the OffensiveWords table exists before running tests.
+        /// </summary>
         private void EnsureTableExists()
         {
-            using var conn = new SqlConnection(connectionString);
+            using var conn = new SqlConnection(this.connectionString);
             conn.Open();
             using var cmd = new SqlCommand(
                 @"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'OffensiveWords')

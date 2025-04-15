@@ -1,4 +1,8 @@
-﻿namespace UnitTests.ReviewChecker
+﻿// <copyright file="CheckerServiceTests.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace UnitTests.ReviewChecker
 {
     using System;
     using System.Collections.Generic;

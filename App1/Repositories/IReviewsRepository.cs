@@ -1,12 +1,12 @@
-﻿using App1.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace App1.Repositories
+﻿namespace App1.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using App1.Models;
+
     /// <summary>
     /// Interface for the Review repository that defines operations for managing reviews.
     /// </summary>

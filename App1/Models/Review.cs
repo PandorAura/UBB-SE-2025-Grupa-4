@@ -1,7 +1,11 @@
-﻿using System;
+﻿// <copyright file="Review.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace App1.Models
 {
+    using System;
+
     /// <summary>
     /// Initializes a new instance of the Review class with specified parameters.
     /// </summary>

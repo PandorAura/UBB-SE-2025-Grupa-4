@@ -1,4 +1,8 @@
-﻿namespace App1.Services
+﻿// <copyright file="ReviewsService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace App1.Services
 {
     using System;
     using System.Collections.Generic;
@@ -71,7 +75,7 @@
             int count = this.reviewsRepository.GetReviewCountAfterDate(date);
 
             List<Review> reviews = this.reviewsRepository.GetMostRecentReviews(count);
-            return reviews ?? [];
+            return reviews??[];
         }
 
         public List<Review> FilterReviewsByContent(string content)

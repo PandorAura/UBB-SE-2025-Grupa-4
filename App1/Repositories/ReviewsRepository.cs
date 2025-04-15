@@ -1,4 +1,8 @@
-﻿namespace App1.Repositories
+﻿// <copyright file="ReviewsRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace App1.Repositories
 {
     using System;
     using System.Collections.Generic;
@@ -82,10 +86,7 @@
 
         public List<Review> GetReviewsByUser(int userId)
         {
-            return this.reviews
-                .Where(review => review.UserId == userId && !review.IsHidden)
-                .OrderByDescending(review => review.CreatedDate)
-                .ToList();
+            return this.reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList();
         }
 
         public Review GetReviewById(int reviewId)

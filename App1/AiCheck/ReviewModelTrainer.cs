@@ -1,4 +1,8 @@
-﻿namespace App1.AiCheck
+﻿// <copyright file="ReviewModelTrainer.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace App1.AiCheck
 {
     using System;
     using System.Collections.Generic;

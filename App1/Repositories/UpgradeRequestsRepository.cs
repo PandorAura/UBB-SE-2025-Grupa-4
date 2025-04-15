@@ -1,4 +1,8 @@
-﻿namespace App1.Repositories
+﻿// <copyright file="UpgradeRequestsRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace App1.Repositories
 {
     using System;
     using System.Collections.Generic;

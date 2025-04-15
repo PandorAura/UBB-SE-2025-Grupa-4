@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using App1.AutoChecker;
     using Moq;
     using Xunit;

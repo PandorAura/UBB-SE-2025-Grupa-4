@@ -1,16 +1,20 @@
-﻿using App1.Models;
-using System.Collections.Generic;
-using Xunit;
+﻿// <copyright file="UserTests.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace UnitTests.Users
 {
+    using System.Collections.Generic;
+    using App1.Models;
+    using Xunit;
+
     /// <summary>
     /// Unit tests for the <see cref="User"/> class.
     /// </summary>
     public class UserTests
     {
         /// <summary>
-        /// Verifies that the <see cref="User"/> constructor initializes all properties correctly.
+        /// Verifies that the <see cref="User"/> constructor iSnitializes all properties correctly.
         /// </summary>
         [Fact]
         public void Constructor_ShouldInitializePropertiesCorrectly()
@@ -22,7 +26,7 @@ namespace UnitTests.Users
             bool hasSubmittedAppeal = true;
             List<Role> assignedRoles = new List<Role>
             {
-                new Role(RoleType.User, "User")
+                new Role(RoleType.User, "User"),
             };
             var exception = Record.Exception(() => new User(userId, emailAddress, fullName, numberOfDeletedReviews, hasSubmittedAppeal, assignedRoles));
             Assert.Null(exception);
@@ -46,7 +50,7 @@ namespace UnitTests.Users
             User user = new User
             {
                 UserId = 1,
-                EmailAddress = "test@example.com"
+                EmailAddress = "test@example.com",
             };
 
             string result = user.ToString();

@@ -1,4 +1,8 @@
-﻿namespace App1
+﻿// <copyright file="App.xaml.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace App1
 {
     using System;
     using System.Collections.Generic;
@@ -55,7 +59,7 @@
                     IConfiguration config = new ConfigurationBuilder().AddUserSecrets<App>().AddEnvironmentVariables().AddJsonFile("appSettings.json", optional: false, reloadOnChange: true).Build();
                     services.AddSingleton<IConfiguration>(config);
                     string connectionString = config.GetConnectionString("DefaultConnection");
-                    services.AddSingleton<IUserRepository, UserRepo>();
+                    services.AddSingleton<IUserRepository, UserRepository>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
                     {
                         ReviewsRepository repository = new ReviewsRepository();

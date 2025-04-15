@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using App1.Models;
-using App1.Repositories;
-using Xunit;
+﻿// <copyright file="RolesTests.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace UnitTests.Roles
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using App1.Models;
+    using App1.Repositories;
+    using Xunit;
+
     public class RolesTests
     {
         [Fact]
@@ -19,7 +23,7 @@ namespace UnitTests.Roles
                 new { Type = RoleType.Banned, Name = "Banned" },
                 new { Type = RoleType.User, Name = "User" },
                 new { Type = RoleType.Admin, Name = "Admin" },
-                new { Type = RoleType.Manager, Name = "Manager" }
+                new { Type = RoleType.Manager, Name = "Manager" },
             };
 
             foreach (var testCase in testCases)

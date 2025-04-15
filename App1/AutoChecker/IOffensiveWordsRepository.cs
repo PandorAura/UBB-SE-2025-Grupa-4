@@ -1,4 +1,8 @@
-﻿namespace App1.AutoChecker
+﻿// <copyright file="IOffensiveWordsRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace App1.AutoChecker
 {
     using System;
     using System.Collections.Generic;

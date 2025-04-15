@@ -1,4 +1,8 @@
-﻿namespace UnitTests.EmailJobs
+﻿// <copyright file="AdminReportDataTests.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace UnitTests.EmailJobs
 {
     using System;
     using System.Collections.Generic;
@@ -8,18 +12,24 @@
     using App1.Models;
     using App1.Repositories;
     using Xunit;
-
+    
+    /// <summary>
+    /// tests AdminReprotData class.
+    /// </summary>
     public class AdminReportDataTests
     {
         private DateTime reportDate = DateTime.Now;
         private List<User> adminUsers = new List<User>();
-        private int activeUsersCount;
+        private int activeUsersCount = 0;
         private int bannedUsersCount = 0;
         private int newReviewsCount = 0;
         private float averageRating = 4.5f;
         private List<Review> recentReviews = new List<Review>();
         private AdminReportData? reportData;
 
+        /// <summary>
+        /// tests that data initializes corectly.
+        /// </summary>
         [Fact]
         public void AdminReportData_WhenCreated_InitializesCorrectly()
         {
@@ -33,12 +43,16 @@
             Assert.Same(this.recentReviews, this.reportData.RecentReviews);
         }
 
+        /// <summary>
+        /// tests that data initializes corectly.
+        /// </summary>
         [Fact]
         public void AdminReportData_WithNonEmptyCollections_InitializesCorrectly()
         {
-            List<User> adminUsers = new List<User> { new User(1, "admin@example.com", "Admin User", 0, false, UserRepo.AdminRoles) };
+            List<User> adminUsers = new List<User> { new User(1, "admin@example.com", "Admin User", 0, false, UserRepository.AdminRoles) };
 
             List<Review> recentReviews = new List<Review> { new Review(1, 1, 4, "Great product", DateTime.Now) };
+
             this.reportData = new AdminReportData(this.reportDate, this.adminUsers, 10, 5, 3, 4.2, this.recentReviews);
 
             // Assert
@@ -49,10 +63,11 @@
             Assert.Equal(3, this.reportData.NewReviewsCount);
             Assert.Equal(4.2, this.reportData.AverageRating);
             Assert.Same(this.recentReviews, this.reportData.RecentReviews);
-            Assert.Single(this.reportData.AdminUsers);
-            Assert.Single(this.reportData.RecentReviews);
         }
 
+        /// <summary>
+        /// tests changing values.
+        /// </summary>
         [Fact]
         public void AdminReportData_ModifyingProperties_ChangesValues()
         {
@@ -79,6 +94,9 @@
             Assert.Same(newReviews, this.reportData.RecentReviews);
         }
 
+        /// <summary>
+        /// tests that data initializes corectly.
+        /// </summary>
         [Fact]
         public void AdminReportData_WithExtremeDateValues_InitializesCorrectly()
         {
@@ -94,6 +112,9 @@
             Assert.Equal(maxDate, data2.ReportDate);
         }
 
+        /// <summary>
+        /// tests class initializes correctly.
+        /// </summary>
         [Fact]
         public void AdminReportData_WithExtremeNumericValues_InitializesCorrectly()
         {

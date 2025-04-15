@@ -1,4 +1,4 @@
-﻿// <copyright file="CheckersService.cs" company="PlaceholderCompany">
+﻿// <copyright file="OffensiveTextDetector.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -20,11 +20,19 @@ namespace App1.Services
     using Microsoft.ML;
     using Newtonsoft.Json;
 
+    /// <summary>
+    /// class for detecting offensive content.
+    /// </summary>
     public static class OffensiveTextDetector
     {
         private static readonly string HuggingFaceApiUrl = "https://api-inference.huggingface.co/models/facebook/roberta-hate-speech-dynabench-r1-target";
         private static readonly string HuggingFaceApiToken = string.Empty;
 
+        /// <summary>
+        /// Search for offensive content.
+        /// </summary>
+        /// <param name="text">review.</p aram>
+        /// <returns>json string with the results.</returns>
         public static string DetectOffensiveContent(string text)
         {
             HttpClient client = new HttpClient();

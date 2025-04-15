@@ -1,8 +1,8 @@
-using System;
-using System.Windows.Input;
-
 namespace App1.ViewModels
 {
+    using System;
+    using System.Windows.Input;
+
     public class RelayCommand : ICommand
     {
         private readonly Action execute;

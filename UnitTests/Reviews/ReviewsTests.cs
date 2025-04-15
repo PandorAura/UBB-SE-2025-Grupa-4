@@ -1,9 +1,11 @@
-﻿using App1.Models;
-using System;
-using Xunit;
+﻿// <copyright file="ReviewsTests.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace UnitTests.Reviews
 {
+    using App1.Models;
+
     public class ReviewsTests
     {
         [Fact]
@@ -26,8 +28,7 @@ namespace UnitTests.Reviews
                 content: content,
                 createdDate: createdDate,
                 numberOfFlags: numberOfFlags,
-                isHidden: isHidden
-            );
+                isHidden: isHidden);
 
             // Assert
             Assert.Equal(reviewId, review.ReviewId);
@@ -48,8 +49,7 @@ namespace UnitTests.Reviews
                 userId: 2,
                 rating: 4,
                 content: "Great drink!",
-                createdDate: DateTime.Now
-            );
+                createdDate: DateTime.Now);
             int newRating = 5;
 
             // Act
@@ -68,8 +68,7 @@ namespace UnitTests.Reviews
                 userId: 2,
                 rating: 4,
                 content: "Great drink!",
-                createdDate: DateTime.Now
-            );
+                createdDate: DateTime.Now);
             string newContent = "Amazing drink!";
 
             // Act
@@ -89,8 +88,7 @@ namespace UnitTests.Reviews
                 rating: 4,
                 content: "Great drink!",
                 createdDate: DateTime.Now,
-                numberOfFlags: 0
-            );
+                numberOfFlags: 0);
             int newNumberOfFlags = 2;
 
             // Act
@@ -110,8 +108,7 @@ namespace UnitTests.Reviews
                 rating: 4,
                 content: "Great drink!",
                 createdDate: DateTime.Now,
-                isHidden: false
-            );
+                isHidden: false);
             bool newIsHidden = true;
 
             // Act

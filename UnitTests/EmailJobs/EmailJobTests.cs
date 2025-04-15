@@ -25,23 +25,21 @@
         private readonly Mock<IConfiguration> mockConfiguration;
         private readonly Mock<ITemplateProvider> mockTemplateProvider;
         private readonly Mock<IEmailSender> mockEmailSender;
-        private readonly Mock<IUserRepository> userRepository;
-        private readonly Mock<IReviewsRepository> reviewRepository;
         private readonly EmailJob emailJob;
 
-        private readonly List<User> adminUsers = new List<User> { new User(1, "admin@example.com", "Admin User", 0, false, UserRepo.AdminRoles), new User(2, "admin2@example.com", "Second Admin", 0, false, UserRepo.AdminRoles) };
+        private readonly List<User> adminUsers = new List<User> { new User(1, "admin@example.com", "Admin User", 0, false, UserRepository.AdminRoles), new User(2, "admin2@example.com", "Second Admin", 0, false, UserRepository.AdminRoles) };
 
-        private readonly List<User> regularUsers = [new User(3, "user@example.com", "Regular User", 0, false, UserRepo.BasicUserRoles), new User(4, "user2@example.com", "Another User", 1, false, UserRepo.BasicUserRoles)];
+        private readonly List<User> regularUsers = new List<User> { new User(3, "user@example.com", "Regular User", 0, false, UserRepository.BasicUserRoles), new User(4, "user2@example.com", "Another User", 1, false, UserRepository.BasicUserRoles) };
 
-        private readonly List<User> bannedUsers = new List<User> { new User(5, "banned@example.com", "Banned User", 3, true, UserRepo.BannedUserRoles) };
+        private readonly List<User> bannedUsers = new List<User> { new User(5, "banned@example.com", "Banned User", 3, true, UserRepository.BannedUserRoles) };
 
         private readonly List<User> allUsers = new List<User>
         {
-            new User(1, "admin@example.com", "Admin User", 0, false, UserRepo.AdminRoles),
-            new User(2, "admin2@example.com", "Second Admin", 0, false, UserRepo.AdminRoles),
-            new User(3, "user@example.com", "Regular User", 0, false, UserRepo.BasicUserRoles),
-            new User(4, "user2@example.com", "Another User", 1, false, UserRepo.BasicUserRoles),
-            new User(5, "banned@example.com", "Banned User", 3, true, UserRepo.BannedUserRoles),
+            new User(1, "admin@example.com", "Admin User", 0, false, UserRepository.AdminRoles),
+            new User(2, "admin2@example.com", "Second Admin", 0, false, UserRepository.AdminRoles),
+            new User(3, "user@example.com", "Regular User", 0, false, UserRepository.BasicUserRoles),
+            new User(4, "user2@example.com", "Another User", 1, false, UserRepository.BasicUserRoles),
+            new User(5, "banned@example.com", "Banned User", 3, true, UserRepository.BannedUserRoles),
         };
 
         private readonly List<Review> reviews = new List<Review> { new Review(1, 3, 4, "Good product", DateTime.Now.AddDays(-1)), new Review(2, 4, 5, "Excellent service", DateTime.Now.AddDays(-2)) };

@@ -1,61 +1,66 @@
-using App1.Models;
-using App1.Services;
-using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Microsoft.UI.Text;
-using System;
-using System.Runtime.CompilerServices;
-using App1.AutoChecker;
-using App1.Converters;
-using App1.ViewModels;
-using System.ComponentModel;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+// <copyright file="MainPage.xaml.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace App1.Views
 {
+    using System;
+    using System.ComponentModel;
+    using App1.AutoChecker;
+    using App1.Models;
+    using App1.Services;
+    using App1.ViewModels;
+    using Microsoft.UI.Text;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Controls.Primitives;
 
+    /// <summary>
+    /// a page.
+    /// </summary>
     public sealed partial class MainPage : Page
     {
+        /// <summary>
+        /// Gets correspinding view model.
+        /// </summary>
         public MainPageViewModel ViewModel { get; }
 
-        public MainPage(IReviewService reviewsService,
-                   IUserService userService, IUpgradeRequestsService upgradeRequestsService, ICheckersService checkersService, IAutoCheck autoCheck)
+        /// <summary>
+        /// main page initialization.
+        /// </summary>
+        /// <param name="reviewsService">given review service.</param>
+        /// <param name="userService">given user service.</param>
+        /// <param name="upgradeRequestsService">given update request service.</param>
+        /// <param name="checkersService">given checker service.</param>
+        /// <param name="autoCheck">given auto check.</param>
+        public MainPage(IReviewService reviewsService, IUserService userService, IUpgradeRequestsService upgradeRequestsService, ICheckersService checkersService, IAutoCheck autoCheck)
         {
             this.InitializeComponent();
 
-            ViewModel = new MainPageViewModel(
+            this.ViewModel = new MainPageViewModel(
                 reviewsService,
                 userService,
                 upgradeRequestsService,
                 checkersService,
-                autoCheck
-            );
+                autoCheck);
 
-            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+            this.ViewModel.PropertyChanged += this.ViewModel_PropertyChanged;
 
-            this.DataContext = ViewModel;
-            
-            this.Unloaded += MainPage_Unloaded;
+            this.DataContext = this.ViewModel;
+
+            this.Unloaded += this.MainPage_Unloaded;
         }
 
         private void MainPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+            this.ViewModel.PropertyChanged -= this.ViewModel_PropertyChanged;
         }
 
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ViewModel.IsWordListVisible))
+            if (e.PropertyName == nameof(this.ViewModel.IsWordListVisible))
             {
-                WordListPopup.Visibility = ViewModel.IsWordListVisible ? Visibility.Visible : Visibility.Collapsed;
+                this.WordListPopup.Visibility = this.ViewModel.IsWordListVisible ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -63,70 +68,69 @@ namespace App1.Views
         {
             if (e.ClickedItem is User selectedUser)
             {
-                ViewModel.SelectedAppealUser = selectedUser;
-                
-                ShowAppealDetailsUI(sender);
+                this.ViewModel.SelectedAppealUser = selectedUser;
+                this.ShowAppealDetailsUI(sender);
             }
         }
-        
+
         private void ShowAppealDetailsUI(object anchor)
         {
             Flyout flyout = new Flyout();
             StackPanel panel = new StackPanel { Padding = new Thickness(10) };
             TextBlock userInfo = new TextBlock
             {
-                FontSize = 18
+                FontSize = 18,
             };
             userInfo.SetBinding(TextBlock.TextProperty, new Microsoft.UI.Xaml.Data.Binding
             {
                 Path = new PropertyPath("UserStatusDisplay"),
-                Source = ViewModel,
-                Mode = Microsoft.UI.Xaml.Data.BindingMode.OneWay
+                Source = this.ViewModel,
+                Mode = Microsoft.UI.Xaml.Data.BindingMode.OneWay,
             });
-            
+
             TextBlock reviewsHeader = new TextBlock
             {
                 Text = "User Reviews:",
                 FontWeight = FontWeights.Bold,
-                Margin = new Thickness(0, 10, 0, 5)
+                Margin = new Thickness(0, 10, 0, 5),
             };
-            
+
             ListView reviewsList = new ListView
             {
-                MaxHeight = 200
+                MaxHeight = 200,
             };
             reviewsList.SetBinding(ListView.ItemsSourceProperty, new Microsoft.UI.Xaml.Data.Binding
             {
                 Path = new PropertyPath("UserReviewsFormatted"),
-                Source = ViewModel,
-                Mode = Microsoft.UI.Xaml.Data.BindingMode.OneWay
+                Source = this.ViewModel,
+                Mode = Microsoft.UI.Xaml.Data.BindingMode.OneWay,
             });
-            
+
             Button banButton = new Button
             {
                 Content = "Keep Ban",
                 Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
                 Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                Command = ViewModel.KeepBanCommand
+                Command = this.ViewModel.KeepBanCommand,
             };
-            
+
             Button appealButton = new Button
             {
                 Content = "Accept Appeal",
                 Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green),
                 Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                Command = ViewModel.AcceptAppealCommand
+                Command = this.ViewModel.AcceptAppealCommand,
             };
-            
+
             Button closeButton = new Button
             {
                 Content = "Close Appeal Case",
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Command = ViewModel.CloseAppealCaseCommand
+                Command = this.ViewModel.CloseAppealCaseCommand,
             };
-            
+
             closeButton.Click += (s, args) => { flyout.Hide(); };
 
             panel.Children.Add(userInfo);
@@ -136,43 +140,43 @@ namespace App1.Views
             panel.Children.Add(banButton);
             panel.Children.Add(appealButton);
             panel.Children.Add(closeButton);
-            
+
             flyout.Content = panel;
             flyout.Placement = FlyoutPlacementMode.Left;
             flyout.ShowAt((FrameworkElement)anchor);
         }
-        
+
         private void RequestList_ItemClick(object sender, ItemClickEventArgs e)
         {
             if (e.ClickedItem is UpgradeRequest selectedUpgradeRequest)
             {
-                ViewModel.SelectedUpgradeRequest = selectedUpgradeRequest;
-                ShowUpgradeRequestDetailsUI(sender);
+                this.ViewModel.SelectedUpgradeRequest = selectedUpgradeRequest;
+                this.ShowUpgradeRequestDetailsUI(sender);
             }
         }
-        
+
         private void ShowUpgradeRequestDetailsUI(object anchor)
         {
             Flyout flyout = new Flyout();
             StackPanel panel = new StackPanel { Padding = new Thickness(10) };
-            
+
             TextBlock userInfo = new TextBlock
             {
-                Text = ViewModel.UserUpgradeInfo,
-                FontSize = 18
+                Text = this.ViewModel.UserUpgradeInfo,
+                FontSize = 18,
             };
 
             TextBlock reviewsHeader = new TextBlock
             {
                 Text = "User Reviews:",
                 FontWeight = FontWeights.Bold,
-                Margin = new Thickness(0, 10, 0, 5)
+                Margin = new Thickness(0, 10, 0, 5),
             };
 
             ListView reviewsList = new ListView
             {
-                ItemsSource = ViewModel.UserReviewsWithFlags,
-                Height = 100
+                ItemsSource = this.ViewModel.UserReviewsWithFlags,
+                Height = 100,
             };
 
             panel.Children.Add(userInfo);
@@ -183,39 +187,38 @@ namespace App1.Views
             flyout.Placement = FlyoutPlacementMode.Left;
             flyout.ShowAt((FrameworkElement)anchor);
         }
-        
+
         private void AcceptUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int requestId)
             {
-                ViewModel.HandleUpgradeRequest(true, requestId);
+                this.ViewModel.HandleUpgradeRequest(true, requestId);
             }
         }
-        
+
         private void DeclineUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int requestId)
             {
-                ViewModel.HandleUpgradeRequest(false, requestId);
+                this.ViewModel.HandleUpgradeRequest(false, requestId);
             }
         }
 
         private void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ViewModel.FilterReviews(ReviewSearchTextBox.Text);
+            this.ViewModel.FilterReviews(this.ReviewSearchTextBox.Text);
         }
 
         private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        { 
-            ViewModel.FilterAppeals(BannedUserSearchTextBox.Text);
+        {
+            this.ViewModel.FilterAppeals(this.BannedUserSearchTextBox.Text);
         }
-
 
         private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                ViewModel.ResetReviewFlags(review.ReviewId);
+                this.ViewModel.ResetReviewFlags(review.ReviewId);
             }
         }
 
@@ -223,7 +226,7 @@ namespace App1.Views
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                ViewModel.HideReview(review.UserId, review.ReviewId);
+                this.ViewModel.HideReview(review.UserId, review.ReviewId);
             }
         }
 
@@ -231,7 +234,7 @@ namespace App1.Views
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                ViewModel.RunAICheck(review);
+                this.ViewModel.RunAICheck(review);
             }
         }
 
@@ -245,13 +248,13 @@ namespace App1.Views
                 Content = input,
                 PrimaryButtonText = "Add Word",
                 CloseButtonText = "Cancel",
-                XamlRoot = this.XamlRoot
+                XamlRoot = this.XamlRoot,
             };
 
             if (await dialog.ShowAsync() == ContentDialogResult.Primary)
             {
                 string newWord = input.Text.Trim();
-                ViewModel.AddOffensiveWord(newWord);
+                this.ViewModel.AddOffensiveWord(newWord);
             }
         }
     }

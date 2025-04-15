@@ -1,38 +1,28 @@
-﻿using App1.AutoChecker;
-using App1.Models;
-using App1.Services;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UnitTests.ReviewChecker.AuxiliaryTestsClasses
+﻿namespace UnitTests.ReviewChecker.AuxiliaryTestsClasses
 {
+    using System;
 
     public class ConsoleOutput : IDisposable
     {
-        private readonly StringWriter _stringWriter;
-        private readonly TextWriter _originalOutput;
+        private readonly StringWriter stringWriter;
+        private readonly TextWriter originalOutput;
 
         public ConsoleOutput()
         {
-            _stringWriter = new StringWriter();
-            _originalOutput = Console.Out;
-            Console.SetOut(_stringWriter);
+            this.stringWriter = new StringWriter();
+            this.originalOutput = Console.Out;
+            Console.SetOut(this.stringWriter);
         }
 
         public string GetOutput()
         {
-            return _stringWriter.ToString();
+            return this.stringWriter.ToString();
         }
 
         public void Dispose()
         {
-            Console.SetOut(_originalOutput);
-            _stringWriter.Dispose();
+            Console.SetOut(this.originalOutput);
+            this.stringWriter.Dispose();
         }
     }
 }

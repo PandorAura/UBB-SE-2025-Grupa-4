@@ -1,19 +1,22 @@
-﻿using Quartz;
-using Quartz.Spi;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using System;
+using Quartz;
+using Quartz.Spi;
 
 public class JobFactory : IJobFactory
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceProvider serviceProvider;
 
-    public JobFactory(IServiceProvider serviceProvider) { _serviceProvider = serviceProvider; }
+    public JobFactory(IServiceProvider serviceProvider)
+    {
+        this.serviceProvider = serviceProvider;
+    }
 
     public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
     {
         try
         {
-            IJob? job = _serviceProvider.GetRequiredService(bundle.JobDetail.JobType) as IJob;
+            IJob? job = this.serviceProvider.GetRequiredService(bundle.JobDetail.JobType) as IJob;
             return job == null ? throw new Exception("Couldn't retrieve the required service") : job;
         }
         catch (Exception ex)
@@ -23,5 +26,8 @@ public class JobFactory : IJobFactory
         }
     }
 
-    public void ReturnJob(IJob job) { (job as IDisposable)?.Dispose(); }
+    public void ReturnJob(IJob job)
+    {
+        (job as IDisposable)?.Dispose();
+    }
 }

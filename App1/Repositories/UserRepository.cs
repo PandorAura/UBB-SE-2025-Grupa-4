@@ -1,76 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using App1.Models;
-using Windows.System;
-
-namespace App1.Repositories
+﻿namespace App1.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Linq;
+    using App1.Models;
+
     /// <summary>
     /// Repository for managing user data and operations.
     /// </summary>
-    public class UserRepo : IUserRepository
+    public class UserRepository : IUserRepository
     {
+        /// <summary>
+        /// Static role collections for user initialization.
+        /// </summary>
+        public static List<Role> BasicUserRoles = new List<Role> { new Role(RoleType.User, "user") };
+
+        public static List<Role> AdminRoles = new List<Role> { new Role(RoleType.User, "user"), new Role(RoleType.Admin, "admin") };
+
+        public static List<Role> ManagerRoles = new List<Role> { new Role(RoleType.User, "user"), new Role(RoleType.Admin, "admin"), new Role(RoleType.Manager, "manager") };
+
+        public static List<Role> BannedUserRoles = new List<Role> { new Role(RoleType.Banned, "banned") };
+
         /// <summary>
         /// Internal list of users managed by the repository.
         /// </summary>
         private readonly List<User> _usersList;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserRepo"/> class with default user data.
+        /// Initializes a new instance of the <see cref="UserRepository"/> class with default user data.
         /// </summary>
-        public static List<Role> BasicUserRoles = new List<Role>
+        public UserRepository()
         {
-                new Role(RoleType.User, "user")
-        };
-
-        public static List<Role> AdminRoles = new List<Role>
+            this._usersList = new List<User>
             {
-                new Role(RoleType.User, "user"),
-                new Role(RoleType.Admin, "admin"),
-            };
-
-        public static List<Role> ManagerRoles = new List<Role>
-            {
-                new Role(RoleType.User, "user"),
-                new Role(RoleType.Admin, "admin"),
-                new Role(RoleType.Manager, "manager"),
-            };
-
-        public static List<Role> BannedUserRoles = new List<Role>
-            {
-                new Role(RoleType.Banned, "banned")
-            };
-
-        public UserRepo()
-        {
-            _usersList = new List<User>
-            {
-                new User(
-                    userId: 1,
-                    emailAddress: "bianca.georgiana.cirnu@gmail.com",
-                    fullName: "Bianca Georgiana Cirnu",
-                    numberOfDeletedReviews: 2,
-                    hasSubmittedAppeal: true,
-                    assignedRoles: AdminRoles
-                ),
-                new User(
-                    userId: 3,
-                    emailAddress: "admin.one@example.com",
-                    fullName: "Admin One",
-                    numberOfDeletedReviews: 0,
-                    hasSubmittedAppeal: false,
-                    assignedRoles: BasicUserRoles
-                ),
-                new User(
-                    userId: 5,
-                    emailAddress: "admin.two@example.com",
-                    fullName: "Admin Two",
-                    numberOfDeletedReviews: 0,
-                    hasSubmittedAppeal: false,
-                    assignedRoles: AdminRoles
-                ),
+                new User(userId: 1, emailAddress: "bianca.georgiana.cirnu@gmail.com", fullName: "Bianca Georgiana Cirnu", numberOfDeletedReviews: 2, hasSubmittedAppeal: true, assignedRoles: BasicUserRoles),
+                new User(userId: 3, emailAddress: "admin.one@example.com", fullName: "Admin One", numberOfDeletedReviews: 0, hasSubmittedAppeal: false, assignedRoles: AdminRoles),
+                new User(userId: 5, emailAddress: "admin.two@example.com", fullName: "Admin Two", numberOfDeletedReviews: 0, hasSubmittedAppeal: false, assignedRoles: AdminRoles),
             };
         }
 
@@ -83,11 +49,12 @@ namespace App1.Repositories
         {
             try
             {
-                if (_usersList == null)
+                if (this._usersList == null)
                 {
                     throw new NullReferenceException("_usersList is null.");
                 }
-                return _usersList.Where(user => user.HasSubmittedAppeal).ToList();
+
+                return this._usersList.Where(user => user.HasSubmittedAppeal).ToList();
             }
             catch (Exception ex)
             {
@@ -105,11 +72,12 @@ namespace App1.Repositories
         {
             try
             {
-                if (_usersList == null)
+                if (this._usersList == null)
                 {
                     throw new NullReferenceException("_usersList is null.");
                 }
-                return _usersList.Where(user => user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
+
+                return this._usersList.Where(user => user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
             }
             catch (Exception ex)
             {
@@ -125,13 +93,24 @@ namespace App1.Repositories
         /// <exception cref="RepositoryException">Thrown when the user has no roles or does not exist.</exception>
         public RoleType GetHighestRoleTypeForUser(int userId)
         {
-            var user = GetUserByID(userId);
-            if (user.AssignedRoles == null || !user.AssignedRoles.Any())
+            try
             {
-                throw new RepositoryException("User has no roles assigned.", new ArgumentException($"No roles found for user with ID {userId}"));
-            }
+                User user = this.GetUserByID(userId);
+                if (user.AssignedRoles == null || !user.AssignedRoles.Any())
+                {
+                    throw new ArgumentException($"No roles found for user with ID {userId}");
+                }
 
-            return user.AssignedRoles.Max(role => role.RoleType);
+                return user.AssignedRoles.Max(role => role.RoleType);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new RepositoryException("User has no roles assigned.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to get highest role type for user with ID {userId}.", ex);
+            }
         }
 
         /// <summary>
@@ -144,7 +123,7 @@ namespace App1.Repositories
         {
             try
             {
-                User? user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                User user = this._usersList.FirstOrDefault(u => u.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
@@ -167,11 +146,16 @@ namespace App1.Repositories
         {
             try
             {
-                if (_usersList == null)
+                if (this._usersList == null)
                 {
                     throw new NullReferenceException("_usersList is null.");
                 }
-                return _usersList.Where(user => user.HasSubmittedAppeal && user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)).ToList();
+
+                return this._usersList.Where(user =>
+                    user.HasSubmittedAppeal &&
+                    user.AssignedRoles != null &&
+                    user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)
+                ).ToList();
             }
             catch (Exception ex)
             {
@@ -189,7 +173,7 @@ namespace App1.Repositories
         {
             try
             {
-                User? user = _usersList.FirstOrDefault(user => user.UserId == userId);
+                User user = this._usersList.FirstOrDefault(u => u.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
@@ -212,11 +196,12 @@ namespace App1.Repositories
         {
             try
             {
-                if (_usersList == null)
+                if (this._usersList == null)
                 {
                     throw new NullReferenceException("_usersList is null.");
                 }
-                return _usersList;
+
+                return this._usersList;
             }
             catch (Exception ex)
             {

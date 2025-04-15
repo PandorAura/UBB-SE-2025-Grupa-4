@@ -1,35 +1,36 @@
-﻿using App1.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace App1.Repositories
+﻿namespace App1.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using App1.Models;
+
     public class RolesRepository : IRolesRepository
     {
-        private readonly List<Role> _roles;
+        private readonly List<Role> roles;
+
         public RolesRepository()
         {
-            _roles = new List<Role>();
+            this.roles = new List<Role>();
 
-            _roles.Add(new Role(RoleType.Banned, "Banned"));
-            _roles.Add(new Role(RoleType.User, "User"));
-            _roles.Add(new Role(RoleType.Admin, "Admin"));
-            _roles.Add(new Role(RoleType.Manager, "Manager"));
+            this.roles.Add(new Role(RoleType.Banned, "Banned"));
+            this.roles.Add(new Role(RoleType.User, "User"));
+            this.roles.Add(new Role(RoleType.Admin, "Admin"));
+            this.roles.Add(new Role(RoleType.Manager, "Manager"));
         }
 
         public List<Role> GetAllRoles()
         {
-            return _roles;
+            return this.roles;
         }
 
         public Role GetNextRoleInHierarchy(RoleType currentRoleType)
         {
             try
             {
-                Role nextRole = _roles.First(role => role.RoleType == currentRoleType + 1);
+                Role nextRole = this.roles.First(role => role.RoleType == currentRoleType + 1);
                 return nextRole;
             }
             catch (InvalidOperationException)

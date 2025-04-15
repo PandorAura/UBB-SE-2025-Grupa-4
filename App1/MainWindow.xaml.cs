@@ -1,28 +1,29 @@
-using Microsoft.UI.Xaml;
-using Quartz;
-using Quartz.Impl;
-using System.Threading.Tasks;
-using System;
-using App1.Views;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Windowing;
-using Microsoft.UI;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+// <copyright file="MainWindow.xaml.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace App1
 {
+    using System;
+    using System.Threading.Tasks;
+    using App1.Views;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI;
+    using Microsoft.UI.Windowing;
+    using Microsoft.UI.Xaml;
+    using Quartz;
+    using Quartz.Impl;
+
     public sealed partial class MainWindow : Window
     {
-        private IScheduler _scheduler;
+        private IScheduler scheduler;
 
         public MainWindow()
         {
             this.InitializeComponent();
-            InitializeScheduler().ConfigureAwait(false);
-            ScheduleDelayedEmailAutomatically().ConfigureAwait(false);
-            this.Activated += OnWindowActivated;
+            this.InitializeScheduler().ConfigureAwait(false);
+            this.ScheduleDelayedEmailAutomatically().ConfigureAwait(false);
+            this.Activated += this.OnWindowActivated;
 
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WindowId windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
@@ -38,9 +39,9 @@ namespace App1
         {
             if (args.WindowActivationState != WindowActivationState.Deactivated)
             {
-                rootFrame.Content = App.Host.Services.GetRequiredService<MainPage>();
+                this.rootFrame.Content = App.Host.Services.GetRequiredService<MainPage>();
 
-                this.Activated -= OnWindowActivated;
+                this.Activated -= this.OnWindowActivated;
             }
         }
 
@@ -49,8 +50,8 @@ namespace App1
             try
             {
                 StdSchedulerFactory factory = new StdSchedulerFactory();
-                _scheduler = await factory.GetScheduler();
-                await _scheduler.Start();
+                this.scheduler = await factory.GetScheduler();
+                await this.scheduler.Start();
                 System.Diagnostics.Debug.WriteLine("Scheduler initialized successfully");
             }
             catch (Exception ex)
@@ -73,7 +74,7 @@ namespace App1
                     .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Monday, 11, 40))
                     .Build();
 
-                await _scheduler.ScheduleJob(job, trigger);
+                await this.scheduler.ScheduleJob(job, trigger);
                 System.Diagnostics.Debug.WriteLine($"Job scheduled to run every 1 minute");
             }
             catch (Exception ex)
@@ -82,5 +83,4 @@ namespace App1
             }
         }
     }
-    
 }

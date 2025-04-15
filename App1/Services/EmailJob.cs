@@ -1,36 +1,41 @@
-﻿using MailKit.Net.Smtp;
+﻿// <copyright file="EmailJob.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using App1.Models;
+using App1.Services;
+using Microsoft.Extensions.Configuration;
 using MimeKit;
 using Quartz;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using App1.Services;
-using App1.Models;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using Windows.ApplicationModel.Contacts;
 
+/// <summary>
+/// email job.
+/// </summary>
 public class EmailJob : IJob
 {
-    private readonly IUserService _userService;
-    private readonly IReviewService _reviewService;
-    private readonly IConfiguration _config;
-    private readonly ITemplateProvider _templateProvider ;
-    private readonly IEmailSender _emailSender ;
+    private readonly IUserService userService;
+    private readonly IReviewService reviewService;
+    private readonly IConfiguration config;
+    private readonly ITemplateProvider templateProvider;
+    private readonly IEmailSender emailSender;
 
     public EmailJob(
         IUserService userService,
         IReviewService reviewService,
         IConfiguration configuration)
     {
-        _userService = userService;
-        _reviewService = reviewService;
-        _config = configuration;
-        _templateProvider = new FileTemplateProvider();
-        _emailSender = new SmtpEmailSender();
+        this.userService = userService;
+        this.reviewService = reviewService;
+        this.config = configuration;
+        this.templateProvider = new FileTemplateProvider();
+        this.emailSender = new SmtpEmailSender();
     }
+
     public EmailJob(
         IUserService userService,
         IReviewService reviewService,
@@ -38,26 +43,29 @@ public class EmailJob : IJob
         IEmailSender emailSender,
         ITemplateProvider templateProvider)
     {
-        _userService = userService;
-        _reviewService = reviewService;
-        _config = configuration;
-        _templateProvider = templateProvider;
-        _emailSender = emailSender;
+        this.userService = userService;
+        this.reviewService = reviewService;
+        this.config = configuration;
+        this.templateProvider = templateProvider;
+        this.emailSender = emailSender;
     }
+
     public async Task Execute(IJobExecutionContext context)
     {
         try
         {
-            string? smtpEmail = _config["SMTP_MODERATOR_EMAIL"];
-            string? smtpPassword = _config["SMTP_MODERATOR_PASSWORD"];
+            string? smtpEmail = this.config["SMTP_MODERATOR_EMAIL"];
+            string? smtpPassword = this.config["SMTP_MODERATOR_PASSWORD"];
 
             if (string.IsNullOrEmpty(smtpEmail) || string.IsNullOrEmpty(smtpPassword))
+            {
                 throw new Exception("SMTP credentials not configured in appsettings.json");
+            }
 
-            AdminReportData reportData = GatherReportData();
+            AdminReportData reportData = this.GatherReportData();
 
-            string emailHtml = GenerateEmailContent(reportData);
-            string emailText = GeneratePlainTextContent(reportData);
+            string emailHtml = this.GenerateEmailContent(reportData);
+            string emailText = this.GeneratePlainTextContent(reportData);
 
             foreach (User admin in reportData.AdminUsers)
             {
@@ -66,15 +74,11 @@ public class EmailJob : IJob
                 message.To.Add(new MailboxAddress(admin.FullName, admin.EmailAddress));
                 message.Subject = $"Admin Report - {reportData.ReportDate:yyyy-MM-dd}";
 
-                var body = new BodyBuilder
-                {
-                    HtmlBody = emailHtml,
-                    TextBody = emailText
-                };
+                var body = new BodyBuilder { HtmlBody = emailHtml, TextBody = emailText };
 
                 message.Body = body.ToMessageBody();
 
-                await _emailSender.SendEmailAsync(message, smtpEmail, smtpPassword);
+                await this.emailSender.SendEmailAsync(message, smtpEmail, smtpPassword);
                 System.Diagnostics.Debug.WriteLine($"Sent report to {admin.EmailAddress}");
             }
 
@@ -90,25 +94,25 @@ public class EmailJob : IJob
     {
         DateTime reportDate = DateTime.Now;
         DateTime yesterday = reportDate.AddDays(-1);
-        List<User> adminUsers = _userService.GetAdminUsers();
-        int activeUsersCount = _userService.GetAdminUsers().Count() + _userService.GetRegularUsers().Count();
-        int bannedUsersCount = _userService.GetBannedUsers().Count();
-        int numberOfNewReviews = _reviewService.GetReviewsSince(yesterday).Count;
-        double averageRating = _reviewService.GetAverageRatingForVisibleReviews();
-        List<Review> recentReviews = _reviewService.GetReviewsForReport();
+        List<User> adminUsers = this.userService.GetAdminUsers();
+        int activeUsersCount = this.userService.GetAdminUsers().Count() + this.userService.GetRegularUsers().Count();
+        int bannedUsersCount = this.userService.GetBannedUsers().Count();
+        int numberOfNewReviews = this.reviewService.GetReviewsSince(yesterday).Count;
+        double averageRating = this.reviewService.GetAverageRatingForVisibleReviews();
+        List<Review> recentReviews = this.reviewService.GetReviewsForReport();
 
         return new AdminReportData(reportDate, adminUsers, activeUsersCount, bannedUsersCount, numberOfNewReviews, averageRating, recentReviews);
     }
 
     private string GenerateEmailContent(AdminReportData data)
     {
-        string emailTemplate = _templateProvider.GetEmailTemplate();
+        string emailTemplate = this.templateProvider.GetEmailTemplate();
         emailTemplate = emailTemplate.Replace("{{ReportDate}}", data.ReportDate.ToString("yyyy-MM-dd"))
                                      .Replace("{{ActiveUsersCount}}", data.ActiveUsersCount.ToString())
                                      .Replace("{{BannedUsersCount}}", data.BannedUsersCount.ToString())
                                      .Replace("{{NewReviewsCount}}", data.NewReviewsCount.ToString())
                                      .Replace("{{AverageRating}}", data.AverageRating.ToString("0.0"))
-                                     .Replace("{{RecentReviewsHtml}}", GenerateRecentReviewsHtml(data.RecentReviews))
+                                     .Replace("{{RecentReviewsHtml}}", this.GenerateRecentReviewsHtml(data.RecentReviews))
                                      .Replace("{{GeneratedAt}}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
         return emailTemplate;
     }
@@ -116,13 +120,15 @@ public class EmailJob : IJob
     private string GenerateRecentReviewsHtml(List<Review> reviews)
     {
         if (!reviews.Any())
+        {
             return "<p>No recent reviews</p>";
+        }
 
         StringBuilder html = new StringBuilder("<table border='1' cellpadding='5' style='border-collapse: collapse; width: 100%;'> <tr><th>User</th><th>Rating</th><th>Date</th></tr>");
         foreach (var review in reviews)
         {
-            string row = _templateProvider.GetReviewRowTemplate();
-            string userName = _userService.GetUserById(review.UserId).FullName;
+            string row = this.templateProvider.GetReviewRowTemplate();
+            string userName = this.userService.GetUserById(review.UserId).FullName;
             row = row.Replace("{{userName}}", userName)
                      .Replace("{{rating}}", review.Rating.ToString())
                      .Replace("{{creationDate}}", review.CreatedDate.ToString("yyyy-MM-dd"));
@@ -135,7 +141,7 @@ public class EmailJob : IJob
 
     private string GeneratePlainTextContent(AdminReportData data)
     {
-        string textTemplate = _templateProvider.GetPlainTextTemplate();
+        string textTemplate = this.templateProvider.GetPlainTextTemplate();
         textTemplate = textTemplate.Replace("{{ReportDate}}", data.ReportDate.ToString("yyyy-MM-dd"))
                                    .Replace("{{ActiveUsersCount}}", data.ActiveUsersCount.ToString())
                                    .Replace("{{BannedUsersCount}}", data.BannedUsersCount.ToString())
@@ -143,25 +149,4 @@ public class EmailJob : IJob
                                    .Replace("{{GeneratedAt}}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
         return textTemplate;
     }
-}
-public class AdminReportData
-{
-    public AdminReportData(DateTime reportDate, List<User> adminUsers, int activeUsersCount, int bannedUsersCount, int newReviewsCount, double averageRating, List<Review> recentReviews)
-    {
-        this.ReportDate = reportDate;
-        this.AdminUsers = adminUsers;
-        this.ActiveUsersCount = activeUsersCount;
-        this.BannedUsersCount = bannedUsersCount;
-        this.NewReviewsCount = newReviewsCount;
-        this.AverageRating = averageRating;
-        this.RecentReviews = recentReviews;
-
-    }
-    public DateTime ReportDate { get; set; }
-    public List<User> AdminUsers { get; set; }
-    public int ActiveUsersCount { get; set; }
-    public int BannedUsersCount { get; set; }
-    public int NewReviewsCount { get; set; }
-    public double AverageRating { get; set; }
-    public List<Review> RecentReviews { get; set; }
 }

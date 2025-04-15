@@ -1,9 +1,9 @@
-using System;
-using System.Data;
-using Microsoft.Data.SqlClient;
-
 namespace App1.Infrastructure
 {
+    using System;
+    using System.Data;
+    using Microsoft.Data.SqlClient;
+
     public interface IDbConnectionFactory
     {
         SqlConnection CreateConnection();
@@ -11,16 +11,16 @@ namespace App1.Infrastructure
 
     public class SqlConnectionFactory : IDbConnectionFactory
     {
-        private readonly string _connectionString;
+        private readonly string connectionString;
 
         public SqlConnectionFactory(string connectionString)
         {
-            _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            this.connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
         public SqlConnection CreateConnection()
         {
-            return new SqlConnection(_connectionString);
+            return new SqlConnection(this.connectionString);
         }
     }
-} 
+}

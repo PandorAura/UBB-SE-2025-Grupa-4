@@ -1,11 +1,6 @@
-﻿using System;
-using System.IO;
-using App1.Services;
-using Moq;
-using Xunit;
-
-namespace UnitTests.EmailJobs.AuxiliaryTestClasses
+﻿namespace UnitTests.EmailJobs.AuxiliaryTestClasses
 {
+    using System.IO;
 
     public class DefaultFileSystem : IFileSystem
     {

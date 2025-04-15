@@ -1,9 +1,13 @@
-﻿using App1.Models;
-using System;
-using System.Collections.Generic;
+﻿// <copyright file="IReviewService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace App1.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using App1.Models;
+
     /// <summary>
     /// Service interface for managing reviews in the application.
     /// </summary>
@@ -81,6 +85,7 @@ namespace App1.Services
 
         // Add new filter methods
         public List<Review> FilterReviewsByContent(string content);
-        //public List<Review> FilterReviewsByUser(string userFilter);
+
+        // public List<Review> FilterReviewsByUser(string userFilter);
     }
 }

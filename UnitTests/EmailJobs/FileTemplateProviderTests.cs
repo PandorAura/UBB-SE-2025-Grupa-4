@@ -180,7 +180,10 @@
             {
                 Directory.Delete(this.tempDirectory, true);
             }
-            catch { }
+            catch
+            {
+            }
+
             Environment.SetEnvironmentVariable("BASEDIR", null);
         }
     }

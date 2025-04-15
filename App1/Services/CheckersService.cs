@@ -22,11 +22,11 @@ namespace App1.Services
 
     public class CheckersService : ICheckersService
     {
+        private static readonly string ModelPath = Path.Combine(GetProjectRoot(), "Models", "curseword_model.zip");
         private static readonly string ProjectRoot = GetProjectRoot();
         private static readonly string LogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
         private readonly IReviewService reviewsService;
         private readonly IAutoCheck autoCheck;
-        private static readonly string ModelPath = Path.Combine(GetProjectRoot(), "Models", "curseword_model.zip");
 
         public CheckersService(IReviewService reviewsService, IAutoCheck autoCheck)
         {

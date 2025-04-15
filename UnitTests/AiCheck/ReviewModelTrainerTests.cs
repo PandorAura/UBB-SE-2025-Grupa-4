@@ -32,8 +32,15 @@ namespace UnitTests.AiCheck
             CreateRobustTestDataFile();
 
             // Make sure target files don't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-            if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
+
+            if (File.Exists(TestLogPath))
+            {
+                File.Delete(TestLogPath);
+            }
 
             // Verify test data file exists
             if (!File.Exists(TestDataPath))
@@ -72,8 +79,15 @@ namespace UnitTests.AiCheck
             CreateInvalidTestDataFile();
 
             // Make sure target files don't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-            if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
+
+            if (File.Exists(TestLogPath))
+            {
+                File.Delete(TestLogPath);
+            }
 
             // Act
             bool result = ReviewModelTrainer.TrainModel(TestDataPath, TestModelPath, TestLogPath);
@@ -98,8 +112,15 @@ namespace UnitTests.AiCheck
             CreateMalformedTestDataFile();
 
             // Make sure target files don't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-            if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
+
+            if (File.Exists(TestLogPath))
+            {
+                File.Delete(TestLogPath);
+            }
 
             // Act
             bool result = ReviewModelTrainer.TrainModel(TestDataPath, TestModelPath, TestLogPath);
@@ -129,8 +150,15 @@ namespace UnitTests.AiCheck
             }
 
             // Make sure target files don't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-            if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
+
+            if (File.Exists(TestLogPath))
+            {
+                File.Delete(TestLogPath);
+            }
 
             // Act
             bool result = ReviewModelTrainer.TrainModel(NonExistentPath, TestModelPath, TestLogPath);
@@ -171,8 +199,15 @@ namespace UnitTests.AiCheck
                 }
 
                 // Make sure target files don't exist before test
-                if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-                if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+                if (File.Exists(TestModelPath))
+                {
+                    File.Delete(TestModelPath);
+                }
+
+                if (File.Exists(TestLogPath))
+                {
+                    File.Delete(TestLogPath);
+                }
 
                 // Act
                 bool result = ReviewModelTrainer.TrainModel(specialDataPath, TestModelPath, TestLogPath);
@@ -191,6 +226,7 @@ namespace UnitTests.AiCheck
                     {
                         File.Delete(specialDataPath);
                     }
+
                     if (Directory.Exists(tempDir))
                     {
                         Directory.Delete(tempDir, true);
@@ -200,6 +236,7 @@ namespace UnitTests.AiCheck
                 {
                     // Ignore cleanup errors
                 }
+
                 CleanupTestFiles();
             }
         }
@@ -219,8 +256,15 @@ namespace UnitTests.AiCheck
             File.WriteAllText(TestDataPath, csvContent.ToString());
 
             // Make sure target files don't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-            if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
+
+            if (File.Exists(TestLogPath))
+            {
+                File.Delete(TestLogPath);
+            }
 
             // Act
             bool result = ReviewModelTrainer.TrainModel(TestDataPath, TestModelPath, TestLogPath);
@@ -255,8 +299,15 @@ namespace UnitTests.AiCheck
             CreateRobustTestDataFile(defaultDataPath);
 
             // Make sure target files don't exist before test
-            if (File.Exists(defaultModelPath)) File.Delete(defaultModelPath);
-            if (File.Exists(defaultLogPath)) File.Delete(defaultLogPath);
+            if (File.Exists(defaultModelPath))
+            {
+                File.Delete(defaultModelPath);
+            }
+
+            if (File.Exists(defaultLogPath))
+            {
+                File.Delete(defaultLogPath);
+            }
 
             // Act
             bool result = ReviewModelTrainer.TrainModel();
@@ -267,9 +318,20 @@ namespace UnitTests.AiCheck
             Assert.True(File.Exists(defaultLogPath), "Log file should be created with default paths");
 
             // Cleanup
-            if (File.Exists(defaultDataPath)) File.Delete(defaultDataPath);
-            if (File.Exists(defaultModelPath)) File.Delete(defaultModelPath);
-            if (File.Exists(defaultLogPath)) File.Delete(defaultLogPath);
+            if (File.Exists(defaultDataPath))
+            {
+                File.Delete(defaultDataPath);
+            }
+
+            if (File.Exists(defaultModelPath))
+            {
+                File.Delete(defaultModelPath);
+            }
+
+            if (File.Exists(defaultLogPath))
+            {
+                File.Delete(defaultLogPath);
+            }
         }
 
         [Fact]
@@ -284,8 +346,15 @@ namespace UnitTests.AiCheck
             CreateRobustTestDataFile(customDataPath);
 
             // Make sure target files don't exist before test
-            if (File.Exists(expectedModelPath)) File.Delete(expectedModelPath);
-            if (File.Exists(expectedLogPath)) File.Delete(expectedLogPath);
+            if (File.Exists(expectedModelPath))
+            {
+                File.Delete(expectedModelPath);
+            }
+
+            if (File.Exists(expectedLogPath))
+            {
+                File.Delete(expectedLogPath);
+            }
 
             // Act
             bool result = ReviewModelTrainer.TrainModel(customDataPath);
@@ -297,9 +366,21 @@ namespace UnitTests.AiCheck
             Assert.True(File.Exists(expectedLogPath), "Log file should be created with derived path");
 
             // Cleanup
-            if (File.Exists(customDataPath)) File.Delete(customDataPath);
-            if (File.Exists(expectedModelPath)) File.Delete(expectedModelPath);
-            if (File.Exists(expectedLogPath)) File.Delete(expectedLogPath);
+            if (File.Exists(customDataPath))
+            {
+                File.Delete(customDataPath);
+            }
+
+            if (File.Exists(expectedModelPath))
+            {
+                File.Delete(expectedModelPath);
+            }
+
+            if (File.Exists(expectedLogPath))
+            {
+                File.Delete(expectedLogPath);
+            }
+
             if (Directory.Exists(Path.GetDirectoryName(customDataPath)))
             {
                 Directory.Delete(Path.GetDirectoryName(customDataPath), true);
@@ -328,8 +409,15 @@ namespace UnitTests.AiCheck
                 CreateRobustTestDataFile(dataPath);
 
                 // Make sure target files don't exist before test
-                if (File.Exists(modelPath)) File.Delete(modelPath);
-                if (File.Exists(logPath)) File.Delete(logPath);
+                if (File.Exists(modelPath))
+                {
+                    File.Delete(modelPath);
+                }
+
+                if (File.Exists(logPath))
+                {
+                    File.Delete(logPath);
+                }
 
                 // Act
                 bool result = ReviewModelTrainer.TrainModel(dataPath, modelPath, logPath);
@@ -366,8 +454,15 @@ namespace UnitTests.AiCheck
             CreateEmptyTrainingDataFile();
 
             // Make sure target files don't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-            if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
+
+            if (File.Exists(TestLogPath))
+            {
+                File.Delete(TestLogPath);
+            }
 
             // Act
             bool result = ReviewModelTrainer.TrainModel(TestDataPath, TestModelPath, TestLogPath);
@@ -391,8 +486,15 @@ namespace UnitTests.AiCheck
             File.WriteAllText(TestDataPath, string.Empty);
 
             // Make sure target files don't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-            if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
+
+            if (File.Exists(TestLogPath))
+            {
+                File.Delete(TestLogPath);
+            }
 
             // Act
             bool result = ReviewModelTrainer.TrainModel(TestDataPath, TestModelPath, TestLogPath);
@@ -417,8 +519,15 @@ namespace UnitTests.AiCheck
             File.WriteAllText(TestDataPath, csvContent.ToString());
 
             // Make sure target files don't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-            if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
+
+            if (File.Exists(TestLogPath))
+            {
+                File.Delete(TestLogPath);
+            }
 
             // Act
             bool result = ReviewModelTrainer.TrainModel(TestDataPath, TestModelPath, TestLogPath);
@@ -443,37 +552,37 @@ namespace UnitTests.AiCheck
             File.WriteAllText(TestDataPath, csvContent.ToString());
 
             // Make sure target files don't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-            if (File.Exists(TestLogPath)) File.Delete(TestLogPath);
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
 
-            // Act
+            if (File.Exists(TestLogPath))
+            {
+                File.Delete(TestLogPath);
+            }
+
             bool result = ReviewModelTrainer.TrainModel(TestDataPath, TestModelPath, TestLogPath);
-
-            // Assert
             Assert.False(result, "TrainModel should fail with non-boolean values");
             Assert.False(File.Exists(TestModelPath), "Model file should not be created with non-boolean values");
             Assert.True(File.Exists(TestLogPath), "Log file should be created even with non-boolean values");
-
-            // Cleanup
             CleanupTestFiles();
         }
 
         [Fact]
         public void TrainModel_LoggingFails_ShouldContinueWithConsoleOutput()
         {
-            // Arrange
             EnsureTestDirectoriesExist();
             CreateRobustTestDataFile();
+            if (File.Exists(TestModelPath))
+            {
+                File.Delete(TestModelPath);
+            }
 
-            // Make sure target model file doesn't exist before test
-            if (File.Exists(TestModelPath)) File.Delete(TestModelPath);
-
-            // Use a more reliable approach - create a directory where we know we can't write files
             string readOnlyDir = Path.Combine(Path.GetTempPath(), "ReadOnlyDir");
 
             try
             {
-                // Create the directory
                 if (Directory.Exists(readOnlyDir))
                 {
                     Directory.Delete(readOnlyDir, true);
@@ -521,16 +630,16 @@ namespace UnitTests.AiCheck
             string testDataDir = Path.GetDirectoryName(TestDataPath);
             string testModelDir = Path.GetDirectoryName(TestModelPath);
             string testLogDir = Path.GetDirectoryName(TestLogPath);
-            
+
             Console.WriteLine($"Ensuring directory exists: {testDataDir}");
             Directory.CreateDirectory(testDataDir);
-            
+
             Console.WriteLine($"Ensuring directory exists: {testModelDir}");
             Directory.CreateDirectory(testModelDir);
-            
+
             Console.WriteLine($"Ensuring directory exists: {testLogDir}");
             Directory.CreateDirectory(testLogDir);
-            
+
             // Verify directories were created successfully
             Console.WriteLine($"Test data directory exists: {Directory.Exists(testDataDir)}");
             Console.WriteLine($"Test model directory exists: {Directory.Exists(testModelDir)}");
@@ -544,7 +653,7 @@ namespace UnitTests.AiCheck
 
         private static void CreateTestDataFile(string path)
         {
-            var csvContent = new StringBuilder();
+            StringBuilder csvContent = new StringBuilder();
             csvContent.AppendLine("ReviewContent}IsOffensiveContent");
             csvContent.AppendLine("This is a great drink!}0");
             csvContent.AppendLine("I love this cocktail, it's amazing!}0");
@@ -559,7 +668,7 @@ namespace UnitTests.AiCheck
         private static void CreateRobustTestDataFile(string path = null)
         {
             string filePath = path ?? TestDataPath;
-            
+
             // Ensure directory exists
             string directory = Path.GetDirectoryName(filePath);
             if (!Directory.Exists(directory))
@@ -569,7 +678,7 @@ namespace UnitTests.AiCheck
             }
 
             Console.WriteLine($"Creating robust test data at: {filePath}");
-            
+
             try
             {
                 var csvContent = new StringBuilder();
@@ -592,15 +701,10 @@ namespace UnitTests.AiCheck
                     csvContent.AppendLine($"What a waste of money, this drink is garbage and the service is awful! {i}}}1");
                 }
 
-                // Write the file
                 File.WriteAllText(filePath, csvContent.ToString());
-                
-                // Verify file was written correctly
                 Console.WriteLine($"Test data file created at: {filePath}");
                 Console.WriteLine($"File exists: {File.Exists(filePath)}");
                 Console.WriteLine($"File size: {new FileInfo(filePath).Length} bytes");
-                
-                // Try to read the first few lines to verify content
                 try
                 {
                     string[] firstFewLines = File.ReadLines(filePath).Take(3).ToArray();
@@ -620,25 +724,22 @@ namespace UnitTests.AiCheck
 
         private static void CreateInvalidTestDataFile()
         {
-            var csvContent = new StringBuilder();
+            StringBuilder csvContent = new StringBuilder();
             csvContent.AppendLine("Invalid,Data,Format");
             csvContent.AppendLine("This,is,not,correct");
-
             File.WriteAllText(TestDataPath, csvContent.ToString());
         }
 
         private static void CreateMalformedTestDataFile()
         {
-            var csvContent = new StringBuilder();
+            StringBuilder csvContent = new StringBuilder();
             csvContent.AppendLine("ReviewContent}WrongColumn");
             csvContent.AppendLine("This is content}not a boolean");
-
             File.WriteAllText(TestDataPath, csvContent.ToString());
         }
 
         private static void CreateEmptyTrainingDataFile()
         {
-            // Create a file with header but no training data
             File.WriteAllText(TestDataPath, "ReviewContent}IsOffensiveContent");
         }
 
@@ -649,8 +750,6 @@ namespace UnitTests.AiCheck
                 string logContent = File.ReadAllText(TestLogPath);
                 Console.WriteLine("Log contents:");
                 Console.WriteLine(logContent);
-                
-                // Also display the last few lines in case the log is very long
                 string[] logLines = File.ReadAllLines(TestLogPath);
                 if (logLines.Length > 10)
                 {

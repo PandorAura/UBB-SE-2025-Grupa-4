@@ -1,210 +1,112 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using Quartz;
-using Quartz.Spi;
-using Xunit;
-
-namespace YourNamespace.Tests
+﻿namespace YourNamespace.Tests
 {
-    public class JobFactoryTests
+    using Microsoft.Extensions.DependencyInjection;
+    using Moq;
+    using Quartz;
+    using Quartz.Spi;
+
+    public partial class JobFactoryTests
     {
         [Fact]
         public void NewJob_WhenServiceProviderReturnsJob_ReturnsJob()
         {
-            // Arrange
-            var mockJob = new Mock<IJob>();
-            var mockJobType = typeof(IJob);
-            
-            var serviceCollection = new ServiceCollection();
+            Mock<IJob> mockJob = new Mock<IJob>();
+            Type mockJobType = typeof(IJob);
+            ServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddSingleton(mockJob.Object);
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            
-            var jobFactory = new JobFactory(serviceProvider);
-            
-            var mockJobDetail = new Mock<IJobDetail>();
+            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+            JobFactory jobFactory = new JobFactory(serviceProvider);
+            Mock<IJobDetail> mockJobDetail = new Mock<IJobDetail>();
             mockJobDetail.Setup(jd => jd.JobType).Returns(mockJobType);
-            
-            var mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(
-                null, null, null, false, DateTimeOffset.Now, 
-                DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
+            Mock<TriggerFiredBundle> mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(null, null, null, false, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
             mockTriggerFiredBundle.Setup(tfb => tfb.JobDetail).Returns(mockJobDetail.Object);
-            
-            var mockScheduler = new Mock<IScheduler>();
-
-            // Act
-            var result = jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object);
-
-            // Assert
+            Mock<IScheduler> mockScheduler = new Mock<IScheduler>();
+            IJob result = jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object);
             Assert.Same(mockJob.Object, result);
         }
 
         [Fact]
         public void NewJob_WhenServiceProviderDoesNotReturnJob_ThrowsException()
         {
-            // Arrange
-            var mockJobType = typeof(IJob);
-            
-            // Creating an empty service provider that doesn't have IJob registered
-            var serviceProvider = new ServiceCollection().BuildServiceProvider();
-            
-            var jobFactory = new JobFactory(serviceProvider);
-            
-            var mockJobDetail = new Mock<IJobDetail>();
+            Type mockJobType = typeof(IJob);
+            ServiceProvider serviceProvider = new ServiceCollection().BuildServiceProvider();
+            JobFactory jobFactory = new JobFactory(serviceProvider);
+            Mock<IJobDetail> mockJobDetail = new Mock<IJobDetail>();
             mockJobDetail.Setup(jd => jd.JobType).Returns(mockJobType);
-            
-            var mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(
-                null, null, null, false, DateTimeOffset.Now, 
-                DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
+            Mock<TriggerFiredBundle> mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(null, null, null, false, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
             mockTriggerFiredBundle.Setup(tfb => tfb.JobDetail).Returns(mockJobDetail.Object);
-            
-            var mockScheduler = new Mock<IScheduler>();
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => 
-                jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object));
+            Mock<IScheduler> mockScheduler = new Mock<IScheduler>();
+            Assert.Throws<InvalidOperationException>(() => jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object));
         }
 
         [Fact]
         public void NewJob_WhenServiceProviderReturnsNonIJobType_ThrowsException()
         {
-            // Arrange
-            var nonJob = new NonJobClass(); // This doesn't implement IJob
-            var nonJobType = typeof(NonJobClass);
-            
-            var serviceCollection = new ServiceCollection();
+            NonJobClass nonJob = new NonJobClass();
+            Type nonJobType = typeof(NonJobClass);
+            ServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddSingleton(nonJob);
             serviceCollection.AddSingleton(nonJobType, nonJob);
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            
-            var jobFactory = new JobFactory(serviceProvider);
-            
-            var mockJobDetail = new Mock<IJobDetail>();
+            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+            JobFactory jobFactory = new JobFactory(serviceProvider);
+            Mock<IJobDetail> mockJobDetail = new Mock<IJobDetail>();
             mockJobDetail.Setup(jd => jd.JobType).Returns(nonJobType);
-            
-            var mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(
-                null, null, null, false, DateTimeOffset.Now, 
-                DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
+            Mock<TriggerFiredBundle> mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(null, null, null, false, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
             mockTriggerFiredBundle.Setup(tfb => tfb.JobDetail).Returns(mockJobDetail.Object);
-            
-            var mockScheduler = new Mock<IScheduler>();
-
-            // Act & Assert
-            Assert.Throws<Exception>(() => 
-                jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object));
+            Mock<IScheduler> mockScheduler = new Mock<IScheduler>();
+            Assert.Throws<Exception>(() => jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object));
         }
-
 
         [Fact]
         public void ReturnJob_WhenJobIsNotDisposable_DoesNothing()
         {
-            // Arrange
-            var mockJob = new Mock<IJob>();
-            var jobFactory = new JobFactory(Mock.Of<IServiceProvider>());
-
-            // Act & Assert (no exception should be thrown)
+            Mock<IJob> mockJob = new Mock<IJob>();
+            JobFactory jobFactory = new JobFactory(Mock.Of<IServiceProvider>());
             jobFactory.ReturnJob(mockJob.Object);
         }
 
         [Fact]
         public void ReturnJob_WhenJobIsDisposable_CallsDispose()
         {
-            // Arrange
-            var mockDisposableJob = new Mock<IDisposableJob>();
-            var jobFactory = new JobFactory(Mock.Of<IServiceProvider>());
-
-            // Act
+            Mock<IDisposableJob> mockDisposableJob = new Mock<IDisposableJob>();
+            JobFactory jobFactory = new JobFactory(Mock.Of<IServiceProvider>());
             jobFactory.ReturnJob(mockDisposableJob.Object);
-
-            // Assert
             mockDisposableJob.Verify(j => j.Dispose(), Times.AtLeastOnce);
         }
 
         [Fact]
         public void NewJob_WhenServiceProviderReturnsNull_ThrowsException()
         {
-            // Arrange
-            var mockJobType = typeof(IJob);
-
-            // Setup service provider to return null for the job type
-            var mockServiceProvider = new Mock<IServiceProvider>();
-            mockServiceProvider
-                .Setup(sp => sp.GetService(It.Is<Type>(t => t == mockJobType)))
-                .Returns(null);
-
-            var serviceCollection = new ServiceCollection();
+            Type mockJobType = typeof(IJob);
+            Mock<IServiceProvider> mockServiceProvider = new Mock<IServiceProvider>();
+            mockServiceProvider.Setup(sp => sp.GetService(It.Is<Type>(t => t == mockJobType))).Returns(null);
+            ServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.AddSingleton(mockServiceProvider.Object);
-            var serviceProvider = new DelegatingServiceProvider(mockServiceProvider.Object);
-
-            var jobFactory = new JobFactory(serviceProvider);
-
-            var mockJobDetail = new Mock<IJobDetail>();
+            DelegatingServiceProvider serviceProvider = new DelegatingServiceProvider(mockServiceProvider.Object);
+            JobFactory jobFactory = new JobFactory(serviceProvider);
+            Mock<IJobDetail> mockJobDetail = new Mock<IJobDetail>();
             mockJobDetail.Setup(jd => jd.JobType).Returns(mockJobType);
-
-            var mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(
-                null, null, null, false, DateTimeOffset.Now,
-                DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
+            Mock<TriggerFiredBundle> mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(null, null, null, false, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
             mockTriggerFiredBundle.Setup(tfb => tfb.JobDetail).Returns(mockJobDetail.Object);
-
-            var mockScheduler = new Mock<IScheduler>();
-
-            // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() =>
-                jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object));
-            Assert.IsType(typeof(string), exception.Message);
+            Mock<IScheduler> mockScheduler = new Mock<IScheduler>();
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object));
+            Assert.IsType<string>(exception.Message);
         }
 
         [Fact]
         public void NewJob_WhenGetRequiredServiceThrowsInvalidOperationException_RethrowsException()
         {
-            // Arrange
-            var mockJobType = typeof(IJob);
-
-            // Setup service provider to throw InvalidOperationException
-            var mockServiceProvider = new Mock<IServiceProvider>();
-            mockServiceProvider
-                .Setup(sp => sp.GetService(It.Is<Type>(t => t == mockJobType)))
-                .Throws(new InvalidOperationException("Service not registered"));
-
-            var serviceProvider = new DelegatingServiceProvider(mockServiceProvider.Object);
-
-            var jobFactory = new JobFactory(serviceProvider);
-
-            var mockJobDetail = new Mock<IJobDetail>();
+            Type mockJobType = typeof(IJob);
+            Mock<IServiceProvider> mockServiceProvider = new Mock<IServiceProvider>();
+            mockServiceProvider.Setup(sp => sp.GetService(It.Is<Type>(t => t == mockJobType))).Throws(new InvalidOperationException("Service not registered"));
+            DelegatingServiceProvider serviceProvider = new DelegatingServiceProvider(mockServiceProvider.Object);
+            JobFactory jobFactory = new JobFactory(serviceProvider);
+            Mock<IJobDetail> mockJobDetail = new Mock<IJobDetail>();
             mockJobDetail.Setup(jd => jd.JobType).Returns(mockJobType);
-
-            var mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(
-                null, null, null, false, DateTimeOffset.Now,
-                DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
+            Mock<TriggerFiredBundle> mockTriggerFiredBundle = new Mock<TriggerFiredBundle>(null, null, null, false, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now, DateTimeOffset.Now);
             mockTriggerFiredBundle.Setup(tfb => tfb.JobDetail).Returns(mockJobDetail.Object);
-
-            var mockScheduler = new Mock<IScheduler>();
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() =>
-                jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object));
-        }
-
-        // Helper classes for testing
-        private class NonJobClass { }
-
-        public interface IDisposableJob : IJob, IDisposable { }
-
-        // Helper class to intercept GetService calls and delegate to mock
-        private class DelegatingServiceProvider : IServiceProvider
-        {
-            private readonly IServiceProvider _innerProvider;
-
-            public DelegatingServiceProvider(IServiceProvider innerProvider)
-            {
-                _innerProvider = innerProvider;
-            }
-
-            public object GetService(Type serviceType)
-            {
-                return _innerProvider.GetService(serviceType);
-            }
+            Mock<IScheduler> mockScheduler = new Mock<IScheduler>();
+            Assert.Throws<InvalidOperationException>(() => jobFactory.NewJob(mockTriggerFiredBundle.Object, mockScheduler.Object));
         }
     }
 }

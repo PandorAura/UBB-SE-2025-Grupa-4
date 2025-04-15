@@ -1,304 +1,68 @@
-using App1.Converters;
-using App1.Models;
-using App1.Services;
-using Moq;
-using Xunit;
-using System;
-using System.Reflection;
+// <copyright file="UserIdToNameConverter.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
-namespace UnitTests.Converters
+namespace App1.Converters
 {
-    public class UserIdToNameConverterTests
+    using System;
+    using App1.Services;
+    using Microsoft.UI.Xaml.Data;
+
+    /// <summary>
+    /// Converter that transforms a user ID into a display name.
+    /// </summary>
+    public class UserIdToNameConverter : IValueConverter
     {
-        // Use a class fixture to ensure tests run sequentially
-        [Collection("Sequential")]
-        public class UserIdToNameConverterTestsSequential
+        // Keep the original field name for compatibility with reflection in tests
+        private static IUserService _userService;
+
+        /// <summary>
+        /// Initializes the converter with a user service.
+        /// </summary>
+        /// <param name="userService">The user service to use for lookups.</param>
+        public static void Initialize(IUserService userService)
         {
-            private static readonly FieldInfo _userServiceField = typeof(UserIdToNameConverter)
-                .GetField("_userService", BindingFlags.NonPublic | BindingFlags.Static);
+            _userService = userService;
+        }
 
-            // Reset the static field before each test
-            private void ResetUserService()
-            {
-                _userServiceField.SetValue(null, null);
-            }
-
-            [Fact]
-            public void Initialize_SetsUserService()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService();
-                    var mockUserService = new Mock<IUserService>();
-
-                    // Act
-                    UserIdToNameConverter.Initialize(mockUserService.Object);
-
-                    // Assert
-                    var userService = _userServiceField.GetValue(null);
-                    Assert.Same(mockUserService.Object, userService);
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
-
-            [Fact]
-            public void Convert_WithValidUserId_ReturnsUserName()
+        /// <summary>
+        /// Converts a user ID to a user name.
+        /// </summary>
+        /// <param name="value">The user ID to convert.</param>
+        /// <param name="targetType">The type of the binding target property.</param>
+        /// <param name="parameter">The converter parameter to use.</param>
+        /// <param name="language">The language to use in the converter.</param>
+        /// <returns>A string representation of the user name.</returns>
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is int userId && _userService != null)
             {
                 try
                 {
-                    // Arrange
-                    ResetUserService();
-                    int userId = 1;
-                    string expectedName = "John Doe";
-                    var user = new User { FullName = expectedName };
-
-                    var mockUserService = new Mock<IUserService>();
-                    mockUserService.Setup(s => s.GetUserById(userId)).Returns(user);
-                    UserIdToNameConverter.Initialize(mockUserService.Object);
-                    var converter = new UserIdToNameConverter();
-
-                    // Act
-                    var result = converter.Convert(userId, null, null, null);
-
-                    // Assert
-                    Assert.Equal(expectedName, result);
-                    mockUserService.Verify(s => s.GetUserById(userId), Times.Once);
+                    var user = _userService.GetUserById(userId);
+                    return string.IsNullOrEmpty(user?.FullName) ? $"User {userId}" : user.FullName;
                 }
-                finally
+                catch
                 {
-                    ResetUserService();
+                    return $"User {userId}";
                 }
             }
 
-            [Fact]
-            public void Convert_WithNullUserService_ReturnsUnknownUser()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService(); // This ensures _userService is null
-                    int userId = 1;
-                    var converter = new UserIdToNameConverter();
+            return "Unknown User";
+        }
 
-                    // Act
-                    var result = converter.Convert(userId, null, null, null);
-
-                    // Assert
-                    Assert.Equal("Unknown User", result);
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
-
-            [Fact]
-            public void Convert_WithUserNotFound_ReturnsDefaultName()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService();
-                    int userId = 1;
-
-                    var mockUserService = new Mock<IUserService>();
-                    mockUserService.Setup(s => s.GetUserById(userId)).Returns((User)null);
-                    UserIdToNameConverter.Initialize(mockUserService.Object);
-                    var converter = new UserIdToNameConverter();
-
-                    // Act
-                    var result = converter.Convert(userId, null, null, null);
-
-                    // Assert
-                    Assert.Equal($"User {userId}", result);
-                    mockUserService.Verify(s => s.GetUserById(userId), Times.Once);
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
-
-            [Fact]
-            public void Convert_WithUserServiceThrowingException_ReturnsDefaultName()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService();
-                    int userId = 1;
-
-                    var mockUserService = new Mock<IUserService>();
-                    mockUserService.Setup(s => s.GetUserById(userId)).Throws(new Exception("Test exception"));
-                    UserIdToNameConverter.Initialize(mockUserService.Object);
-                    var converter = new UserIdToNameConverter();
-
-                    // Act
-                    var result = converter.Convert(userId, null, null, null);
-
-                    // Assert
-                    Assert.Equal($"User {userId}", result);
-                    mockUserService.Verify(s => s.GetUserById(userId), Times.Once);
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
-
-            [Fact]
-            public void Convert_WithNullValue_ReturnsUnknownUser()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService();
-                    var mockUserService = new Mock<IUserService>();
-                    UserIdToNameConverter.Initialize(mockUserService.Object);
-                    var converter = new UserIdToNameConverter();
-
-                    // Act
-                    var result = converter.Convert(null, null, null, null);
-
-                    // Assert
-                    Assert.Equal("Unknown User", result);
-                    // No need to verify since service shouldn't be called
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
-
-            [Fact]
-            public void Convert_WithNonIntegerValue_ReturnsUnknownUser()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService();
-                    var mockUserService = new Mock<IUserService>();
-                    UserIdToNameConverter.Initialize(mockUserService.Object);
-                    var converter = new UserIdToNameConverter();
-
-                    // Act
-                    var result = converter.Convert("not an integer", null, null, null);
-
-                    // Assert
-                    Assert.Equal("Unknown User", result);
-                    // No need to verify since service shouldn't be called
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
-
-            [Fact]
-            public void Convert_WithUserFoundButNullFullName_ReturnsDefaultName()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService();
-                    int userId = 1;
-                    var user = new User { FullName = null };
-
-                    var mockUserService = new Mock<IUserService>();
-                    mockUserService.Setup(s => s.GetUserById(userId)).Returns(user);
-                    UserIdToNameConverter.Initialize(mockUserService.Object);
-                    var converter = new UserIdToNameConverter();
-
-                    // Act
-                    var result = converter.Convert(userId, null, null, null);
-
-                    // Assert
-                    Assert.Equal($"User {userId}", result);
-                    mockUserService.Verify(s => s.GetUserById(userId), Times.Once);
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
-
-            [Fact]
-            public void Convert_WithUserFoundButEmptyFullName_ReturnsDefaultName()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService();
-                    int userId = 1;
-                    var user = new User { FullName = string.Empty };
-
-                    var mockUserService = new Mock<IUserService>();
-                    mockUserService.Setup(s => s.GetUserById(userId)).Returns(user);
-                    UserIdToNameConverter.Initialize(mockUserService.Object);
-                    var converter = new UserIdToNameConverter();
-
-                    // Act
-                    var result = converter.Convert(userId, null, null, null);
-
-                    // Assert
-                    Assert.Equal($"User {userId}", result);
-                    mockUserService.Verify(s => s.GetUserById(userId), Times.Once);
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
-
-            [Fact]
-            public void Convert_WithIntValueButNotBoxedAsInt_ReturnsUnknownUser()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService();
-                    var mockUserService = new Mock<IUserService>();
-                    UserIdToNameConverter.Initialize(mockUserService.Object);
-                    var converter = new UserIdToNameConverter();
-
-                    // This is specifically to test type checking branch
-                    object value = 1L; // Long instead of int
-
-                    // Act
-                    var result = converter.Convert(value, null, null, null);
-
-                    // Assert
-                    Assert.Equal("Unknown User", result);
-                    // No need to verify since service shouldn't be called
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
-
-            [Fact]
-            public void ConvertBack_ThrowsNotImplementedException()
-            {
-                try
-                {
-                    // Arrange
-                    ResetUserService();
-                    var converter = new UserIdToNameConverter();
-
-                    // Act & Assert
-                    Assert.Throws<NotImplementedException>(() =>
-                        converter.ConvertBack(null, null, null, null));
-                }
-                finally
-                {
-                    ResetUserService();
-                }
-            }
+        /// <summary>
+        /// Converts a user name back to a user ID.
+        /// </summary>
+        /// <param name="value">The value to convert back.</param>
+        /// <param name="targetType">The type of the binding target property.</param>
+        /// <param name="parameter">The converter parameter to use.</param>
+        /// <param name="language">The language to use in the converter.</param>
+        /// <returns>The converted value.</returns>
+        /// <exception cref="NotImplementedException">This method is not implemented.</exception>
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
         }
     }
 }

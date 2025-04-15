@@ -1,17 +1,5 @@
-﻿using App1.AutoChecker;
-using App1.Models;
-using App1.Services;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UnitTests.ReviewChecker.AuxiliaryTestsClasses
+﻿namespace UnitTests.ReviewChecker.AuxiliaryTestsClasses
 {
-
     public static class TestHelpers
     {
         public static string MockDetectOffensiveContentHighScore(string text)

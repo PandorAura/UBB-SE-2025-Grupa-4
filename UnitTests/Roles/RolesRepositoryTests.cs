@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using App1.Models;
-using App1.Repositories;
-using Xunit;
-
-namespace UnitTests.Roles
+﻿namespace UnitTests.Roles
 {
+    using App1.Models;
+    using App1.Repositories;
+
     public class RolesRepositoryTests
     {
-        private readonly RolesRepository _repository;
+        private readonly RolesRepository repository;
 
         public RolesRepositoryTests()
         {
-            _repository = new RolesRepository();
+            this.repository = new RolesRepository();
         }
 
         /// <summary>
@@ -24,20 +18,20 @@ namespace UnitTests.Roles
         /// - Banned (0)
         /// - User (1)
         /// - Admin (2)
-        /// - Manager (3)
+        /// - Manager (3).
         /// </summary>
         [Fact]
         public void GetAllRoles_WhenCalled_ReturnsAllRoles()
         {
-            var expectedRoles = new List<Role>
+            List<Role> expectedRoles = new List<Role>
             {
                 new Role(RoleType.Banned, "Banned"),
                 new Role(RoleType.User, "User"),
                 new Role(RoleType.Admin, "Admin"),
-                new Role(RoleType.Manager, "Manager")
+                new Role(RoleType.Manager, "Manager"),
             };
 
-            var result = _repository.GetAllRoles();
+            List<Role> result = this.repository.GetAllRoles();
 
             Assert.Equal(expectedRoles.Count, result.Count);
             for (int i = 0; i < expectedRoles.Count; i++)
@@ -52,7 +46,7 @@ namespace UnitTests.Roles
         /// in the hierarchy for each valid current role. This ensures the role promotion system works correctly:
         /// - Banned -> User
         /// - User -> Admin
-        /// - Admin -> Manager
+        /// - Admin -> Manager.
         /// </summary>
         [Theory]
         [InlineData(RoleType.Banned, RoleType.User)]
@@ -60,25 +54,22 @@ namespace UnitTests.Roles
         [InlineData(RoleType.Admin, RoleType.Manager)]
         public void GetNextRoleInHierarchy_WhenValidCurrentRole_ReturnsNextRole(RoleType currentRole, RoleType expectedNextRole)
         {
-            var result = _repository.GetNextRoleInHierarchy(currentRole);
-
+            Role result = this.repository.GetNextRoleInHierarchy(currentRole);
             Assert.Equal(expectedNextRole, result.RoleType);
         }
 
         [Fact]
         public void GetNextRoleInHierarchy_WhenManagerRole_ThrowsException()
         {
-            var currentRole = RoleType.Manager;
-
-            Assert.Throws<InvalidOperationException>(() => _repository.GetNextRoleInHierarchy(currentRole));
+            RoleType currentRole = RoleType.Manager;
+            Assert.Throws<InvalidOperationException>(() => this.repository.GetNextRoleInHierarchy(currentRole));
         }
 
         [Fact]
         public void GetNextRoleInHierarchy_WhenInvalidRoleType_ThrowsException()
         {
-            var invalidRoleType = (RoleType)999;
-
-            Assert.Throws<InvalidOperationException>(() => _repository.GetNextRoleInHierarchy(invalidRoleType));
+            RoleType invalidRoleType = (RoleType)999;
+            Assert.Throws<InvalidOperationException>(() => this.repository.GetNextRoleInHierarchy(invalidRoleType));
         }
     }
 }

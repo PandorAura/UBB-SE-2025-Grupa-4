@@ -1,19 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using App1.Models;
-using App1.Repositories;
-using Windows.System;
-using static App1.Repositories.UserRepo;
-
 namespace App1.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using App1.Models;
+    using App1.Repositories;
+    using static App1.Repositories.UserRepository;
+
     /// <summary>
     /// Service for managing user-related operations.
     /// </summary>
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUserRepository userRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
@@ -22,7 +20,7 @@ namespace App1.Services
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="userRepository"/> is null.</exception>
         public UserService(IUserRepository userRepository)
         {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
         /// <summary>
@@ -34,7 +32,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetAllUsers();
+                return this.userRepository.GetAllUsers();
             }
             catch (RepositoryException ex)
             {
@@ -55,7 +53,7 @@ namespace App1.Services
             {
                 return roleType switch
                 {
-                    > 0 => _userRepository.GetUsersByRoleType(roleType),
+                    > 0 => this.userRepository.GetUsersByRoleType(roleType),
                     _ => throw new ArgumentException("Permission ID must be positive")
                 };
             }
@@ -74,7 +72,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetUsersByRoleType(RoleType.Banned);
+                return this.userRepository.GetUsersByRoleType(RoleType.Banned);
             }
             catch (RepositoryException ex)
             {
@@ -92,7 +90,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetUsersByRoleType(roleType);
+                return this.userRepository.GetUsersByRoleType(roleType);
             }
             catch (RepositoryException ex)
             {
@@ -106,15 +104,16 @@ namespace App1.Services
         /// <param name="userId">The ID of the user.</param>
         /// <returns>The full name of the user.</returns>
         /// <exception cref="UserServiceException">Thrown when the user does not exist or an error occurs.</exception>
-        public string GetUserFullNameById(int userId) 
+        public string GetUserFullNameById(int userId)
         {
             try
             {
-                var user = _userRepository.GetUserByID(userId);
+                User user = this.userRepository.GetUserByID(userId);
                 if (user == null)
                 {
                     throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", new ArgumentNullException(nameof(user)));
                 }
+
                 return user.FullName;
             }
             catch (RepositoryException ex)
@@ -132,7 +131,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetBannedUsersWhoHaveSubmittedAppeals();
+                return this.userRepository.GetBannedUsersWhoHaveSubmittedAppeals();
             }
             catch (RepositoryException ex)
             {
@@ -150,11 +149,12 @@ namespace App1.Services
         {
             try
             {
-                var user = _userRepository.GetUserByID(userId);
+                User user = this.userRepository.GetUserByID(userId);
                 if (user == null)
                 {
                     throw new UserServiceException($"Failed to retrieve user with ID {userId}.", new ArgumentNullException(nameof(user)));
                 }
+
                 return user;
             }
             catch (RepositoryException ex)
@@ -173,7 +173,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetHighestRoleTypeForUser(userId);
+                return this.userRepository.GetHighestRoleTypeForUser(userId);
             }
             catch (RepositoryException ex)
             {
@@ -190,7 +190,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetUsersByRoleType(RoleType.Admin);
+                return this.userRepository.GetUsersByRoleType(RoleType.Admin);
             }
             catch (RepositoryException ex)
             {
@@ -207,7 +207,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetUsersByRoleType(RoleType.User);
+                return this.userRepository.GetUsersByRoleType(RoleType.User);
             }
             catch (RepositoryException ex)
             {
@@ -224,7 +224,7 @@ namespace App1.Services
         {
             try
             {
-                return _userRepository.GetUsersByRoleType(RoleType.Manager);
+                return this.userRepository.GetUsersByRoleType(RoleType.Manager);
             }
             catch (RepositoryException ex)
             {
@@ -242,14 +242,16 @@ namespace App1.Services
         {
             try
             {
-                User user = _userRepository.GetUserByID(userId);
+                User user = this.userRepository.GetUserByID(userId);
                 if (user == null)
+                {
                     return;
+                }
 
                 if (roleType == RoleType.Banned)
                 {
                     bool hasBannedRole = false;
-                    foreach (var role in user.AssignedRoles)
+                    foreach (Role role in user.AssignedRoles)
                     {
                         if (role.RoleType == RoleType.Banned)
                         {
@@ -261,13 +263,13 @@ namespace App1.Services
                     if (!hasBannedRole)
                     {
                         user.AssignedRoles.Clear();
-                        _userRepository.AddRoleToUser(userId, new Role(RoleType.Banned, "Banned"));
+                        this.userRepository.AddRoleToUser(userId, new Role(RoleType.Banned, "Banned"));
                     }
                 }
                 else
                 {
                     user.AssignedRoles.Clear();
-                    _userRepository.AddRoleToUser(userId, new Role(RoleType.User, "User"));
+                    this.userRepository.AddRoleToUser(userId, new Role(RoleType.User, "User"));
                 }
             }
             catch (Exception ex)
@@ -275,19 +277,5 @@ namespace App1.Services
                 throw new UserServiceException("Failed to update user role", ex);
             }
         }
-    }
-
-    /// <summary>
-    /// Exception class for user service-related errors.
-    /// </summary>
-    public class UserServiceException : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserServiceException"/> class.
-        /// </summary>
-        /// <param name="message">The error message.</param>
-        /// <param name="innerException">The inner exception.</param>
-        public UserServiceException(string message, Exception innerException)
-            : base(message, innerException) { }
     }
 }
